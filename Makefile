@@ -16,6 +16,9 @@ cutout:
 	rm -rf cutout
 	git difftool --tool=vimdiff -y
 
+top: # Monitor hyperkit processes
+	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
+
 kind:
 	$(MAKE) kind-once
 	$(MAKE) kind-cluster
@@ -33,7 +36,6 @@ kind-cluster:
 
 kind-config:
 	kind export kubeconfig
-	#perl -pe 's{127.0.0.1:.*}{host.docker.internal:6443}' -i ~/.kube/config
 	k cluster-info
 
 kind-cilium:
