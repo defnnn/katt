@@ -69,11 +69,11 @@ kind-cilium:
 kind-extras:
 	$(MAKE) metal
 	$(MAKE) traefik
+	$(MAKE) nginx
 
 cilium:
-	k apply -f cilium.yaml
+	ks apply -f cilium.yaml
 	while [[ "$$(ks get -o json pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do ks get pods; sleep 5; echo; done
-	k apply -f hubble.yaml
 
 metal:
 	k create ns metallb-system || true
@@ -87,6 +87,7 @@ traefik: cloudflare.yaml
 	kt apply -f crds
 	kt apply -f cloudflare.yaml
 	kt apply -f traefik.yaml
+	ks apply -f hubble.yaml
 
 nginx:
 	k apply -f $@.yaml
