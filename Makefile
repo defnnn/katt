@@ -15,3 +15,79 @@ cutout:
 	rsync -ia cutout/. .
 	rm -rf cutout
 	git difftool --tool=vimdiff -y
+
+kind:
+	$(MAKE) kind-once
+	$(MAKE) kind-cluster
+	$(MAKE) kind-cilium
+	$(MAKE) kind-extras
+
+kind-once:
+	kind delete cluster || true
+	docker network rm kind || true
+	docker network create --subnet 172.18.0.0/16 kind
+
+kind-cluster:
+	kind create cluster --config kind.yaml
+	$(MAKE) kind-config
+
+kind-config:
+	kind export kubeconfig
+	#perl -pe 's{127.0.0.1:.*}{host.docker.internal:6443}' -i ~/.kube/config
+	k cluster-info
+
+kind-cilium:
+	$(MAKE) cilium
+	while ks get nodes | grep NotReady; do sleep 5; done
+	while [[ "$$(ks get -o json pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do ks get pods; sleep 5; echo; done
+
+kind-extras:
+	$(MAKE) metal
+	$(MAKE) traefik
+
+cilium:
+	k apply -f cilium.yaml
+	while [[ "$$(ks get -o json pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do ks get pods; sleep 5; echo; done
+
+metal:
+	k create ns metallb-system || true
+	kn metallb-system apply -f metal.yaml
+
+cloudflare.yaml:
+	cp $@.example $@
+
+traefik: cloudflare.yaml
+	k create ns traefik || true
+	kt apply -f crds
+	kt apply -f cloudflare.yaml
+	kt apply -f traefik.yaml
+
+argo:
+	k create ns argo || true
+	kn argo apply -f argo.yaml
+
+pihole openvpn nginx registry home kong:
+	k apply -f $@.yaml
+
+cilium.yaml:
+	helm repo add cilium https://helm.cilium.io/
+	helm template cilium/cilium --version 1.8.0-rc4 \
+		--namespace kube-system \
+		--set global.nodeinit.enabled=true \
+		--set global.kubeProxyReplacement=partial \
+		--set global.hostServices.enabled=false \
+		--set global.externalIPs.enabled=true \
+		--set global.nodePort.enabled=true \
+		--set global.hostPort.enabled=true \
+		--set global.pullPolicy=IfNotPresent \
+		--set config.ipam=kubernetes \
+		--set global.hubble.enabled=true \
+		--set global.hubble.listenAddress=":4244" \
+		--set global.hubble.relay.enabled=true \
+		--set global.hubble.ui.enabled=true \
+		--set global.hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,http}" \
+		--set global.cni.chainingMode=portmap \
+		> cilium.yaml
+
+connectivity-check:
+	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.0-rc4/examples/kubernetes/connectivity-check/connectivity-check.yaml
