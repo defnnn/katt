@@ -91,7 +91,7 @@ argo:
 	k create ns argo || true
 	kn argo apply -f argo.yaml
 
-pihole openvpn nginx registry home kong:
+pihole openvpn nginx registry home:
 	k apply -f $@.yaml
 
 cilium.yaml:
