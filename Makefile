@@ -16,6 +16,29 @@ cutout:
 	rm -rf cutout
 	git difftool --tool=vimdiff -y
 
+KATT_IP := 169.254.21.0
+
+once:
+	$(MAKE) network || true
+	$(MAKE) os-$(shell uname -s) || true
+
+network:
+	docker network create --subnet 172.31.188.0/24 kitt
+
+os-Linux:
+	docker run --rm -i --privileged --network=host --pid=host alpine nsenter -t 1 -m -u -n -i -- \
+  bash -c "ip link add dummy0 type dummy; ip addr add $(KATT_IP)/32 dev dummy0; ip link set dev dummy0 up"
+
+os-Linux-down:
+	docker run --rm -i --privileged --network=host --pid=host alpine nsenter -t 1 -m -u -n -i -- \
+	bash -c "ip addr del $(KATT_IP)/32 dev dummy0"
+
+os-Darwin:
+	for ip in $(KATT_IP); do sudo ifconfig lo0 alias "$$ip" netmask 255.255.255.255; done
+
+os-Darwin-down:
+	for ip in $(KATT_IP); do sudo ifconfig lo0 -alias "$$ip" netmask 255.255.255.255; done
+
 top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
 
