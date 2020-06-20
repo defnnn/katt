@@ -73,6 +73,7 @@ kind-extras:
 cilium:
 	k apply -f cilium.yaml
 	while [[ "$$(ks get -o json pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do ks get pods; sleep 5; echo; done
+	k apply -f hubble.yaml
 
 metal:
 	k create ns metallb-system || true
