@@ -152,9 +152,11 @@ spec:
         - name: "http"
           containerPort: 80
           protocol: TCP
+          hostPort: 80
         - name: "https"
           containerPort: 443
           protocol: TCP
+          hostPort: 443
         - name: "traefik"
           containerPort: 8080
           protocol: TCP
