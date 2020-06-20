@@ -88,11 +88,7 @@ traefik: cloudflare.yaml
 	kt apply -f cloudflare.yaml
 	kt apply -f traefik.yaml
 
-argo:
-	k create ns argo || true
-	kn argo apply -f argo.yaml
-
-pihole openvpn nginx registry:
+nginx:
 	k apply -f $@.yaml
 
 cilium.yaml:
