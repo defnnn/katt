@@ -8,7 +8,7 @@ nodes:
 - role: control-plane
   image: kindest/node:v1.18.2
   extraMounts:
-  - hostPath: /usr/local/data
+  - hostPath: /usr/local/katt
     containerPath: /data
   - hostPath: /var/run/docker.sock
     containerPath: /var/run/docker.sock
