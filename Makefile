@@ -96,15 +96,14 @@ cilium.yaml:
 	helm repo add cilium https://helm.cilium.io/
 	helm template cilium/cilium --version 1.8.0 \
 		--namespace kube-system \
+		--set global.kubeProxyReplacement=partial \
 		--set global.nodeinit.enabled=true \
-		--set global.kubeProxyReplacement=strict \
+		--set global.pullPolicy=IfNotPresent \
+		--set config.ipam=kubernetes \
 		--set global.hostServices.enabled=false \
 		--set global.externalIPs.enabled=true \
 		--set global.nodePort.enabled=true \
-		--set global.nodePort.mode=hybrid \
 		--set global.hostPort.enabled=true \
-		--set global.pullPolicy=IfNotPresent \
-		--set config.ipam=kubernetes \
 		--set global.hubble.enabled=true \
 		--set global.hubble.listenAddress=":4244" \
 		--set global.hubble.relay.enabled=true \
