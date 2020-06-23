@@ -97,10 +97,11 @@ cilium.yaml:
 	helm template cilium/cilium --version 1.8.0 \
 		--namespace kube-system \
 		--set global.nodeinit.enabled=true \
-		--set global.kubeProxyReplacement=partial \
+		--set global.kubeProxyReplacement=strict \
 		--set global.hostServices.enabled=false \
 		--set global.externalIPs.enabled=true \
 		--set global.nodePort.enabled=true \
+		--set global.nodePort.mode=hybrid \
 		--set global.hostPort.enabled=true \
 		--set global.pullPolicy=IfNotPresent \
 		--set config.ipam=kubernetes \
