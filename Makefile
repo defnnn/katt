@@ -21,17 +21,18 @@ top: # Monitor hyperkit processes
 
 setup:
 	exec/katt-setup
+	docker network create --subnet 172.18.0.0/16 kind
+
+clean:
+	kind delete cluster || true
+	docker network rm kind || true
 
 kind:
-	$(MAKE) kind-once
+	$(MAKE) clean
+	$(MAKE) setup
 	$(MAKE) kind-cluster
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
-
-kind-once:
-	kind delete cluster || true
-	docker network rm kind || true
-	docker network create --subnet 172.18.0.0/16 kind
 
 kind-cluster:
 	kind create cluster --config kind.yaml
