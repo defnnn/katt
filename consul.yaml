@@ -411,7 +411,7 @@ spec:
                 -hcl='leave_on_terminate = true' \
                 -hcl='ports { grpc = 8502 }' \
                 -config-dir=/consul/config \
-                -datacenter=dc1 \
+                -datacenter=dc2 \
                 -data-dir=/consul/data \
                 -retry-join="${CONSUL_FULLNAME}-server-0.${CONSUL_FULLNAME}-server.${NAMESPACE}.svc" \
                 -domain=consul
@@ -620,7 +620,7 @@ spec:
                 -bootstrap-expect=1 \
                 -client=0.0.0.0 \
                 -config-dir=/consul/config \
-                -datacenter=dc1 \
+                -datacenter=dc2 \
                 -data-dir=/consul/data \
                 -domain=consul \
                 -hcl="connect { enabled = true }" \

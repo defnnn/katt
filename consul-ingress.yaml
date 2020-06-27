@@ -1,0 +1,16 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: consul
+  labels:
+    app: consul-ui
+spec:
+  entryPoints:
+    - https
+  routes:
+  - match: HostRegexp(`consul.{domain:.+}`)
+    kind: Rule
+    services:
+    - name: consul-ui
+      port: 80
