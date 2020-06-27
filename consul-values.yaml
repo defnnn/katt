@@ -2,15 +2,26 @@ global:
   name: consul
   datacenter: dc2
 
-connectInject:
-  enabled: true
-
-client:
-  enabled: true
-
 server:
   replicas: 1
   bootstrapExpect: 1
   disruptionBudget:
     enabled: true
     maxUnavailable: 0
+
+meshGateway:
+  enabled: true
+
+federation:
+  enabled: true
+  createFederationSecret: true
+
+tls:
+  enabled: true
+
+connectInject:
+  enabled: true
+  default: false
+
+client:
+  enabled: true

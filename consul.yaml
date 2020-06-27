@@ -44,6 +44,19 @@ metadata:
     heritage: Helm
     release: consul
 ---
+# Source: consul/templates/mesh-gateway-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: consul-mesh-gateway
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+    component: mesh-gateway
+---
 # Source: consul/templates/server-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -98,6 +111,20 @@ data:
     {
       "enable_central_service_config": true
     }
+  proxy-defaults-config.json: |-
+    {
+      "config_entries": {
+        "bootstrap": [
+          {
+            "kind": "proxy-defaults",
+            "name": "global",
+            "mesh_gateway": {
+              "mode": "local"
+            }
+          }
+        ]
+      }
+    }
 ---
 # Source: consul/templates/client-clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -130,6 +157,26 @@ rules:
     - "list"
     - "watch"
     - "patch"
+---
+# Source: consul/templates/mesh-gateway-clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consul-mesh-gateway
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+    component: mesh-gateway
+rules:
+  - apiGroups: [""]
+    resources:
+      - services
+    resourceNames:
+      - consul-mesh-gateway
+    verbs:
+      - get
 ---
 # Source: consul/templates/server-clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -179,6 +226,26 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: consul-connect-injector-webhook-svc-account
+    namespace: default
+---
+# Source: consul/templates/mesh-gateway-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: consul-mesh-gateway
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+    component: mesh-gateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: consul-mesh-gateway
+subjects:
+  - kind: ServiceAccount
+    name: consul-mesh-gateway
     namespace: default
 ---
 # Source: consul/templates/server-clusterrolebinding.yaml
@@ -248,6 +315,29 @@ spec:
     app: consul
     release: "consul"
     hasDNS: "true"
+---
+# Source: consul/templates/mesh-gateway-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul-mesh-gateway
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+    component: mesh-gateway
+spec:
+  selector:
+    app: consul
+    release: "consul"
+    component: mesh-gateway
+  ports:
+    - name: gateway
+      port: 443
+      targetPort: 8443
+  type: LoadBalancer
 ---
 # Source: consul/templates/server-service.yaml
 # Headless service for Consul server DNS entries. This service should only
@@ -542,6 +632,228 @@ spec:
             requests:
               cpu: 50m
               memory: 50Mi
+---
+# Source: consul/templates/mesh-gateway-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul-mesh-gateway
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+    component: mesh-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: consul
+      chart: consul-helm
+      release: consul
+      component: mesh-gateway
+  template:
+    metadata:
+      labels:
+        app: consul
+        chart: consul-helm
+        release: consul
+        component: mesh-gateway
+      annotations:
+        "consul.hashicorp.com/connect-inject": "false"
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: consul
+                  release: "consul"
+                  component: mesh-gateway
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: consul-mesh-gateway
+      volumes:
+        - name: consul-bin
+          emptyDir: {}
+        - name: consul-service
+          emptyDir:
+            medium: "Memory"
+      initContainers:
+        # We use the Envoy image as our base image so we use an init container to
+        # copy the Consul binary to a shared directory that can be used when
+        # starting Envoy.
+        - name: copy-consul-bin
+          image: "consul:1.8.0"
+          command:
+          - cp
+          - /bin/consul
+          - /consul-bin/consul
+          volumeMounts:
+          - name: consul-bin
+            mountPath: /consul-bin
+          resources:
+            requests:
+              memory: "25Mi"
+              cpu: "50m"
+            limits:
+              memory: "25Mi"
+              cpu: "50m"
+        # service-init registers the mesh gateway service.
+        - name: service-init
+          image: hashicorp/consul-k8s:0.16.0
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CONSUL_HTTP_ADDR
+              value: http://$(HOST_IP):8500
+          command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+                consul-k8s service-address \
+                  -k8s-namespace=default \
+                  -name=consul-mesh-gateway \
+                  -output-file=/tmp/address.txt
+                WAN_ADDR="$(cat /tmp/address.txt)"
+                WAN_PORT="443"
+
+                cat > /consul/service/service.hcl << EOF
+                service {
+                  kind = "mesh-gateway"
+                  name = "mesh-gateway"
+                  port = 8443
+                  address = "${POD_IP}"
+                  tagged_addresses {
+                    lan {
+                      address = "${POD_IP}"
+                      port = 8443
+                    }
+                    wan {
+                      address = "${WAN_ADDR}"
+                      port = ${WAN_PORT}
+                    }
+                  }
+                  checks = [
+                    {
+                      name = "Mesh Gateway Listening"
+                      interval = "10s"
+                      tcp = "${POD_IP}:8443"
+                      deregister_critical_service_after = "6h"
+                    }
+                  ]
+                }
+                EOF
+
+                /consul-bin/consul services register \
+                  /consul/service/service.hcl
+          volumeMounts:
+            - name: consul-service
+              mountPath: /consul/service
+            - name: consul-bin
+              mountPath: /consul-bin
+          resources:
+            requests:
+              memory: "25Mi"
+              cpu: "50m"
+            limits:
+              memory: "25Mi"
+              cpu: "50m"
+      containers:
+        - name: mesh-gateway
+          image: "envoyproxy/envoy-alpine:v1.14.2"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+          - name: consul-bin
+            mountPath: /consul-bin
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CONSUL_HTTP_ADDR
+              value: http://$(HOST_IP):8500
+            - name: CONSUL_GRPC_ADDR
+              value: $(HOST_IP):8502
+          command:
+            - /consul-bin/consul
+            - connect
+            - envoy
+            - -mesh-gateway
+          livenessProbe:
+            tcpSocket:
+              port: 8443
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 8443
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          ports:
+            - name: gateway
+              containerPort: 8443
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-ec", "/consul-bin/consul services deregister -id=\"mesh-gateway\""]
+
+        # lifecycle-sidecar ensures the mesh gateway is always registered with
+        # the local Consul agent, even if it loses the initial registration.
+        - name: lifecycle-sidecar
+          image: hashicorp/consul-k8s:0.16.0
+          volumeMounts:
+            - name: consul-service
+              mountPath: /consul/service
+              readOnly: true
+            - name: consul-bin
+              mountPath: /consul-bin
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: CONSUL_HTTP_ADDR
+              value: http://$(HOST_IP):8500
+          command:
+            - consul-k8s
+            - lifecycle-sidecar
+            - -service-config=/consul/service/service.hcl
+            - -consul-binary=/consul-bin/consul
+          resources:
+            requests:
+              memory: "25Mi"
+              cpu: "10m"
+            limits:
+              memory: "25Mi"
+              cpu: "10m"
 ---
 # Source: consul/templates/server-statefulset.yaml
 # StatefulSet to run the actual Consul server cluster.

@@ -96,8 +96,8 @@ connectivity-check:
 	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.0/examples/kubernetes/connectivity-check/connectivity-check.yaml
 
 consul:
-	ks apply -f consul.yaml
-	ks apply -f consul-ingress.yaml
+	k apply -f consul.yaml
+	k apply -f consul-ingress.yaml
 
 consul.yaml: consul-values.yaml
 	#helm repo add hashicorp https://helm.releases.hashicorp.com
