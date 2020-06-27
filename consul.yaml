@@ -797,7 +797,7 @@ spec:
             - connect
             - envoy
             - -mesh-gateway
-            - -wan-address", "169.254.21.0:4444"
+            - -wan-address=169.254.21.0:4444
           livenessProbe:
             tcpSocket:
               port: 8443
