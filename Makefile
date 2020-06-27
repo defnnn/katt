@@ -51,6 +51,7 @@ kind-extras:
 	$(MAKE) metal
 	$(MAKE) traefik
 	$(MAKE) nginx
+	$(MAKE) consul
 
 cilium:
 	ks apply -f cilium.yaml
