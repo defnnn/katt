@@ -74,7 +74,7 @@ nginx:
 	k apply -f $@.yaml
 
 cilium.yaml:
-	helm repo add cilium https://helm.cilium.io/
+	helm repo add cilium https://helm.cilium.io
 	helm template cilium/cilium --version 1.8.0 \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
@@ -94,3 +94,10 @@ cilium.yaml:
 
 connectivity-check:
 	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.0/examples/kubernetes/connectivity-check/connectivity-check.yaml
+
+consul.yaml:
+	helm repo add hashicorp https://helm.releases.hashicorp.com
+	helm template consul hashicorp/consul \
+		-f consul-values.yaml \
+		> consul.yaml
+
