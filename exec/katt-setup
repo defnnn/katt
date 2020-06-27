@@ -14,7 +14,7 @@
 #- See the License for the specific language governing permissions and
 #- limitations under the License.
 
-# USAGE: kitt setup
+# USAGE: katt setup
 #
 # Setup one-time networking after host or docker vm restarts.
 
@@ -25,15 +25,7 @@ function options {
 KATT_IP=169.254.21.0
 
 function main {
-  if [[ "$(docker network inspect kitt | jq -r 'map(select(.Name == "kitt")) | length')" == 0 ]]; then
-    setup-network
-  fi
-
   os-$(uname -s)-check
-}
-
-function setup-network {
-  docker network create --subnet "$KATT_DOCKER_NETWORK" kitt
 }
 
 function os-Linux-check {
