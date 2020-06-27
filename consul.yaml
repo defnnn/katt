@@ -105,8 +105,16 @@ metadata:
     release: consul
 data:
   extra-from-values.json: |-
-    {}
-    
+    {
+      "primary_datacenter": "dc1",
+      "acl": {
+        "tokens": {
+          "master": "FBAF54CC-E03D-4763-9F19-376114D3857B",
+          "agent": "FBAF54CC-E03D-4763-9F19-376114D3857B"
+        }
+      },
+      "join-wan": "169.254.32.1"
+    }
   central-config.json: |-
     {
       "enable_central_service_config": true
