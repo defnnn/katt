@@ -113,7 +113,7 @@ data:
           "agent": "FBAF54CC-E03D-4763-9F19-376114D3857B"
         }
       },
-      "join-wan": "169.254.32.1"
+      "start_join_wan": ["169.254.32.1"]
     }
   central-config.json: |-
     {
@@ -654,7 +654,7 @@ metadata:
     release: consul
     component: mesh-gateway
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: consul

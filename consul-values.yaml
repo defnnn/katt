@@ -17,15 +17,16 @@ server:
           "agent": "FBAF54CC-E03D-4763-9F19-376114D3857B"
         }
       },
-      "join-wan": "169.254.32.1"
+      "start_join_wan": ["169.254.32.1"]
     }
 
 meshGateway:
   enabled: true
+  replicas: 1
 
 federation:
   enabled: true
-  createFederationSecret: true
+  createFederationSecret: false
 
 tls:
   enabled: true
