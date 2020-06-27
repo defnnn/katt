@@ -19,6 +19,9 @@ nodes:
   - containerPort: 443
     hostPort: 443
     listenAddress: 169.254.21.0
+  - containerPort: 4444
+    hostPort: 4444
+    listenAddress: 169.254.21.0
 kubeadmConfigPatches:
 - |
   kind: ClusterConfiguration
