@@ -107,6 +107,7 @@ data:
   extra-from-values.json: |-
     {
       "primary_datacenter": "dc1",
+      "advertise_addr_wan": "169.254.32.2",
       "acl": {
         "tokens": {
           "master": "FBAF54CC-E03D-4763-9F19-376114D3857B",
@@ -805,7 +806,7 @@ spec:
             - connect
             - envoy
             - -mesh-gateway
-            - -wan-address=169.254.21.0:4444
+            - -wan-address=169.254.32.2:4444
           livenessProbe:
             tcpSocket:
               port: 8443

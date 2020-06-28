@@ -22,7 +22,7 @@ function options {
   true
 }
 
-KATT_IP=169.254.21.0
+KATT_IP=169.254.32.2
 
 function main {
   os-$(uname -s)-check
