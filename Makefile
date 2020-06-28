@@ -21,7 +21,6 @@ top: # Monitor hyperkit processes
 
 setup:
 	exec/katt-setup
-	docker network create --subnet 172.18.0.0/16 kind
 
 clean:
 	kind delete cluster || true
