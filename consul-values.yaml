@@ -20,6 +20,8 @@ server:
       },
       "start_join_wan": ["169.254.32.1"]
     }
+  extraEnvironmentVars:
+    CHECKPOINT_DISABLE: 1
 
 meshGateway:
   enabled: true
@@ -36,5 +38,12 @@ connectInject:
   enabled: true
   default: false
 
+syncCatalog:
+  enabled: true
+  toConsul: true
+  toK8S: false
+
 client:
   enabled: true
+  extraEnvironmentVars:
+    CHECKPOINT_DISABLE: 1

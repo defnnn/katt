@@ -69,6 +69,18 @@ metadata:
     heritage: Helm
     release: consul
 ---
+# Source: consul/templates/sync-catalog-serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: consul-sync-catalog
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+---
 # Source: consul/templates/client-config-configmap.yaml
 # ConfigMap with extra configuration specified directly to the chart
 # for client agents only.
@@ -199,6 +211,31 @@ metadata:
     release: consul
 rules: []
 ---
+# Source: consul/templates/sync-catalog-clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: consul-sync-catalog
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+rules:
+  - apiGroups: [""]
+    resources:
+      - services
+      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: [""]
+    resources:
+      - nodes
+    verbs:
+      - get
+---
 # Source: consul/templates/client-clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -274,6 +311,25 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: consul-server
+    namespace: default
+---
+# Source: consul/templates/sync-catalog-clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: consul-sync-catalog
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: consul-sync-catalog
+subjects:
+  - kind: ServiceAccount
+    name: consul-sync-catalog
     namespace: default
 ---
 # Source: consul/templates/connect-inject-service.yaml
@@ -495,6 +551,8 @@ spec:
                 fieldRef:
                   fieldPath: status.hostIP
             
+            - name: CHECKPOINT_DISABLE
+              value: "1"
           command:
             - "/bin/sh"
             - "-ec"
@@ -866,6 +924,94 @@ spec:
               memory: "25Mi"
               cpu: "10m"
 ---
+# Source: consul/templates/sync-catalog-deployment.yaml
+# The deployment for running the sync-catalog pod
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul-sync-catalog
+  namespace: default
+  labels:
+    app: consul
+    chart: consul-helm
+    heritage: Helm
+    release: consul
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consul
+      chart: consul-helm
+      release: consul
+      component: sync-catalog
+  template:
+    metadata:
+      labels:
+        app: consul
+        chart: consul-helm
+        release: consul
+        component: sync-catalog
+      annotations:
+        "consul.hashicorp.com/connect-inject": "false"
+    spec:
+      serviceAccountName: consul-sync-catalog
+      containers:
+        - name: consul-sync-catalog
+          image: "hashicorp/consul-k8s:0.16.0"
+          env:
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CONSUL_HTTP_ADDR
+              value: http://$(HOST_IP):8500
+          command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              consul-k8s sync-catalog \
+                -k8s-default-sync=true \
+                -to-k8s=false \
+                -consul-domain=consul \
+                -allow-k8s-namespace="*" \
+                -deny-k8s-namespace="kube-system" \
+                -deny-k8s-namespace="kube-public" \
+                -k8s-write-namespace=${NAMESPACE} \
+                -node-port-sync-type=ExternalFirst \
+                -log-level=info \
+                -add-k8s-namespace-suffix \
+          livenessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              cpu: 50m
+              memory: 50Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+---
 # Source: consul/templates/server-statefulset.yaml
 # StatefulSet to run the actual Consul server cluster.
 apiVersion: apps/v1
@@ -931,6 +1077,8 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             
+            - name: CHECKPOINT_DISABLE
+              value: "1"
           command:
             - "/bin/sh"
             - "-ec"
@@ -1018,9 +1166,6 @@ spec:
         resources:
           requests:
             storage: 10Gi
----
-# Source: consul/templates/sync-catalog-deployment.yaml
-# The deployment for running the sync-catalog pod
 ---
 # Source: consul/templates/tls-init-cleanup-job.yaml
 # tls-init-cleanup job deletes Kubernetes secrets created by tls-init
