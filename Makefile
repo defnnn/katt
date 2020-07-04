@@ -73,9 +73,11 @@ traefik: cloudflare.yaml
 nginx:
 	k apply -f $@.yaml
 
+cilium-repo:
+	helm repo add cilium https://helm.cilium.io
+
 cilium.yaml:
-	#helm repo add cilium https://helm.cilium.io
-	helm template cilium/cilium --version 1.8.0 \
+	helm template cilium/cilium --version 1.8.1 \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
 		--set global.nodeinit.enabled=true \
@@ -93,14 +95,16 @@ cilium.yaml:
 		> cilium.yaml
 
 connectivity-check:
-	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.0/examples/kubernetes/connectivity-check/connectivity-check.yaml
+	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.1/examples/kubernetes/connectivity-check/connectivity-check.yaml
 
 consul:
 	k apply -f consul.yaml
 	k apply -f consul-ingress.yaml
 
+consul-repo:
+	helm repo add hashicorp https://helm.releases.hashicorp.com
+
 consul.yaml: consul-values.yaml
-	#helm repo add hashicorp https://helm.releases.hashicorp.com
 	helm template consul hashicorp/consul \
 		-f consul-values.yaml \
 		> consul.yaml

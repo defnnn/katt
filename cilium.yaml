@@ -552,7 +552,7 @@ spec:
               key: custom-cni-conf
               name: cilium-config
               optional: true
-        image: "docker.io/cilium/cilium:v1.8.0"
+        image: "docker.io/cilium/cilium:v1.8.1"
         imagePullPolicy: IfNotPresent
         lifecycle:
           postStart:
@@ -601,7 +601,7 @@ spec:
       initContainers:
       - name: wait-for-node-init
         command: ['sh', '-c', 'until stat /tmp/cilium-bootstrap-time > /dev/null 2>&1; do echo "Waiting on node-init to run..."; sleep 1; done']
-        image: "docker.io/cilium/cilium:v1.8.0"
+        image: "docker.io/cilium/cilium:v1.8.1"
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - mountPath: /tmp/cilium-bootstrap-time
@@ -627,7 +627,7 @@ spec:
               key: wait-bpf-mount
               name: cilium-config
               optional: true
-        image: "docker.io/cilium/cilium:v1.8.0"
+        image: "docker.io/cilium/cilium:v1.8.1"
         imagePullPolicy: IfNotPresent
         name: clean-cilium-state
         securityContext:
@@ -725,7 +725,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
         - name: node-init
-          image: docker.io/cilium/startup-script:af2a99046eca96c0138551393b21a5c044c7fe79
+          image: "docker.io/cilium/startup-script:af2a99046eca96c0138551393b21a5c044c7fe79"
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
@@ -822,7 +822,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
         - name: hubble-relay
-          image: "docker.io/cilium/hubble-relay:v1.8.0"
+          image: "docker.io/cilium/hubble-relay:v1.8.1"
           imagePullPolicy: IfNotPresent
           command:
             - "hubble-relay"
@@ -874,7 +874,7 @@ spec:
       serviceAccountName: hubble-ui
       containers:
         - name: hubble-ui
-          image: "quay.io/cilium/hubble-ui:v0.6.0"
+          image: "quay.io/cilium/hubble-ui:v0.6.1"
           imagePullPolicy: IfNotPresent
           env:
             - name: NODE_ENV
@@ -961,7 +961,7 @@ spec:
               key: AWS_DEFAULT_REGION
               name: cilium-aws
               optional: true
-        image: "docker.io/cilium/operator-generic:v1.8.0"
+        image: "docker.io/cilium/operator-generic:v1.8.1"
         imagePullPolicy: IfNotPresent
         name: cilium-operator
         livenessProbe:
