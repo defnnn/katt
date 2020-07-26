@@ -23,7 +23,6 @@ function options {
 }
 
 KATT_IP=169.254.32.2
-KATT_DOCKER_NETWORK=172.31.189.0/24
 
 function main {
   if [[ "$(docker network inspect kind | jq -r 'map(select(.Name == "kind")) | length')" == 0 ]]; then
@@ -34,7 +33,7 @@ function main {
 }
 
 function setup-network {
-  docker network create --subnet "$KATT_DOCKER_NETWORK" kind
+  docker network create kind
 }
 
 function os-Linux-check {
