@@ -53,3 +53,9 @@ kubeadmConfigPatches:
     - kind
     - 172.18.0.1
     - host.docker.internal
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:registry-1.docker.io"]
+    endpoint = ["https://docker.defn.sh"]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:docker.io"]
+    endpoint = ["https://docker.defn.sh"]
