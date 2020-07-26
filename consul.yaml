@@ -651,7 +651,7 @@ spec:
       serviceAccountName: consul-connect-injector-webhook-svc-account
       containers:
         - name: sidecar-injector
-          image: "hashicorp/consul-k8s:0.16.0"
+          image: "hashicorp/consul-k8s:0.17.0"
           env:
             - name: NAMESPACE
               valueFrom:
@@ -666,7 +666,7 @@ spec:
               consul-k8s inject-connect \
                 -default-inject=false \
                 -consul-image="consul:1.8.0" \
-                -consul-k8s-image="hashicorp/consul-k8s:0.16.0" \
+                -consul-k8s-image="hashicorp/consul-k8s:0.17.0" \
                 -listen=:8080 \
                 -enable-central-config=true \
                 -allow-k8s-namespace="*" \
@@ -769,7 +769,7 @@ spec:
               cpu: "50m"
         # service-init registers the mesh gateway service.
         - name: service-init
-          image: hashicorp/consul-k8s:0.16.0
+          image: hashicorp/consul-k8s:0.17.0
           env:
             - name: HOST_IP
               valueFrom:
@@ -835,7 +835,7 @@ spec:
               cpu: "50m"
       containers:
         - name: mesh-gateway
-          image: "envoyproxy/envoy-alpine:v1.14.2"
+          image: "envoyproxy/envoy-alpine:v1.14.4"
           resources:
             limits:
               cpu: 100m
@@ -893,7 +893,7 @@ spec:
         # lifecycle-sidecar ensures the mesh gateway is always registered with
         # the local Consul agent, even if it loses the initial registration.
         - name: lifecycle-sidecar
-          image: hashicorp/consul-k8s:0.16.0
+          image: hashicorp/consul-k8s:0.17.0
           volumeMounts:
             - name: consul-service
               mountPath: /consul/service
@@ -957,7 +957,7 @@ spec:
       serviceAccountName: consul-sync-catalog
       containers:
         - name: consul-sync-catalog
-          image: "hashicorp/consul-k8s:0.16.0"
+          image: "hashicorp/consul-k8s:0.17.0"
           env:
             - name: HOST_IP
               valueFrom:
