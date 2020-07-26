@@ -77,7 +77,7 @@ cilium-repo:
 	helm repo add cilium https://helm.cilium.io
 
 cilium.yaml:
-	helm template cilium/cilium --version 1.8.1 \
+	helm template cilium/cilium --version 1.8.2 \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
 		--set global.nodeinit.enabled=true \
@@ -95,7 +95,7 @@ cilium.yaml:
 		> cilium.yaml
 
 connectivity-check:
-	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.1/examples/kubernetes/connectivity-check/connectivity-check.yaml
+	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.2/examples/kubernetes/connectivity-check/connectivity-check.yaml
 
 consul:
 	k apply -f consul.yaml
