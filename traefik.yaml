@@ -129,7 +129,7 @@ spec:
             path: /data/traefik
             type: Directory
       containers:
-      - image: traefik:2.2.0
+      - image: traefik:2.2.7
         name: traefik
         resources:
         env:
