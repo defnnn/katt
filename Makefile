@@ -60,13 +60,13 @@ metal:
 	k create ns metallb-system || true
 	kn metallb-system apply -f metal.yaml
 
-cloudflare.yaml:
-	cp $@.example $@
+k.yaml:
+	kustomize build . | perl -pe 's{cloudflare-.*}{cloudflare} if m{name: cloudflare-}' > k.yaml
 
-traefik: cloudflare.yaml
+traefik: k.yaml
 	k create ns traefik || true
+	kt apply -f k.yaml
 	kt apply -f crds
-	kt apply -f cloudflare.yaml
 	kt apply -f traefik.yaml
 	ks apply -f hubble.yaml
 

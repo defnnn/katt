@@ -137,17 +137,17 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: cloudflare
-                key: email
+                key: CF_API_EMAIL
           - name: CF_DNS_API_TOKEN
             valueFrom:
               secretKeyRef:
                 name: cloudflare
-                key: dns-token
+                key: CF_DNS_API_TOKEN
           - name: CF_ZONE_API_TOKEN
             valueFrom:
               secretKeyRef:
                 name: cloudflare
-                key: zone-token
+                key: CF_ZONE_API_TOKEN
         ports:
         - name: "http"
           containerPort: 80
