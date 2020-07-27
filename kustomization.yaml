@@ -8,3 +8,5 @@ secretGenerator:
     - secret/cloudflare/CF_API_EMAIL
     - secret/cloudflare/CF_DNS_API_TOKEN
     - secret/cloudflare/CF_ZONE_API_TOKEN
+  envs: 
+    - secret/cloudflare/env

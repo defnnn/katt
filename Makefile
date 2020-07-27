@@ -60,6 +60,7 @@ metal:
 	k create ns metallb-system || true
 	kn metallb-system apply -f metal.yaml
 
+.PHONY: k.yaml
 k.yaml:
 	kustomize build > k.yaml.1
 	mv -f k.yaml.1 k.yaml
