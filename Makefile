@@ -49,6 +49,7 @@ kind-cilium:
 kind-extras:
 	$(MAKE) metal
 	$(MAKE) traefik
+	$(MAKE) hubble
 	$(MAKE) nginx
 	$(MAKE) consul
 
@@ -64,6 +65,8 @@ traefik:
 	k create ns traefik || true
 	kt apply -f crds
 	kustomize build k/traefik | kt apply -f -
+
+hubble:
 	kustomize build k/hubble | ks apply -f -
 
 nginx:
