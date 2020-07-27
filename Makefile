@@ -61,7 +61,8 @@ metal:
 	kn metallb-system apply -f metal.yaml
 
 k.yaml:
-	kustomize build . | perl -pe 's{cloudflare-.*}{cloudflare} if m{name: cloudflare-}' > k.yaml
+	kustomize build > k.yaml.1
+	mv -f k.yaml.1 k.yaml
 
 traefik: k.yaml
 	k create ns traefik || true
