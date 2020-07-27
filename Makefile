@@ -53,61 +53,21 @@ kind-extras:
 	$(MAKE) consul
 
 cilium:
-	ks apply -f cilium.yaml
+	kustomize build cilium | ks apply -f -
 	while [[ "$$(ks get -o json pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do ks get pods; sleep 5; echo; done
 
 metal:
 	k create ns metallb-system || true
-	kn metallb-system apply -f metal.yaml
+	kustomize build metal | kn metallb-system apply -f -
 
-.PHONY: k.yaml
-k.yaml:
-	kustomize build > k.yaml.1
-	mv -f k.yaml.1 k.yaml
-
-traefik: k.yaml
+traefik:
 	k create ns traefik || true
-	kt apply -f k.yaml
 	kt apply -f crds
-	kt apply -f traefik.yaml
-	ks apply -f hubble.yaml
+	kustomize build traefik | kt apply -f -
+	kustomize build hubble | kt apply -f -
 
 nginx:
-	k apply -f $@.yaml
-
-cilium-repo:
-	helm repo add cilium https://helm.cilium.io
-
-cilium.yaml:
-	helm template cilium/cilium --version 1.8.2 \
-		--namespace kube-system \
-		--set global.kubeProxyReplacement=partial \
-		--set global.nodeinit.enabled=true \
-		--set global.pullPolicy=IfNotPresent \
-		--set config.ipam=kubernetes \
-		--set global.hostServices.enabled=false \
-		--set global.externalIPs.enabled=true \
-		--set global.nodePort.enabled=true \
-		--set global.hostPort.enabled=true \
-		--set global.hubble.enabled=true \
-		--set global.hubble.listenAddress=":4244" \
-		--set global.hubble.relay.enabled=true \
-		--set global.hubble.ui.enabled=true \
-		--set global.hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,http}" \
-		> cilium.yaml
-
-connectivity-check:
-	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/1.8.2/examples/kubernetes/connectivity-check/connectivity-check.yaml
+	kustomize build nginx | k apply -f -
 
 consul:
-	k apply -f consul.yaml
-	k apply -f consul-ingress.yaml
-
-consul-repo:
-	helm repo add hashicorp https://helm.releases.hashicorp.com
-
-consul.yaml: consul-values.yaml
-	helm template consul hashicorp/consul \
-		-f consul-values.yaml \
-		> consul.yaml
-
+	kustomize build consul | k apply -f -
