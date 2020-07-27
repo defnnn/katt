@@ -52,6 +52,8 @@ kind-extras:
 	$(MAKE) nginx
 	$(MAKE) consul
 
+.PHONY: cilium metal traefik nginx consul
+
 cilium:
 	kustomize build cilium | ks apply -f -
 	while [[ "$$(ks get -o json pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do ks get pods; sleep 5; echo; done
@@ -64,7 +66,7 @@ traefik:
 	k create ns traefik || true
 	kt apply -f crds
 	kustomize build traefik | kt apply -f -
-	kustomize build hubble | kt apply -f -
+	kustomize build hubble | ks apply -f -
 
 nginx:
 	kustomize build nginx | k apply -f -
