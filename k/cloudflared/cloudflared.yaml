@@ -43,11 +43,11 @@ spec:
             memory: 20Mi
         volumeMounts:
         - mountPath: /etc/cloudflared
-          name: tunnel-secret
+          name: cloudflared-config
           readOnly: true
       terminationGracePeriodSeconds: 60
       volumes:
-      - name: tunnel-secret
+      - name: cloudflared-config
         secret:
-          secretName: katt.run
+          secretName: cloudflared-config
 ---
