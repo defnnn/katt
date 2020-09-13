@@ -38,7 +38,7 @@ function setup-network {
 
 function os-Linux-check {
   for ip in ${KATT_IP}; do 
-    if ! ifconfig dummy0 | grep -q "inet $ip "; then 
+    if ! ifconfig dummy3 | grep -q "inet $ip "; then 
       os-$(uname -s)-up
     fi
   done
@@ -47,14 +47,14 @@ function os-Linux-check {
 function os-Linux-up {
   for ip in ${KATT_IP}; do 
     docker run --rm -i --privileged --network=host --pid=host alpine nsenter -t 1 -m -u -n -i -- \
-      bash -c "ip link add dummy0 type dummy; ip addr add ${ip}/32 dev dummy0; ip link set dev dummy0 up"
+      bash -c "ip link add dummy3 type dummy; ip addr add ${ip}/32 dev dummy3; ip link set dev dummy3 up"
   done
 }
 
 function os-Linux-down {
   for ip in ${KATT_IP}; do 
     docker run --rm -i --privileged --network=host --pid=host alpine nsenter -t 1 -m -u -n -i -- \
-      bash -c "ip addr del ${ip}/32 dev dummy0"
+      bash -c "ip addr del ${ip}/32 dev dummy3"
   done
 }
 
