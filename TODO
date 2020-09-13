@@ -8,5 +8,10 @@ k/traefik/secret/cloudflare/env
 k/metal/configs/config
 k/metal/configs/secretkey
 
+make katt
+
 cloudflared tunnel login
 kubectl create secret generic katt.run --from-file="$HOME/.cloudflared/cert.pem"
+
+make katt-setup
+
