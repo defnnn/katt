@@ -13,6 +13,11 @@ menu:
 katt: # Bring up a basic katt with kind
 	$(MAKE) clean
 	$(MAKE) kind-cluster
+	$(MAKE) katt-setup
+
+katt-tunnel: # Bring up a basic katt with kind, api-tunnel
+	$(MAKE) clean
+	$(MAKE) kind-cluster1s
 	(sleep 10; $(MAKE) katt-setup) & $(MAKE) api-tunnel
 
 katt-setup: # Setup katt with configs, cilium, and extras
@@ -28,6 +33,9 @@ clean: # Teardown katt
 	docker network rm kind || true
 
 kind-cluster:
+	kind create cluster --config kind.yaml
+
+kind-cluster1s:
 	kind create cluster --config kind.yaml --wait 1s
 
 kind-config:
