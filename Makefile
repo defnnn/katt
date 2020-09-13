@@ -19,6 +19,9 @@ kind:
 	$(MAKE) clean
 	$(MAKE) setup
 	$(MAKE) kind-cluster
+	$(MAKE) api-tunnel
+
+kind-setup:
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
 
