@@ -13,16 +13,13 @@ menu:
 katt: # Bring up a basic katt with kind
 	$(MAKE) clean
 	$(MAKE) kind-cluster
-	@echo; echo; echo
-	@echo RUN: make katt-setup to install the rest of katt
-	@echo; echo; echo
-	$(MAKE) api-tunnel
+	(sleep 10; $(MAKE) katt-setup) & $(MAKE) api-tunnel
 
 katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get pods; sleep 5; echo; done
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
 
 clean: # Teardown katt
 	kind delete cluster || true
