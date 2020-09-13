@@ -6,6 +6,13 @@ metadata:
   name: cilium
   namespace: kube-system
 ---
+# Source: cilium/charts/hubble-relay/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hubble-relay
+  namespace: kube-system
+---
 # Source: cilium/charts/hubble-ui/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -222,6 +229,8 @@ rules:
   - ciliumnodes
   - ciliumnodes/status
   - ciliumidentities
+# deprecated remove in v1.9
+  - ciliumidentities/status
   verbs:
   - '*'
 ---
@@ -329,6 +338,23 @@ rules:
   - get
   - list
   - watch
+# For cilium-operator running in HA mode.
+#
+# Cilium operator running in HA mode requires the use of ResourceLock for Leader Election
+# between mulitple running instances.
+# The preferred way of doing this is to use LeasesResourceLock as edits to Leases are less
+# common and fewer objects in the cluster watch "all Leases".
+# The support for leases was introduced in coordination.k8s.io/v1 during Kubernetes 1.14 release.
+# In Cilium we currently don't support HA mode for K8s version < 1.14. This condition make sure
+# that we only authorize access to leases resources in supported K8s versions.
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - get
+  - update
 ---
 # Source: cilium/charts/agent/templates/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -532,7 +558,7 @@ spec:
               key: custom-cni-conf
               name: cilium-config
               optional: true
-        image: "docker.io/cilium/cilium:v1.8.2"
+        image: "docker.io/cilium/cilium:v1.8.3"
         imagePullPolicy: IfNotPresent
         lifecycle:
           postStart:
@@ -581,7 +607,7 @@ spec:
       initContainers:
       - name: wait-for-node-init
         command: ['sh', '-c', 'until stat /tmp/cilium-bootstrap-time > /dev/null 2>&1; do echo "Waiting on node-init to run..."; sleep 1; done']
-        image: "docker.io/cilium/cilium:v1.8.2"
+        image: "docker.io/cilium/cilium:v1.8.3"
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - mountPath: /tmp/cilium-bootstrap-time
@@ -607,7 +633,7 @@ spec:
               key: wait-bpf-mount
               name: cilium-config
               optional: true
-        image: "docker.io/cilium/cilium:v1.8.2"
+        image: "docker.io/cilium/cilium:v1.8.3"
         imagePullPolicy: IfNotPresent
         name: clean-cilium-state
         securityContext:
@@ -800,9 +826,11 @@ spec:
                   values:
                     - cilium
             topologyKey: "kubernetes.io/hostname"
+      serviceAccount: hubble-relay
+      serviceAccountName: hubble-relay
       containers:
         - name: hubble-relay
-          image: "docker.io/cilium/hubble-relay:v1.8.2"
+          image: "docker.io/cilium/hubble-relay:v1.8.3"
           imagePullPolicy: IfNotPresent
           command:
             - "hubble-relay"
@@ -883,7 +911,10 @@ metadata:
   name: cilium-operator
   namespace: kube-system
 spec:
-  replicas: 1
+  # We support HA mode only for Kubernetes version > 1.14
+  # See docs on ServerCapabilities.LeasesResourceLock in file pkg/k8s/version/version.go
+  # for more details.
+  replicas: 2
   selector:
     matchLabels:
       io.cilium/app: operator
@@ -900,6 +931,18 @@ spec:
         io.cilium/app: operator
         name: cilium-operator
     spec:
+      # In HA mode, cilium-operator pods must not be scheduled on the same
+      # node as they will clash with each other.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: io.cilium/app
+                operator: In
+                values:
+                - operator
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - args:
         - --config-dir=/tmp/cilium/config-map
@@ -941,7 +984,7 @@ spec:
               key: AWS_DEFAULT_REGION
               name: cilium-aws
               optional: true
-        image: "docker.io/cilium/operator-generic:v1.8.2"
+        image: "docker.io/cilium/operator-generic:v1.8.3"
         imagePullPolicy: IfNotPresent
         name: cilium-operator
         livenessProbe:
@@ -962,6 +1005,8 @@ spec:
       priorityClassName: system-cluster-critical
       serviceAccount: cilium-operator
       serviceAccountName: cilium-operator
+      tolerations:
+        - operator: Exists
       volumes:
         # To read the configuration from the config map
       - configMap:

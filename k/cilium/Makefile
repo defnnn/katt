@@ -2,9 +2,10 @@ SHELL := /bin/bash
 
 cilium-repo:
 	helm repo add cilium https://helm.cilium.io
+	helm pull cilium/cilium
 
 cilium.yaml:
-	helm template cilium/cilium --version 1.8.2 \
+	helm template cilium/cilium --version 1.8.3 \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
 		--set global.nodeinit.enabled=true \
