@@ -129,7 +129,7 @@ spec:
             path: /data/traefik
             type: Directory
       containers:
-      - image: traefik:2.2.7
+      - image: traefik:2.2.11
         name: traefik
         resources:
         env:
@@ -176,12 +176,10 @@ spec:
           - "--certificatesresolvers.le.acme.storage=/data/acme.json"
           - "--certificatesresolvers.le.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
           - "--entrypoints.traefik.address=:8080"
+          - "--entrypoints.http.address=:80"
           - "--entrypoints.https.address=:443"
           - "--entrypoints.https.http.tls.certResolver=le"
           - "--entrypoints.https.http.tls.domains[2].main=*.katt.run"
-          - "--entrypoints.http.address=:80"
-          - "--entrypoints.http.http.redirections.entryPoint.to=https"
-          - "--entrypoints.http.http.redirections.entryPoint.scheme=https"
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
