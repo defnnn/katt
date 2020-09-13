@@ -19,6 +19,9 @@ kind:
 	$(MAKE) clean
 	$(MAKE) setup
 	$(MAKE) kind-cluster
+	@echo; echo; echo
+	@echo RUN: make kind-setup to install the rest of katt
+	@echo; echo; echo
 	$(MAKE) api-tunnel
 
 kind-setup:
