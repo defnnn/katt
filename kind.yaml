@@ -8,7 +8,7 @@ nodes:
 - role: control-plane
   image: kindest/node:v1.18.4
   extraMounts:
-  - hostPath: /usr/local/data/katt
+  - hostPath: /host/katt
     containerPath: /data
   - hostPath: /var/run/docker.sock
     containerPath: /var/run/docker.sock
@@ -53,9 +53,3 @@ kubeadmConfigPatches:
     - kind
     - 172.18.0.1
     - host.docker.internal
-containerdConfigPatches:
-- |-
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:registry-1.docker.io"]
-    endpoint = ["https://docker.defn.sh"]
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:docker.io"]
-    endpoint = ["https://docker.defn.sh"]
