@@ -22,6 +22,7 @@ katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '.items[].status | "\(.phase) \(.containerStatuses[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get pods; sleep 5; echo; done
 
 clean: # Teardown katt
 	kind delete cluster || true
@@ -53,9 +54,9 @@ metal:
 	kustomize build k/metal | $(km) apply -f -
 
 traefik:
-	$(k) create ns traefi$(k) || true
+	$(k) create ns traefik || true
 	$(kt) apply -f crds
-	kustomize build k/traefi$(k) | $(kt) apply -f -
+	kustomize build k/traefik | $(kt) apply -f -
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
