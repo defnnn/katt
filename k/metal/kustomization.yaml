@@ -6,12 +6,12 @@ resources:
 configMapGenerator:
 - name: config
   files:
-    - configs/config
+    - config/config
 
 secretGenerator:
 - name: memberlist
   files:
-    - configs/secretkey
+    - config/secretkey
 
 generatorOptions:
  disableNameSuffixHash: true
