@@ -8,23 +8,20 @@ menu:
 top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
 
-setup:
-	exec/katt-setup
-
-clean:
+clean: # Teardown katt
 	kind delete cluster || true
 	docker network rm kind || true
 
-kind:
+katt: # Bring up a basic katt with kind
 	$(MAKE) clean
 	$(MAKE) setup
 	$(MAKE) kind-cluster
 	@echo; echo; echo
-	@echo RUN: make kind-setup to install the rest of katt
+	@echo RUN: make katt-setup to install the rest of katt
 	@echo; echo; echo
 	$(MAKE) api-tunnel
 
-kind-setup:
+katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
