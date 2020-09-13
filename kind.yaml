@@ -6,7 +6,7 @@ networking:
   serviceSubnet: "10.71.0.0/16"
 nodes:
 - role: control-plane
-  image: kindest/node:v1.18.4
+  image: kindest/node:v1.18.8
   extraMounts:
   - hostPath: /host/katt
     containerPath: /data
