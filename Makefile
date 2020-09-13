@@ -57,7 +57,7 @@ hubble:
 	kustomize build k/hubble | ks apply -f -
 
 cloudflared:
-	kubectl create secret generic katt.run --from-file="$(HOME)/.cloudflared/cert.pem"
+	-kubectl create secret generic katt.run --from-file="$(HOME)/.cloudflared/cert.pem"
 	kustomize build k/cloudflared | k apply -f -
 
 consul:
