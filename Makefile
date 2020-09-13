@@ -46,7 +46,7 @@ kind-extras:
 	$(MAKE) traefik
 	$(MAKE) hubble
 	$(MAKE) nginx
-	$(MAKE) consul
+	#$(MAKE) consul
 
 cilium:
 	kustomize build k/cilium | ks apply -f -
