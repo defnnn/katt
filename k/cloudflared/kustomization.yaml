@@ -7,9 +7,9 @@ resources:
 configMapGenerator:
 - name: cloudflared-config
   files:
-    - config
+    - config/config.yaml
 
 secretGenerator:
 - name: cloudflared-secret
   files:
-    - secret
+    - secret/cert.pem
