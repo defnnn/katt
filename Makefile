@@ -65,4 +65,4 @@ consul:
 	kustomize build k/consul | k apply -f -
 
 api-tunnel:
-	port=$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort'); ssh defn.sh -f -L "$$port:localhost:$$port"
+	port=$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort'); ssh defn.sh -L "$$port:localhost:$$port" sleep 8640000
