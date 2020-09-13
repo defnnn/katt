@@ -20,6 +20,7 @@ katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
+	$(k) get --all-namespaces pods
 
 clean: # Teardown katt
 	kind delete cluster || true
