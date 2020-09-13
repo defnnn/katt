@@ -25,12 +25,12 @@ kind:
 	$(MAKE) api-tunnel
 
 kind-setup:
+	$(MAKE) kind-config
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
 
 kind-cluster:
 	kind create cluster --config kind.yaml --wait 1s
-	$(MAKE) kind-config
 
 kind-config:
 	kind export kubeconfig
