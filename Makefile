@@ -59,6 +59,9 @@ traefik:
 hubble:
 	kustomize build k/hubble | ks apply -f -
 
+cloudflared:
+	kustomize build k/cloudflared | k apply -f -
+
 consul:
 	kustomize build k/consul | k apply -f -
 
