@@ -5,13 +5,6 @@ SHELL := /bin/bash
 menu:
 	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-top: # Monitor hyperkit processes
-	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
-
-clean: # Teardown katt
-	kind delete cluster || true
-	docker network rm kind || true
-
 katt: # Bring up a basic katt with kind
 	$(MAKE) clean
 	$(MAKE) kind-cluster
@@ -24,6 +17,10 @@ katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
+
+clean: # Teardown katt
+	kind delete cluster || true
+	docker network rm kind || true
 
 kind-cluster:
 	kind create cluster --config kind.yaml --wait 1s
@@ -65,5 +62,9 @@ cloudflared:
 consul:
 	kustomize build k/consul | k apply -f -
 
-api-tunnel:
-	port=$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort'); ssh defn.sh -L "$$port:localhost:$$port" sleep 8640000
+top: # Monitor hyperkit processes
+	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
+
+api-tunnel: # ssh tunnel to kind api port
+	port=$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort'); \
+			ssh defn.sh -L "$$port:localhost:$$port" sleep 8640000
