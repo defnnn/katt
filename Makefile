@@ -23,7 +23,7 @@ kind:
 	$(MAKE) kind-extras
 
 kind-cluster:
-	kind create cluster --config kind.yaml
+	kind create cluster --config kind.yaml --wait 3600s
 	$(MAKE) kind-config
 
 kind-config:
@@ -63,3 +63,6 @@ nginx:
 
 consul:
 	kustomize build k/consul | k apply -f -
+
+api-tunnel:
+	port="$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort')"; ssh defn.sh -L "$$port:localhost:$$port")
