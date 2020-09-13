@@ -14,7 +14,6 @@ clean: # Teardown katt
 
 katt: # Bring up a basic katt with kind
 	$(MAKE) clean
-	$(MAKE) setup
 	$(MAKE) kind-cluster
 	@echo; echo; echo
 	@echo RUN: make katt-setup to install the rest of katt
