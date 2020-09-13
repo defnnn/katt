@@ -12,7 +12,6 @@ k/traefik/secret/cloudflare/env
 k/metal/configs/config
 k/metal/configs/secretkey
 
-make katt
-
 cloudflared tunnel login
-make cloudflared
+
+make katt

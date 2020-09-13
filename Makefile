@@ -15,10 +15,10 @@ katt: # Bring up a basic katt with kind
 	$(MAKE) kind-cluster
 	$(MAKE) katt-setup
 
-katt-tunnel: # Bring up a basic katt with kind, api-tunnel
+katt-defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
 	$(MAKE) clean
 	$(MAKE) kind-cluster1s
-	(sleep 10; $(MAKE) katt-setup) & $(MAKE) api-tunnel
+	(sleep 10; $(MAKE) katt-setup; $(MAKE) cloudflared) & $(MAKE) api-tunnel
 
 katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
