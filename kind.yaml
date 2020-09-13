@@ -19,25 +19,6 @@ nodes:
   - containerPort: 443
     hostPort: 443
     listenAddress: 169.254.32.2
-  - containerPort: 4444
-    hostPort: 4444
-    listenAddress: 169.254.32.2
-  - containerPort: 18500
-    hostPort: 8500
-    listenAddress: 169.254.32.2
-  - containerPort: 18502
-    hostPort: 8502
-    listenAddress: 169.254.32.2
-  - containerPort: 18300
-    hostPort: 8300
-    listenAddress: 169.254.32.2
-  - containerPort: 18302
-    hostPort: 8302
-    listenAddress: 169.254.32.2
-  - containerPort: 18302
-    hostPort: 8302
-    listenAddress: 169.254.32.2
-    protocol: udp
 kubeadmConfigPatches:
 - |
   kind: ClusterConfiguration
