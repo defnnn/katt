@@ -42,7 +42,6 @@ kind-extras:
 	$(MAKE) metal
 	$(MAKE) traefik
 	$(MAKE) hubble
-	$(MAKE) nginx
 	#$(MAKE) consul
 
 cilium:
@@ -60,9 +59,6 @@ traefik:
 
 hubble:
 	kustomize build k/hubble | ks apply -f -
-
-nginx:
-	kustomize build k/nginx | k apply -f -
 
 consul:
 	kustomize build k/consul | k apply -f -
