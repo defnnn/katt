@@ -3,3 +3,13 @@ kind: Kustomization
 
 resources:
   - cloudflared.yaml
+
+configMapGenerator:
+- name: cloudflared-config
+  files:
+    - config
+
+secretGenerator:
+- name: cloudflared-secret
+  files:
+    - secret
