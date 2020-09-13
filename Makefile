@@ -22,7 +22,7 @@ katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
 	$(MAKE) kind-cilium
 	$(MAKE) kind-extras
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items/[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get pods; sleep 5; echo; done
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get pods; sleep 5; echo; done
 
 clean: # Teardown katt
 	kind delete cluster || true
@@ -38,7 +38,7 @@ kind-config:
 kind-cilium:
 	$(MAKE) cilium
 	while $(ks) get nodes | grep NotReady; do sleep 5; done
-	while [[ "$$($(ks) get -o json --all-namespaces pods | jq -r '(.items/[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
+	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
 
 kind-extras:
 	$(MAKE) metal
