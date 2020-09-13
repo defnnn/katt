@@ -1,1 +1,9 @@
 sudo mkdir /host/katt/traefik
+
+k/traefik/secret/cloudflare/CF_API_EMAIL
+k/traefik/secret/cloudflare/CF_DNS_API_TOKEN
+k/traefik/secret/cloudflare/CF_ZONE_API_TOKEN
+k/traefik/secret/cloudflare/env
+
+k/metal/configs/config
+k/metal/configs/secretkey
