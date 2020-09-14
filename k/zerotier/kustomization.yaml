@@ -10,3 +10,6 @@ configMapGenerator:
     - config/ZT_NETWORK
     - config/ZT_VIP
     - config/ZT_DEST
+- name: zerotier-hooks
+  files:
+    - config/hook-customize
