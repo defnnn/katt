@@ -165,7 +165,7 @@ spec:
     - http
     - https
   routes:
-  - match: HostRegexp(`traefik{domain:.+}`)
+  - match: HostRegexp(`traefik.{domain:.+}`)
     kind: Rule
     services:
     - name: traefik
