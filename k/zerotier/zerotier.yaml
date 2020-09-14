@@ -23,6 +23,7 @@ spec:
         - name: zerotier-hooks
           configMap:
             name: zerotier-hooks
+            defaultMode: 0755
       containers:
       - name: zerotier
         image: letfn/zerotier
