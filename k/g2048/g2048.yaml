@@ -45,7 +45,7 @@ metadata:
     app: g2048
 spec:
   entryPoints:
-    - https
+    - http
     - https
   routes:
   - match: HostRegexp(`g2048.{domain:.+}`)
