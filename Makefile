@@ -10,6 +10,9 @@ km := kubectl -n metallb-system
 menu:
 	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
+test: # Test manifests with kubeval
+	 for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
+
 katt: # Bring up a basic katt with kind
 	$(MAKE) clean
 	$(MAKE) kind-cluster
