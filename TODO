@@ -1,7 +1,5 @@
 create a dummy1 with 169.254.32.2
 
-mkdir /host/katt/traefik
-
 create files for kustomize config, secrets generators:
 
 k/traefik/secret/cloudflare/CF_API_EMAIL

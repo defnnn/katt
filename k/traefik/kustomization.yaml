@@ -1,12 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-secretGenerator:
-  - name: cloudflare
-    files:
-      - secret/cloudflare/CF_API_EMAIL
-      - secret/cloudflare/CF_DNS_API_TOKEN
-      - secret/cloudflare/CF_ZONE_API_TOKEN
-
 resources:
   - traefik.yaml
+
+configMapGenerator:
+- name: traefik-config
+  files:
+    - config/config.yaml
+
+secretGenerator:
+- name: traefik-secret
+  files:
+    - secret/acme.json
+- name: traefik-secret-env
+  files:
+    - secret/cloudflare/CF_API_EMAIL
+    - secret/cloudflare/CF_DNS_API_TOKEN
+    - secret/cloudflare/CF_ZONE_API_TOKEN

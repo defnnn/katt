@@ -8,8 +8,6 @@ nodes:
 - role: control-plane
   image: kindest/node:v1.18.8
   extraMounts:
-  - hostPath: /host/katt
-    containerPath: /data
   - hostPath: /var/run/docker.sock
     containerPath: /var/run/docker.sock
   extraPortMappings:
@@ -32,5 +30,4 @@ kubeadmConfigPatches:
     - kubernetes.default.svc
     - kubernetes.default.svc.cluster.local
     - kind
-    - 172.18.0.1
     - host.docker.internal
