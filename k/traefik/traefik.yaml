@@ -135,22 +135,6 @@ spec:
       - image: traefik:2.2.11
         name: traefik
         resources:
-        env:
-          - name: CF_API_EMAIL
-            valueFrom:
-              secretKeyRef:
-                name: traefik-secret-env
-                key: CF_API_EMAIL
-          - name: CF_DNS_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: traefik-secret-env
-                key: CF_DNS_API_TOKEN
-          - name: CF_ZONE_API_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: traefik-secret-env
-                key: CF_ZONE_API_TOKEN
         ports:
         - name: "http"
           containerPort: 80

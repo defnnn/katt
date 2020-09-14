@@ -5,8 +5,4 @@ create files for kustomize config, secrets generators:
 k/traefik/config/traefik.yaml
 k/traefik/secret/acme.json
 
-k/traefik/secret/cloudflare/CF_API_EMAIL
-k/traefik/secret/cloudflare/CF_DNS_API_TOKEN
-k/traefik/secret/cloudflare/CF_ZONE_API_TOKEN
-
 make katt
