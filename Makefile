@@ -67,6 +67,9 @@ traefik:
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
 
+g2048:
+	kustomize build k/g2048 | $(k) apply -f -
+
 cloudflared:
 	kustomize build k/cloudflared | $(k) apply -f -
 
