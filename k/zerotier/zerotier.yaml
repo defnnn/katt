@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zerotier
+spec:
+  selector:
+    matchLabels:
+      app: zerotier
+  template:
+    metadata:
+      labels:
+        app: zerotier
+    spec:
+      volumes:
+        - name: tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+        - name: zerotier-config
+          configMap:
+            name: zerotier-config
+      containers:
+      - name: zerotier
+        image: letfn/zerotier
+        imagePullPolicy: Always
+        volumeMounts:
+         - name: tun
+           mountPath: /dev/net/tun
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "NET_RAW", "SYS_ADMIN"]
+        env:
+          - name: ZT_NETWORK
+            valueFrom:
+              configMapKeyRef:
+                name: zerotier-config
+                key: ZT_NETWORK
+          - name: ZT_VIP
+            valueFrom:
+              configMapKeyRef:
+                name: zerotier-config
+                key: ZT_VIP
+          - name: ZT_DEST
+            valueFrom:
+              configMapKeyRef:
+                name: zerotier-config
+                key: ZT_DEST

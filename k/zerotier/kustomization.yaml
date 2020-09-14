@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - zerotier.yaml
+
+configMapGenerator:
+- name: zerotier-config
+  files:
+    - config/ZT_NETWORK
+    - config/ZT_VIP
+    - config/ZT_DEST
