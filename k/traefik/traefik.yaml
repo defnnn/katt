@@ -162,6 +162,7 @@ metadata:
     app: traefik
 spec:
   entryPoints:
+    - http
     - https
   routes:
   - match: HostRegexp(`traefik{domain:.+}`)

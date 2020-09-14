@@ -1,5 +1,3 @@
-create a dummy1 with 169.254.32.2
-
 create files for kustomize config, secrets generators:
 
 k/traefik/config/traefik.yaml

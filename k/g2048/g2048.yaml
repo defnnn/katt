@@ -46,6 +46,7 @@ metadata:
 spec:
   entryPoints:
     - https
+    - https
   routes:
   - match: HostRegexp(`g2048.{domain:.+}`)
     kind: Rule

@@ -8,6 +8,7 @@ metadata:
     app: hubble-ui
 spec:
   entryPoints:
+    - http
     - https
   routes:
   - match: HostRegexp(`hubble.{domain:.+}`)

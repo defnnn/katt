@@ -1,3 +1,3 @@
 hostname: traefik.yourodmain
-url: https://traefik-katt.yourodmain
+url: http://traefik-proxy
 origincert: /data/cloudflared-secret/cert.pem

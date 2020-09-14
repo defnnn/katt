@@ -18,7 +18,7 @@ katt: # Bring up a basic katt with kind
 katt-defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
 	$(MAKE) clean
 	$(MAKE) kind-cluster1s
-	(sleep 10; $(MAKE) katt-setup; $(MAKE) cloudflared) & $(MAKE) api-tunnel
+	(sleep 10; $(MAKE) katt-setup; $(MAKE) cloudflared g2048) & $(MAKE) api-tunnel
 
 katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
@@ -71,10 +71,7 @@ g2048:
 	kustomize build k/g2048 | $(k) apply -f -
 
 cloudflared:
-	kustomize build k/cloudflared | $(k) apply -f -
-
-consul:
-	kustomize build k/consul | $(k) apply -f -
+	kustomize build k/cloudflared | $(kt) apply -f -
 
 top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
