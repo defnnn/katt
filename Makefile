@@ -81,4 +81,4 @@ top: # Monitor hyperkit processes
 
 api-tunnel: # ssh tunnel to kind api port
 	port=$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort'); \
-			ssh defn.sh -L "$$port:localhost:$$port" sleep 8640000
+			exec ssh defn.sh -L "$$port:localhost:$$port" sleep 8640000
