@@ -42,7 +42,7 @@ spec:
         - mountPath: /etc/cloudflared
           name: cloudflared-config
           readOnly: true
-        - mountPath: /etc/cloudflared-secret
+        - mountPath: /data/cloudflared-secret
           name: cloudflared-secret
           readOnly: true
       terminationGracePeriodSeconds: 60
@@ -53,5 +53,4 @@ spec:
       - name: cloudflared-secret
         secret:
           secretName: cloudflared-secret
-          defaultMode: 0400
 ---

@@ -167,24 +167,7 @@ spec:
           - name: traefik-secret
             mountPath: /data/traefik-secret
           - name: traefik-config
-            mountPath: /data/traefik-config
-        args:
-          - "--log.level=DEBUG"
-          - "--api.insecure=true"
-          - "--api.dashboard=true"
-          - "--ping=true"
-          - "--providers.kubernetescrd"
-          - "--accesslog=true"
-          - "--certificatesresolvers.le.acme.dnsChallenge=true"
-          - "--certificatesResolvers.le.acme.dnsChallenge.provider=cloudflare"
-          - "--certificatesresolvers.le.acme.email=iam@defn.sh"
-          - "--certificatesresolvers.le.acme.storage=/data/traefik-secret/acme.json"
-          - "--certificatesresolvers.le.acme.caServer=https://acme-v02.api.letsencrypt.org/directory"
-          - "--entrypoints.traefik.address=:8080"
-          - "--entrypoints.http.address=:80"
-          - "--entrypoints.https.address=:443"
-          - "--entrypoints.https.http.tls.certResolver=le"
-          - "--entrypoints.https.http.tls.domains[2].main=*.katt.run"
+            mountPath: /etc/traefik
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute

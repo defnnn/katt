@@ -48,7 +48,6 @@ kind-cilium:
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
 
 kind-extras:
-	$(MAKE) metal
 	$(MAKE) traefik
 	$(MAKE) hubble
 

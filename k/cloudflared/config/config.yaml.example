@@ -1,3 +1,3 @@
 hostname: yoursite.yourodmain
 url: https://traefik-katt.yourodmain
-origincert: /etc/cloudflared-secret/cert.pem
+origincert: /data/cloudflared-secret/cert.pem
