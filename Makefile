@@ -18,10 +18,9 @@ katt: # Bring up a basic katt with kind
 	$(MAKE) kind-cluster
 	$(MAKE) katt-setup
 
-katt-defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
-	$(MAKE) clean
-	$(MAKE) kind-cluster1s
-	(sleep 10; $(MAKE) katt-setup; $(MAKE) cloudflared zerotier g2048) & $(MAKE) api-tunnel
+defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
+	$(MAKE) katt
+	$(MAKE) cloudflared zerotier g2048
 
 katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
@@ -37,9 +36,6 @@ clean: # Teardown katt
 
 kind-cluster:
 	kind create cluster --config kind.yaml
-
-kind-cluster1s:
-	kind create cluster --config kind.yaml --wait 1s
 
 kind-config:
 	kind export kubeconfig
@@ -81,7 +77,3 @@ zerotier:
 
 top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
-
-api-tunnel: # ssh tunnel to kind api port
-	port=$(shell docker inspect kind-control-plane | jq -r '.[].NetworkSettings.Ports["6443/tcp"][] | select(.HostIp == "127.0.0.1") | .HostPort'); \
-			exec ssh defn.sh -L "$$port:localhost:$$port" sleep 8640000

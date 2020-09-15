@@ -2,7 +2,8 @@
 
 function main {
   if [[ -n "${ZT_DEST:-}" ]]; then
-    socat tcp4-listen:443,reuseaddr,fork  "TCP:${ZT_DEST}:443" &
+    socat tcp4-listen:443,reuseaddr,fork "TCP:${ZT_DEST}:443" &
+    socat tcp4-listen:6443,reuseaddr,fork "TCP:kubernetes.default.svc.cluster.local:443" &
   fi
 }
 
