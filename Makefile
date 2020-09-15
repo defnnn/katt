@@ -19,7 +19,6 @@ katt: # Bring up a basic katt with kind
 	$(MAKE) katt-setup
 
 defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
-	$(MAKE) katt
 	$(MAKE) cloudflared zerotier g2048
 
 katt-setup: # Setup katt with configs, cilium, and extras

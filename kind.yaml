@@ -1,17 +1,25 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+
 networking:
   disableDefaultCNI: true
   podSubnet: "10.70.0.0/16"
   serviceSubnet: "10.71.0.0/16"
   apiServerAddress: "169.254.32.2"
   apiServerPort: 6443
+
 nodes:
 - role: control-plane
   image: kindest/node:v1.18.8
   extraMounts:
   - hostPath: /var/run/docker.sock
     containerPath: /var/run/docker.sock
+- role: worker
+  image: kindest/node:v1.18.8
+  extraMounts:
+  - hostPath: /var/run/docker.sock
+    containerPath: /var/run/docker.sock
+
 kubeadmConfigPatches:
 - |
   kind: ClusterConfiguration
