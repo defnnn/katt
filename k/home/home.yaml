@@ -33,7 +33,7 @@ spec:
 
       containers:
       - name: home
-        image: "docker.io/defn/home:ssh"
+        image: "docker.io/defn/home:jojomomojo"
         imagePullPolicy: Always
         command: ["/service", "sshd"]
         env:
