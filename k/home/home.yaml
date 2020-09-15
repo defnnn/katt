@@ -1,0 +1,85 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: home
+  name: home
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home
+  template:
+    metadata:
+      labels:
+        app: home
+    spec:
+      terminationGracePeriodSeconds: 60
+
+      volumes:
+      - name: home-config
+        configMap:
+          name: home-config
+      - name: home-secret
+        secret:
+          secretName: home-secret
+      - name: cloudflared-config
+        configMap:
+          name: cloudflared-config
+      - name: cloudflared-secret
+        secret:
+          secretName: cloudflared-secret
+
+      containers:
+      - name: home
+        image: "docker.io/defn/home:ssh"
+        imagePullPolicy: Always
+        command: ["/service", "sshd"]
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - mountPath: /data/home-config
+          name: home-config
+          readOnly: true
+        - mountPath: /data/home-secret
+          name: home-secret
+          readOnly: true
+
+      - name: cloudflared
+        image: docker.io/cloudflare/cloudflared:2020.8.2
+        imagePullPolicy: Always
+        command: ["cloudflared", "tunnel"]
+        args:
+        - --no-autoupdate
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        resources:
+          limits:
+            cpu: 10m
+            memory: 20Mi
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        volumeMounts:
+        - mountPath: /etc/cloudflared
+          name: cloudflared-config
+          readOnly: true
+        - mountPath: /data/cloudflared-secret
+          name: cloudflared-secret
+          readOnly: true
+---

@@ -75,5 +75,8 @@ cloudflared:
 zerotier:
 	kustomize build k/zerotier | $(kt) apply -f -
 
+home:
+	kustomize build k/home | $(k) apply -f -
+
 top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
