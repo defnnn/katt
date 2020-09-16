@@ -69,7 +69,7 @@ metadata:
   labels:
     app: traefik
   annotations:
-    metallb.universe.tf/address-pool: my-ip-space
+    metallb.universe.tf/address-pool: traefik
 spec:
   type: LoadBalancer
   selector:
@@ -86,7 +86,7 @@ metadata:
   labels:
     app: traefik-proxy
   annotations:
-    metallb.universe.tf/address-pool: traefik
+    metallb.universe.tf/address-pool: traefik-proxy
 spec:
   type: LoadBalancer
   selector:

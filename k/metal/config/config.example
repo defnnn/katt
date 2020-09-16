@@ -2,16 +2,20 @@ address-pools:
 - name: my-ip-space
   protocol: layer2
   addresses:
-  - 172.18.80.10-172.18.89.254
+  - 172.25.80.10-172.25.89.254
 - name: traefik
   protocol: layer2
   addresses:
-  - 172.18.80.9/32
+  - 172.25.25.26/32
+- name: traefik-proxy
+  protocol: layer2
+  addresses:
+  - 172.25.25.25/32
 - name: pihole
   protocol: layer2
   addresses:
-  - 172.18.80.8/32
+  - 172.25.25.1/32
 - name: home
   protocol: layer2
   addresses:
-  - 172.18.80.7/32
+  - 172.25.25.100/32

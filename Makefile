@@ -19,7 +19,7 @@ katt: # Bring up a basic katt with kind
 	$(MAKE) katt-setup
 
 defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
-	$(MAKE) cloudflared zerotier g2048
+	$(MAKE) metal cloudflared zerotier g2048
 
 katt-setup: # Setup katt with configs, cilium, and extras
 	$(MAKE) kind-config
@@ -34,6 +34,7 @@ clean: # Teardown katt
 	docker network rm kind || true
 
 kind-cluster:
+	docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind
 	kind create cluster --config kind.yaml
 
 kind-config:
