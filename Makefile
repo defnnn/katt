@@ -51,6 +51,7 @@ kind-cilium:
 kind-extras:
 	$(MAKE) traefik
 	$(MAKE) hubble
+	$(MAKE) zerotier
 
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
