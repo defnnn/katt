@@ -24,6 +24,9 @@ spec:
           configMap:
             name: zerotier-hooks
             defaultMode: 0755
+        - name: zerotier-secret
+          secret:
+            secretName: zerotier-secret
       containers:
       - name: zerotier
         image: letfn/zerotier
@@ -52,3 +55,18 @@ spec:
               configMapKeyRef:
                 name: zerotier-config
                 key: ZT_DEST
+          - name: ZT_AUTHTOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_AUTHTOKEN_SECRET
+          - name: ZT_IDENTITY_PUBLIC
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_IDENTITY_PUBLIC
+          - name: ZT_IDENTITY_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_IDENTITY_SECRET

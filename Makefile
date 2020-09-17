@@ -103,6 +103,10 @@ restore:
 	pass katt/ZT_DEST | perl -pe 's{\s*$$}{}'  > k/zerotier/config/ZT_DEST
 	pass katt/ZT_NETWORK | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_NETWORK
 	pass katt/ZT_VIP | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_VIP
+	mkdir -p k/zerotier/secret
+	pass katt/authtoken.secret | perl -pe 's{\s*$$}{}'  > k/zerotier/secret/ZT_AUTHTOKEN_SECRET
+	pass katt/identity.public | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_PUBLIC
+	pass katt/identity.secret | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_SECRET
 	pass katt/hook-customize | base64 -d > k/zerotier/config/hook-customize
 	pass katt/acme.json | base64 -d > k/traefik/secret/acme.json
 	pass katt/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
