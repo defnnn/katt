@@ -6,7 +6,7 @@ networking:
   podSubnet: "10.70.0.0/16"
   serviceSubnet: "10.71.0.0/16"
   apiServerAddress: "169.254.32.2"
-  apiServerPort: 6443
+  apiServerPort: 443
 
 nodes:
 - role: control-plane
@@ -33,6 +33,4 @@ kubeadmConfigPatches:
     - kubernetes.default.svc
     - kubernetes.default.svc.cluster.local
     - kind
-    - host.docker.internal
     - 169.254.32.2
-    - 10.88.88.88
