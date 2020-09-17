@@ -84,16 +84,17 @@ top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
 
 
-k/traefik/secret/acme.json:
+k/traefik/secret/acme.json acme.json:
 	@jq -n \
 		--arg domain $(DOMAIN) \
 		--arg certificate "$(shell cat ~/.acme.sh/$(DOMAIN)/fullchain.cer | base64 -w 0)" \
 		--arg key "$(shell cat ~/.acme.sh/$(DOMAIN)/$(DOMAIN).key | base64 -w 0)" \
-		'{le: { Certificates: [{certificate: $$certificate, key: $$key, domain: {main: $$domain, sans: ["*.\($$domain)"]}}]}}' \
+		'{le: { Certificates: [{Store: "default", certificate: $$certificate, key: $$key, domain: {main: $$domain, sans: ["*.\($$domain)"]}}]}}' \
 	> acme.json.1
 	mv acme.json.1 k/traefik/secret/acme.json
 
-~/.acme.sh/$(DOMAIN)/fullchain.cer:
+~/.acme.sh/$(DOMAIN)/fullchain.cer cert:
 	~/.acme.sh/acme.sh --issue --dns dns_cf \
+		-k 4096 \
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
