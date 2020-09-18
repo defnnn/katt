@@ -24,13 +24,13 @@ katts: # Bring up both katts: kind, mean
 katt-kind: # Bring up kind katt
 	$(MAKE) restore-pet PET=kind
 	$(MAKE) network || true
-	kind create cluster --name kind --config kind.yaml
+	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) katt-setup
 
 katt-mean: # Bring up mean katt
 	$(MAKE) restore-pet PET=mean
 	$(MAKE) network || true
-	kind create cluster --name mean --config mean.yaml
+	kind create cluster --name mean --config k/mean.yaml
 	$(MAKE) katt-setup
 
 clean: # Teardown katt
