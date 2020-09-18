@@ -13,30 +13,36 @@ menu:
 	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
 test: # Test manifests with kubeval
-	 for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
+	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
+
+setup: # Setup requirements for katt
+	$(MAKE) network || true
+	$(MAKE) dummy || true
 
 katts: # Bring up both katts: kind, mean
 	$(MAKE) clean
-	$(MAKE) network
+	$(MAKE) setup
 	$(MAKE) katt-kind
 	$(MAKE) katt-mean
 
 katt-kind: # Bring up kind katt
 	$(MAKE) restore-pet PET=kind
-	$(MAKE) network || true
+	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
-	$(MAKE) katt-setup
+	$(MAKE) katt-extras
 
 katt-mean: # Bring up mean katt
 	$(MAKE) restore-pet PET=mean
-	$(MAKE) network || true
+	$(MAKE) setup || true
 	kind create cluster --name mean --config k/mean.yaml
-	$(MAKE) katt-setup
+	$(MAKE) katt-extras
 
 clean: # Teardown katt
 	$(MAKE) clean-kind || true
 	$(MAKE) clean-mean || true
 	docker network rm kind || true
+	sudo ip link del dummy1
+	sudo ip link del dummy2
 
 clean-kind:
 	kind delete cluster --name kind
@@ -47,10 +53,18 @@ clean-mean:
 network:
 	docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind
 
+dummy:
+	sudo ip link add dummy1 type dummy || true
+	sudo ip addr add 169.254.32.2/32 dev dummy1 || true
+	sudo ip link set dev dummy1 up
+	sudo ip link add dummy2 type dummy || true
+	sudo ip addr add 169.254.32.3/32 dev dummy2 || true
+	sudo ip link set dev dummy2 up
+
 defn:
 	$(MAKE) metal cloudflared g2048
 
-katt-setup: # Setup katt with cilium, traefik, hubble, zerotier
+katt-extras: # Setup katt with cilium, traefik, hubble, zerotier
 	$(MAKE) cilium
 	$(MAKE) traefik
 	$(MAKE) hubble
