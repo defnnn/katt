@@ -139,3 +139,13 @@ restore-pet:
 	pass katt/$(PET)/hook-customize | base64 -d > k/zerotier/config/hook-customize
 	pass katt/$(PET)/acme.json | base64 -d > k/traefik/secret/acme.json
 	pass katt/$(PET)/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
+
+restore-kitt:
+	set -a; source ../kitt/.env; set +a; $(MAKE) restore-kitt-inner
+
+restore-kitt-inner:
+	pass kitt/$(KITT_DOMAIN)/env | base64 -d > .env
+	pass kitt/$(KITT_DOMAIN)/authtoken.secret | perl -pe 's{\s*$$}{}'  > etc/zerotier/zerotier-one/authtoken.secret
+	pass kitt/$(KITT_DOMAIN)/identity.public | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.public
+	pass kitt/$(KITT_DOMAIN)/identity.secret | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.secret
+	pass kitt/$(KITT_DOMAIN)/hook-start | base64 -d > etc/zerotier/hooks/hook-start
