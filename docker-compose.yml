@@ -29,6 +29,14 @@ services:
       - "traefik.http.routers.kuma-web.middlewares=kuma-http@docker"
     env_file: .env
 
+  kuard:
+    image: gcr.io/kuar-demo/kuard-amd64:blue
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kuard.entrypoints=https"
+      - "traefik.http.routers.kuard.rule=Host(`kuard.${KITT_DOMAIN}`)"
+      - "traefik.http.services.kuard.loadbalancer.server.port=8080"
+
   whodis:
     image: containous/whoami
     labels:
