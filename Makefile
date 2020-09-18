@@ -15,46 +15,54 @@ menu:
 test: # Test manifests with kubeval
 	 for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
 
-katt: # Bring up a basic katt with kind
+katts: # Bring up both katts: kind, mean
 	$(MAKE) clean
-	$(MAKE) kind-cluster
+	$(MAKE) network
+	$(MAKE) katt-kind
+	$(MAKE) katt-mean
+
+katt-kind: # Bring up kind katt
+	$(MAKE) restore-pet PET=kind
+	$(MAKE) network || true
+	kind create cluster --name kind --config kind.yaml
 	$(MAKE) katt-setup
 
-defn: # Bring up a basic katt with kind, api-tunnel, cloudflared
-	$(MAKE) metal cloudflared zerotier g2048
+katt-mean: # Bring up mean katt
+	$(MAKE) restore-pet PET=mean
+	$(MAKE) network || true
+	kind create cluster --name mean --config mean.yaml
+	$(MAKE) katt-setup
 
-katt-setup: # Setup katt with configs, cilium, and extras
-	$(MAKE) kind-config
-	$(MAKE) kind-cilium
-	$(MAKE) kind-extras
+clean: # Teardown katt
+	$(MAKE) clean-kind || true
+	$(MAKE) clean-mean || true
+	docker network rm kind || true
+
+clean-kind:
+	kind delete cluster --name kind
+
+clean-mean:
+	kind delete cluster --name mean
+
+network:
+	docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind
+
+defn:
+	$(MAKE) metal cloudflared g2048
+
+katt-setup: # Setup katt with cilium, traefik, hubble, zerotier
+	$(MAKE) cilium
+	$(MAKE) traefik
+	$(MAKE) hubble
+	$(MAKE) zerotier
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
-clean: # Teardown katt
-	kind delete cluster || true
-	docker network rm kind || true
-
-kind-cluster:
-	docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind
-	kind create cluster --config kind.yaml
-
-kind-config:
-	kind export kubeconfig
-	$(k) cluster-info
-
-kind-cilium:
-	$(MAKE) cilium
-	while $(ks) get nodes | grep NotReady; do sleep 5; done
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
-
-kind-extras:
-	$(MAKE) traefik
-	$(MAKE) hubble
-	$(MAKE) zerotier
-
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
+	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
+	while $(ks) get nodes | grep NotReady; do sleep 5; done
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
 
 metal:
@@ -92,7 +100,7 @@ k/traefik/secret/acme.json acme.json:
 		--arg key "$(shell cat ~/.acme.sh/$(DOMAIN)/$(DOMAIN).key | base64 -w 0)" \
 		'{le: { Certificates: [{Store: "default", certificate: $$certificate, key: $$key, domain: {main: $$domain, sans: ["*.\($$domain)"]}}]}}' \
 	> acme.json.1
-	mv acme.json.1 k/traefik/secret/acme.json
+	mv acme.json.1 acme.json
 
 ~/.acme.sh/$(DOMAIN)/fullchain.cer cert:
 	~/.acme.sh/acme.sh --issue --dns dns_cf \
@@ -100,14 +108,20 @@ k/traefik/secret/acme.json acme.json:
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
 
-restore:
-	pass katt/ZT_DEST | perl -pe 's{\s*$$}{}'  > k/zerotier/config/ZT_DEST
-	pass katt/ZT_NETWORK | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_NETWORK
-	pass katt/ZT_VIP | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_VIP
+restore-kind:
+	$(MAKE) restore-pet PET=kind
+
+restore-mean:
+	$(MAKE) restore-pet PET=mean
+
+restore-pet:
+	pass katt/$(PET)/ZT_DEST | perl -pe 's{\s*$$}{}'  > k/zerotier/config/ZT_DEST
+	pass katt/$(PET)/ZT_NETWORK | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_NETWORK
+	pass katt/$(PET)/ZT_VIP | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_VIP
 	mkdir -p k/zerotier/secret
-	pass katt/authtoken.secret | perl -pe 's{\s*$$}{}'  > k/zerotier/secret/ZT_AUTHTOKEN_SECRET
-	pass katt/identity.public | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_PUBLIC
-	pass katt/identity.secret | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_SECRET
-	pass katt/hook-customize | base64 -d > k/zerotier/config/hook-customize
-	pass katt/acme.json | base64 -d > k/traefik/secret/acme.json
-	pass katt/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
+	pass katt/$(PET)/authtoken.secret | perl -pe 's{\s*$$}{}'  > k/zerotier/secret/ZT_AUTHTOKEN_SECRET
+	pass katt/$(PET)/identity.public | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_PUBLIC
+	pass katt/$(PET)/identity.secret | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_SECRET
+	pass katt/$(PET)/hook-customize | base64 -d > k/zerotier/config/hook-customize
+	pass katt/$(PET)/acme.json | base64 -d > k/traefik/secret/acme.json
+	pass katt/$(PET)/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
