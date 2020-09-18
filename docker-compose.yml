@@ -14,6 +14,7 @@ services:
       - /dev/net/tun
     privileged: true
     env_file: .env
+
   kuma:
     build: .
     entrypoint: [ "kuma-cp", "run" ]
@@ -27,6 +28,20 @@ services:
       - "traefik.http.middlewares.kuma-http.redirectregex.replacement=http://kuma.${KITT_DOMAIN}/$${1}"
       - "traefik.http.routers.kuma-web.middlewares=kuma-http@docker"
     env_file: .env
+
+  whodis:
+    image: containous/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whodis.entrypoints=https"
+      - "traefik.http.routers.whodis.rule=Host(`whodis.${KITT_DOMAIN}`)"
+
+  whodat:
+    image: containous/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whodat.entrypoints=https"
+      - "traefik.http.routers.whodat.rule=Host(`whodat.${KITT_DOMAIN}`)"
 
 networks:
   default:
