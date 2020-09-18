@@ -1,3 +1,5 @@
 data
 public
 cutout
+.env
+docker-compose.override.yml
