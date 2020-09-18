@@ -41,8 +41,8 @@ clean: # Teardown katt
 	$(MAKE) clean-kind || true
 	$(MAKE) clean-mean || true
 	docker network rm kind || true
-	sudo ip link del dummy1
-	sudo ip link del dummy2
+	sudo ip link del dummy1 || true
+	sudo ip link del dummy2 || true
 
 clean-kind:
 	kind delete cluster --name kind
