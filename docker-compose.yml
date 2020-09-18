@@ -1,13 +1,6 @@
 version: '3.7'
 
 services:
-  nginx:
-    image: nginx
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.hello.entrypoints=https"
-      - "traefik.http.routers.hello.rule=Host(`hello.${KITT_DOMAIN}`)"
-      - "traefik.http.services.hello.loadbalancer.server.port=80"
   zerotier:
     image: letfn/zerotier
     volumes:
@@ -20,6 +13,19 @@ services:
     devices:
       - /dev/net/tun
     privileged: true
+    env_file: .env
+  kuma:
+    image: kong-docker-kuma-docker.bintray.io/kuma-cp:0.7.1
+    command: [ "run" ]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kuma-web.entrypoints=http,https"
+      - "traefik.http.routers.kuma-web.rule=Host(`kuma.${KITT_DOMAIN}`)"
+      - "traefik.http.routers.kuma-web.service=kuma-web"
+      - "traefik.http.services.kuma-web.loadbalancer.server.port=5681"
+      - "traefik.http.middlewares.kuma-http.redirectregex.regex=^https://kuma.${KITT_DOMAIN}/(.*)"
+      - "traefik.http.middlewares.kuma-http.redirectregex.replacement=http://kuma.${KITT_DOMAIN}/$${1}"
+      - "traefik.http.routers.kuma-web.middlewares=kuma-http@docker"
     env_file: .env
 
 networks:
