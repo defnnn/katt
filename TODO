@@ -1,6 +1,1 @@
-create files for kustomize config, secrets generators:
-
-k/traefik/config/traefik.yaml
-k/traefik/secret/acme.json
-
-make katt
+curl https://get.acme.sh | sh
