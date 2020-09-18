@@ -19,6 +19,11 @@ setup: # Setup requirements for katt
 	$(MAKE) network || true
 	$(MAKE) dummy || true
 
+kitt:
+	docker-compose build
+	docker-compose rm -f -s
+	docker-compose up -d --remove-orphans
+
 katts: # Bring up both katts: kind, mean
 	$(MAKE) clean
 	$(MAKE) setup
