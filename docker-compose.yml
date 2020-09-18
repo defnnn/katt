@@ -15,8 +15,8 @@ services:
     privileged: true
     env_file: .env
   kuma:
-    image: kong-docker-kuma-docker.bintray.io/kuma-cp:0.7.1
-    command: [ "run" ]
+    build: .
+    entrypoint: [ "kuma-cp", "run" ]
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.kuma-web.entrypoints=http,https"
