@@ -1,20 +1,6 @@
 version: '3.7'
 
 services:
-  zerotier:
-    image: letfn/zerotier
-    volumes:
-      - ./etc/zerotier/zerotier-one:/var/lib/zerotier-one
-      - ./etc/zerotier/hooks:/service.d
-    cap_drop:
-      - NET_RAW
-      - NET_ADMIN
-      - SYS_ADMIN
-    devices:
-      - /dev/net/tun
-    privileged: true
-    env_file: .env
-
   kuma:
     build: .
     entrypoint: [ "kuma-cp", "run" ]
