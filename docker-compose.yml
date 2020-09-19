@@ -29,6 +29,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whodis.entrypoints=https"
       - "traefik.http.routers.whodis.rule=Host(`whodis.${KITT_DOMAIN}`)"
+      - "traefik.http.routers.this.entrypoints=http-proxy"
+      - "traefik.http.routers.this.rule=Host(`this.${KITT_DOMAIN}`)"
 
   whodat:
     image: containous/whoami
@@ -36,6 +38,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whodat.entrypoints=https"
       - "traefik.http.routers.whodat.rule=Host(`whodat.${KITT_DOMAIN}`)"
+      - "traefik.http.routers.that.entrypoints=http-proxy"
+      - "traefik.http.routers.that.rule=Host(`that.${KITT_DOMAIN}`)"
 
 networks:
   default:
