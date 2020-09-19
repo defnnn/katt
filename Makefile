@@ -17,7 +17,6 @@ test: # Test manifests with kubeval
 
 setup: # Setup requirements for katt
 	$(MAKE) network || true
-	$(MAKE) dummy || true
 
 katts: # Bring up both katts: kind, mean
 	$(MAKE) clean
@@ -41,8 +40,6 @@ clean: # Teardown katt
 	$(MAKE) clean-kind || true
 	$(MAKE) clean-mean || true
 	docker network rm kind || true
-	sudo ip link del dummy1 || true
-	sudo ip link del dummy2 || true
 
 clean-kind:
 	kind delete cluster --name kind
