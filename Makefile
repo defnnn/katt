@@ -69,8 +69,8 @@ katt-extras: # Setup katt with cilium, metallb, traefik, hubble, zerotier
 	$(MAKE) traefik
 	$(MAKE) hubble
 	$(MAKE) kuma
-	$(MAKE) kong
 	$(MAKE) zerotier
+	-$(MAKE) kong
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
 	$(k) get --all-namespaces pods
 	$(k) cluster-info

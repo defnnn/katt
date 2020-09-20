@@ -1,4 +1,4 @@
 type: Zone
 name: mean
 ingress:
-  address: 172.25.35.1:10001
+  address: 10.88.88.90:10001
