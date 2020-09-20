@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: kuma-demo
-  namespace: kuma-demo
+  name: kuma-client
+  namespace: kuma-client
   annotations:
     kuma.io/sidecar-injection: enabled
 ---
@@ -10,13 +10,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
-  namespace: kuma-demo
+  namespace: kuma-client
   annotations:
     8080.service.kuma.io/protocol: "http"
     ingress.kubernetes.io/service-upstream: "true"
 spec:
   selector:
-    app: kuma-demo-frontend
+    app: kuma-client-frontend
   ports:
   - name: http
     port: 8080
@@ -25,19 +25,19 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kuma-demo-app
-  namespace: kuma-demo
+  name: kuma-client-app
+  namespace: kuma-client
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kuma-demo-frontend
+      app: kuma-client-frontend
       version: v8
       env: prod
   template:
     metadata:
       labels:
-        app: kuma-demo-frontend
+        app: kuma-client-frontend
         version: v8
         env: prod
     spec:
@@ -50,15 +50,15 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: kuma-demo-app
-  namespace: kuma-demo
+  name: kuma-client-app
+  namespace: kuma-client
   labels:
-    app: kuma-demo-frontend
+    app: kuma-client-frontend
 spec:
   entryPoints:
     - https
   routes:
-  - match: HostRegexp(`kuma-demo.{domain:.+}`)
+  - match: HostRegexp(`kuma-client.{domain:.+}`)
     kind: Rule
     services:
     - name: frontend
