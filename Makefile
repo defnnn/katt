@@ -162,6 +162,25 @@ restore-pet:
 	pass katt/$(PET)/metal/config | base64 -d > k/metal/config/config
 	pass katt/$(PET)/metal/secretkey | base64 -d > k/metal/config/secretkey
 
+restore-diff-kind:
+	$(MAKE) restore-diff-pet PET=kind
+
+restore-diff-mean:
+	$(MAKE) restore-diff-pet PET=mean
+
+restore-diff-pet:
+	pdif katt/$(PET)/ZT_DEST k/zerotier/config/ZT_DEST
+	pdif katt/$(PET)/ZT_NETWORK k/zerotier/config/ZT_NETWORK
+	pdif katt/$(PET)/ZT_VIP k/zerotier/config/ZT_VIP
+	pdif katt/$(PET)/authtoken.secret k/zerotier/secret/ZT_AUTHTOKEN_SECRET
+	pdif katt/$(PET)/identity.public k/zerotier/secret/ZT_IDENTITY_PUBLIC
+	pdif katt/$(PET)/identity.secret k/zerotier/secret/ZT_IDENTITY_SECRET
+	pdiff katt/$(PET)/hook-customize k/zerotier/config/hook-customize
+	pdiff katt/$(PET)/acme.json k/traefik/secret/acme.json
+	pdiff katt/$(PET)/traefik.yaml k/traefik/config/traefik.yaml
+	pdiff katt/$(PET)/metal/config k/metal/config/config
+	pdiff katt/$(PET)/metal/secretkey k/metal/config/secretkey
+
 kind:
 	$(k) config use-context kind-kind
 	$(k) get nodes
