@@ -123,6 +123,8 @@ spec:
       maxUnavailable: 1
   template:
     metadata:
+      annotations:
+        kuma.io/gateway: enabled
       labels:
         app: traefik
     spec:
