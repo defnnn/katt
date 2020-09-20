@@ -30,6 +30,7 @@ kubeadmConfigPatches:
     - localhost
     - 127.0.0.1
     - 169.254.32.3
+    - 10.88.88.90
     - kubernetes
     - kubernetes.default.svc
     - kubernetes.default.svc.cluster.local
