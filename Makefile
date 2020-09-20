@@ -122,7 +122,6 @@ knative:
 	kubectl patch configmap/config-domain --namespace knative-serving --type merge --patch '{"data":{"$(PET).defn.jp":""}}'
 
 traefik:
-	$(k) create ns traefik || true
 	$(kt) apply -f crds
 	kustomize build k/traefik | $(kt) apply -f -
 
