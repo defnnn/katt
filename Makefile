@@ -29,13 +29,13 @@ katt-kind: # Bring up kind katt
 	$(MAKE) restore-pet PET=kind
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
-	$(MAKE) katt-extras
+	$(MAKE) katt-extras PET=kind
 
 katt-mean: # Bring up mean katt
 	$(MAKE) restore-pet PET=mean
 	$(MAKE) setup || true
 	kind create cluster --name mean --config k/mean.yaml
-	$(MAKE) katt-extras
+	$(MAKE) katt-extras PET=mean
 
 clean: # Teardown katt
 	$(MAKE) clean-kind || true
@@ -67,6 +67,7 @@ katt-extras: # Setup katt with cilium, metallb, traefik, hubble, zerotier
 	$(MAKE) metal
 	$(MAKE) traefik
 	$(MAKE) hubble
+	$(MAKE) kuma
 	$(MAKE) zerotier
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
 	$(k) get --all-namespaces pods
@@ -81,6 +82,17 @@ cilium:
 metal:
 	$(k) create ns metallb-system || true
 	kustomize build k/metal | $(km) apply -f -
+
+kuma-kind:
+	$(MAKE) kuma PET=kind
+
+kuma-mean:
+	$(MAKE) kuma PET=mean
+
+kuma:
+	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://169.254.32.1:5685 | $(k) apply -f -
+	kumactl install ingress | $(k) apply -f -
+	kumactl install dns | $(k) apply -f -
 
 traefik:
 	$(k) create ns traefik || true
@@ -104,7 +116,6 @@ home:
 
 top: # Monitor hyperkit processes
 	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
-
 
 k/traefik/secret/acme.json acme.json:
 	@jq -n \
@@ -142,10 +153,10 @@ restore-pet:
 	pass katt/$(PET)/metal/secretkey | base64 -d > k/metal/config/secretkey
 
 kind:
-	kubectl config use-context kind-kind
-	kubectl get nodes
+	$(k) config use-context kind-kind
+	$(k) get nodes
 
 mean:
-	kubectl config use-context kind-mean
-	kubectl get nodes
+	$(k) config use-context kind-mean
+	$(k) get nodes
 
