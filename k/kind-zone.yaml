@@ -1,0 +1,4 @@
+type: Zone
+name: kind
+ingress:
+  address: 172.25.25.1:10001

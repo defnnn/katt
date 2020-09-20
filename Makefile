@@ -140,3 +140,12 @@ restore-pet:
 	pass katt/$(PET)/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
 	pass katt/$(PET)/metal/config | base64 -d > k/metal/config/config
 	pass katt/$(PET)/metal/secretkey | base64 -d > k/metal/config/secretkey
+
+kind:
+	kubectl config use-context kind-kind
+	kubectl get nodes
+
+mean:
+	kubectl config use-context kind-mean
+	kubectl get nodes
+
