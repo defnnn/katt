@@ -103,7 +103,6 @@ kuma:
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(ks) get pods; sleep 5; echo; done
 	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
-	kumactl install metrics | $(k) apply -f -
 	kumactl install dns | $(k) apply -f -
 	kumactl apply -f k/$(PET)-zone.yaml
 
