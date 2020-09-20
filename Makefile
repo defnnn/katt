@@ -10,6 +10,7 @@ kt := kubectl -n traefik
 km := kubectl -n metallb-system
 kk := kubectl -n kuma-system
 kg := kubectl -n kong
+kv := kubectl -n knative-serving
 
 menu:
 	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
@@ -63,23 +64,28 @@ dummy:
 defn:
 	$(MAKE) metal cloudflared g2048
 
-katt-extras: # Setup katt with cilium, metallb, traefik, hubble, zerotier
+katt-extras: # Setup katt with cilium, metallb, traefik, hubble, kuma, zerotier, knative, kong
 	$(MAKE) cilium
 	$(MAKE) metal
 	$(MAKE) traefik
 	$(MAKE) hubble
 	$(MAKE) kuma
 	$(MAKE) zerotier
-	-$(MAKE) kong
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
+	$(MAKE) knative
+	$(MAKE) kong
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
+		$(k) get --all-namespaces pods; sleep 5; echo; done
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
-	while $(ks) get nodes | grep NotReady; do sleep 5; done
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
+	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
+		$(ks) get pods; sleep 5; echo; done
+	while $(ks) get nodes | grep NotReady; do \
+		sleep 5; done
+	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
+		$(ks) get pods; sleep 5; echo; done
 
 metal:
 	$(k) create ns metallb-system || true
@@ -94,15 +100,20 @@ kuma-mean:
 kuma:
 	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://10.88.88.88:5685 | $(k) apply -f -
 	sleep 5
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
+	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
+		$(ks) get pods; sleep 5; echo; done
 	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
-	sleep 5
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
 	kumactl install dns | $(k) apply -f -
 	kumactl apply -f k/$(PET)-zone.yaml
 
 kong:
 	$(k) apply -f https://bit.ly/k4k8s
+
+knative:
+	kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-crds.yaml
+	kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-core.yaml
+	kubectl patch configmap/config-network --namespace knative-serving --type merge --patch '{"data":{"ingress.class":"kong"}}'
+	kubectl patch configmap/config-domain --namespace knative-serving --type merge --patch '{"data":{"$(PET).defn.jp":""}}'
 
 traefik:
 	$(k) create ns traefik || true
@@ -188,4 +199,3 @@ kind:
 mean:
 	$(k) config use-context kind-mean
 	$(k) get nodes
-
