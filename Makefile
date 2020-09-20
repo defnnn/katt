@@ -109,6 +109,9 @@ kuma:
 	kumactl install dns | $(k) apply -f -
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(ks) get pods; sleep 5; echo; done
+	$(MAKE) kuma-inner PET="$(PET)"
+
+kuma-inner:
 	echo "---" | yq -y --arg pet "$(PET)" --arg address \
 		"$(shell $(kk) get svc -o json | jq -r '.items[] | select(.metadata.name == "kuma-ingress") | .status.loadBalancer.ingress[].ip')" '{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
 		| kumactl apply -f -
