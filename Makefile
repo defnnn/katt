@@ -99,6 +99,7 @@ kuma:
 	sleep 5
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
 	kumactl install dns | $(k) apply -f -
+	kumactl apply -f k/$(PET)-zone.yaml
 
 kong:
 	$(k) apply -f https://bit.ly/k4k8s
