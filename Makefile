@@ -90,7 +90,6 @@ cilium:
 		$(ks) get pods; sleep 5; echo; done
 
 metal:
-	$(k) create ns metallb-system || true
 	kustomize build k/metal | $(km) apply -f -
 
 kuma-kind:
