@@ -11,6 +11,10 @@ address-pools:
   protocol: layer2
   addresses:
   - 172.25.25.25/32
+- name: kuma-ingress
+  protocol: layer2
+  addresses:
+  - 172.25.25.24/32
 - name: pihole
   protocol: layer2
   addresses:

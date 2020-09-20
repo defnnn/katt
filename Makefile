@@ -8,6 +8,7 @@ k := kubectl
 ks := kubectl -n kube-system
 kt := kubectl -n traefik
 km := kubectl -n metallb-system
+kk := kubectl -n kuma-system
 
 menu:
 	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
@@ -61,8 +62,9 @@ dummy:
 defn:
 	$(MAKE) metal cloudflared g2048
 
-katt-extras: # Setup katt with cilium, traefik, hubble, zerotier
+katt-extras: # Setup katt with cilium, metallb, traefik, hubble, zerotier
 	$(MAKE) cilium
+	$(MAKE) metal
 	$(MAKE) traefik
 	$(MAKE) hubble
 	$(MAKE) zerotier
@@ -136,3 +138,5 @@ restore-pet:
 	pass katt/$(PET)/hook-customize | base64 -d > k/zerotier/config/hook-customize
 	pass katt/$(PET)/acme.json | base64 -d > k/traefik/secret/acme.json
 	pass katt/$(PET)/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
+	pass katt/$(PET)/metal/config | base64 -d > k/metal/config/config
+	pass katt/$(PET)/metal/secretkey | base64 -d > k/metal/config/secretkey
