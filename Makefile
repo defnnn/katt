@@ -9,6 +9,7 @@ ks := kubectl -n kube-system
 kt := kubectl -n traefik
 km := kubectl -n metallb-system
 kk := kubectl -n kuma-system
+kg := kubectl -n kong
 
 menu:
 	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
@@ -68,6 +69,7 @@ katt-extras: # Setup katt with cilium, metallb, traefik, hubble, zerotier
 	$(MAKE) traefik
 	$(MAKE) hubble
 	$(MAKE) kuma
+	$(MAKE) kong
 	$(MAKE) zerotier
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(k) get --all-namespaces pods; sleep 5; echo; done
 	$(k) get --all-namespaces pods
@@ -97,6 +99,9 @@ kuma:
 	sleep 5
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do $(ks) get pods; sleep 5; echo; done
 	kumactl install dns | $(k) apply -f -
+
+kong:
+	$(k) apply -f https://bit.ly/k4k8s
 
 traefik:
 	$(k) create ns traefik || true
