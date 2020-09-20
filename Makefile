@@ -28,6 +28,7 @@ katts: # Bring up both katts: kind, mean
 	$(MAKE) katt-mean
 
 katt-kind: # Bring up kind katt
+	$(MAKE) clean-kind
 	$(MAKE) restore-pet PET=kind
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
@@ -35,6 +36,7 @@ katt-kind: # Bring up kind katt
 	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-mean: # Bring up mean katt
+	$(MAKE) clean-mean
 	$(MAKE) restore-pet PET=mean
 	$(MAKE) setup || true
 	kind create cluster --name mean --config k/mean.yaml
