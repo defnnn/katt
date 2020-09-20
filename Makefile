@@ -32,12 +32,14 @@ katt-kind: # Bring up kind katt
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) katt-extras PET=kind
+	$(k) apply -f k/kuma/demo-be.yaml
 
 katt-mean: # Bring up mean katt
 	$(MAKE) restore-pet PET=mean
 	$(MAKE) setup || true
 	kind create cluster --name mean --config k/mean.yaml
 	$(MAKE) katt-extras PET=mean
+	$(k) apply -f k/kuma/demo-fe.yaml
 
 clean: # Teardown katt
 	$(MAKE) clean-kind || true
