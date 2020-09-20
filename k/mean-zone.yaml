@@ -1,4 +1,0 @@
-type: Zone
-name: mean
-ingress:
-  address: 10.88.88.90:10001

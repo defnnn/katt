@@ -32,14 +32,14 @@ katt-kind: # Bring up kind katt
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) katt-extras PET=kind
-	$(k) apply -f k/kuma/demo-be.yaml
+	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-mean: # Bring up mean katt
 	$(MAKE) restore-pet PET=mean
 	$(MAKE) setup || true
 	kind create cluster --name mean --config k/mean.yaml
 	$(MAKE) katt-extras PET=mean
-	$(k) apply -f k/kuma/demo-fe.yaml
+	$(k) apply -f k/kuma/demo-be.yaml
 
 clean: # Teardown katt
 	$(MAKE) clean-kind || true
@@ -100,13 +100,17 @@ kuma-mean:
 	$(MAKE) kuma PET=mean
 
 kuma:
-	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://10.88.88.88:5685 | $(k) apply -f -
+	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://$(shell docker inspect kitt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 | $(k) apply -f -
 	sleep 5
 	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(ks) get pods; sleep 5; echo; done
 	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
 	kumactl install dns | $(k) apply -f -
-	kumactl apply -f k/$(PET)-zone.yaml
+	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
+		$(ks) get pods; sleep 5; echo; done
+	echo "---" | yq -y --arg pet "$(PET)" --arg address \
+		"$(shell $(kk) get svc -o json | jq -r '.items[] | select(.metadata.name == "kuma-ingress") | .status.loadBalancer.ingress[].ip')" '{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
+		| kumactl apply -f -
 
 kong:
 	$(k) apply -f https://bit.ly/k4k8s

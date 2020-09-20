@@ -44,5 +44,22 @@ spec:
       containers:
       - name: kuma-fe
         image: kvn0218/kuma-demo-fe:latest
-        args: ["-P", "http://backend:3001"]
+        args: ["-P", "http://backend_kuma-demo_svc_3001.mesh"]
         imagePullPolicy: IfNotPresent
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kuma-demo-app
+  namespace: kuma-demo
+  labels:
+    app: kuma-demo-frontend
+spec:
+  entryPoints:
+    - https
+  routes:
+  - match: HostRegexp(`kuma-demo.{domain:.+}`)
+    kind: Rule
+    services:
+    - name: frontend
+      port: 8080

@@ -1,4 +1,0 @@
-type: Zone
-name: kind
-ingress:
-  address: 10.88.88.89:10001
