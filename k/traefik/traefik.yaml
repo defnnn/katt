@@ -4,6 +4,8 @@ kind: Namespace
 metadata:
   name: traefik
   namespace: traefik
+  annotations:
+    kuma.io/sidecar-injection: enabled
 ---
 kind: ServiceAccount
 apiVersion: v1
