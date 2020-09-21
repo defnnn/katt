@@ -24,8 +24,12 @@ setup: # Setup requirements for katt
 katts: # Bring up both katts: kind, mean
 	$(MAKE) clean
 	$(MAKE) setup
-	$(MAKE) katt-kind
-	$(MAKE) katt-mean
+	$(MAKE) katt-kind wait
+	$(MAKE) katt-mean wait
+	$(MAKE) mean
+	$(k) apply -f k/kuma/demo-be.yaml
+	$(MAKE) kind
+	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-kind: # Bring up kind katt
 	$(MAKE) clean-kind
@@ -35,7 +39,6 @@ katt-kind: # Bring up kind katt
 	$(MAKE) katt-extras PET=kind
 	kumactl install metrics | $(k) apply -f -
 	$(k) apply -f k/kuma/grafana.yaml
-	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-mean: # Bring up mean katt
 	$(MAKE) clean-mean
@@ -43,7 +46,6 @@ katt-mean: # Bring up mean katt
 	$(MAKE) setup || true
 	kind create cluster --name mean --config k/mean.yaml
 	$(MAKE) katt-extras PET=mean
-	$(k) apply -f k/kuma/demo-be.yaml
 
 clean: # Teardown katt
 	$(MAKE) clean-kind || true
@@ -79,9 +81,9 @@ katt-extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, k
 	$(MAKE) kuma
 	$(MAKE) traefik wait
 	$(MAKE) zerotier wait
-	$(MAKE) knative wait
-	$(MAKE) kong wait
-	$(MAKE) hubble wait
+	#$(MAKE) knative wait
+	#$(MAKE) kong wait
+	#$(MAKE) hubble wait
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
