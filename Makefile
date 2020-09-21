@@ -33,6 +33,8 @@ katt-kind: # Bring up kind katt
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) katt-extras PET=kind
+	kumactl install metrics | $(k) apply -f -
+	$(k) apply -f k/kuma/grafana.yaml
 	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-mean: # Bring up mean katt
@@ -104,8 +106,6 @@ kuma:
 	sleep 5
 	$(MAKE) wait
 	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
-	kumactl install metrics | $(k) apply -f -
-	$(k) apply -f k/kuma/grafana.yaml
 	kumactl install dns | $(k) apply -f -
 	$(MAKE) wait
 	$(MAKE) kuma-inner PET="$(PET)"
