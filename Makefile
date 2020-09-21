@@ -104,6 +104,8 @@ kuma:
 	sleep 5
 	$(MAKE) wait
 	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
+	kumactl install metrics | $(k) apply -f -
+	$(k) apply -f k/kuma/grafana.yaml
 	kumactl install dns | $(k) apply -f -
 	$(MAKE) wait
 	$(MAKE) kuma-inner PET="$(PET)"
