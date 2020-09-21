@@ -48,7 +48,6 @@ katt-mean: # Bring up mean katt
 clean: # Teardown katt
 	$(MAKE) clean-kind || true
 	$(MAKE) clean-mean || true
-	docker network rm kind || true
 
 clean-kind:
 	kind delete cluster --name kind
