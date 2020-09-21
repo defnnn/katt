@@ -139,7 +139,7 @@ cloudflared:
 	kustomize build k/cloudflared | $(kt) apply -f -
 
 zerotier:
-	kustomize build k/zerotier | $(kt) apply -f -
+	kustomize build k/zerotier | $(k) apply -f -
 
 home:
 	kustomize build k/home | $(k) apply -f -
