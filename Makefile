@@ -6,9 +6,9 @@ DOMAIN := ooooooooooooooooooooooooooooo.ooo
 
 k := kubectl
 ks := kubectl -n kube-system
-kt := kubectl -n traefik
 km := kubectl -n metallb-system
 kk := kubectl -n kuma-system
+kt := kubectl -n traefik
 kg := kubectl -n kong
 kv := kubectl -n knative-serving
 
@@ -68,28 +68,27 @@ dummy:
 defn:
 	$(MAKE) metal cloudflared g2048
 
-katt-extras: # Setup katt with cilium, metallb, traefik, hubble, kuma, zerotier, knative, kong
-	$(MAKE) cilium
-	$(MAKE) metal
-	$(MAKE) traefik
-	$(MAKE) hubble
-	$(MAKE) kuma
-	$(MAKE) zerotier
-	$(MAKE) knative
-	$(MAKE) kong
+wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
+
+katt-extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, knative, hubble
+	$(MAKE) cilium wait
+	$(MAKE) metal wait
+	$(MAKE) kuma
+	$(MAKE) traefik wait
+	$(MAKE) zerotier wait
+	$(MAKE) knative wai
+	$(MAKE) kong wait
+	$(MAKE) hubble wait
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
-		$(ks) get pods; sleep 5; echo; done
+	$(MAKE) wait
 	while $(ks) get nodes | grep NotReady; do \
 		sleep 5; done
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
-		$(ks) get pods; sleep 5; echo; done
 
 metal:
 	kustomize build k/metal | $(km) apply -f -
@@ -103,12 +102,10 @@ kuma-mean:
 kuma:
 	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://$(shell docker inspect kitt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 | $(k) apply -f -
 	sleep 5
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
-		$(ks) get pods; sleep 5; echo; done
+	$(MAKE) wait
 	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
 	kumactl install dns | $(k) apply -f -
-	while [[ "$$($(ks) get -o json pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
-		$(ks) get pods; sleep 5; echo; done
+	$(MAKE) wait
 	$(MAKE) kuma-inner PET="$(PET)"
 
 kuma-inner:
