@@ -33,8 +33,8 @@ katt-kind: # Bring up kind katt
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) katt-extras PET=kind
-	kumactl install metrics | $(k) apply -f -
-	$(k) apply -f k/kuma/grafana.yaml
+	#kumactl install metrics | $(k) apply -f -
+	#$(k) apply -f k/kuma/grafana.yaml
 	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-mean: # Bring up mean katt
@@ -103,10 +103,9 @@ kuma-mean:
 
 kuma:
 	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://$(shell docker inspect kitt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 | $(k) apply -f -
-	sleep 5
 	$(MAKE) wait
-	kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
 	kumactl install dns | $(k) apply -f -
+	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
 	$(MAKE) wait
 	$(MAKE) kuma-inner PET="$(PET)"
 
