@@ -78,7 +78,7 @@ katt-extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, k
 	$(MAKE) kuma
 	$(MAKE) traefik wait
 	$(MAKE) zerotier wait
-	$(MAKE) knative wai
+	$(MAKE) knative wait
 	$(MAKE) kong wait
 	$(MAKE) hubble wait
 	$(k) get --all-namespaces pods
