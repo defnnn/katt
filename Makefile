@@ -268,16 +268,22 @@ defn-cp:
 		kuma-cp run
 
 defn-ingress:
-	cat defn-ingress.yaml | kumactl apply -f -
+	cat k/defn-ingress.yaml | kumactl apply -f -
 	kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
 	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
 
 defn-spiral:
-	cat spiral.yaml | kumactl apply -f -
+	sudo python -m http.server --bind 127.0.0.1 1010
+
+defn-the:
+	sudo python -m http.server --bind 127.0.0.1 1020
+
+defn-spiral-dp:
+	cat k/app-spiral.yaml | kumactl apply -f -
 	kumactl generate dataplane-token --dataplane=spiral > spiral-token
 	kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
 
-defn-the:
-	cat the.yaml | kumactl apply -f -
+defn-the-dp:
+	cat k/app-the.yaml | kumactl apply -f -
 	kumactl generate dataplane-token --dataplane=the > the-token
 	kuma-dp run --name=the --cp-address=http://localhost:5681 --dataplane-token-file=the-token --log-level=debug
