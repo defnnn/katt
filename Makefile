@@ -287,14 +287,14 @@ katt-app2:
 	sudo python -m http.server --bind 127.0.0.1 1020
 
 katt-app1-dp:
-	cat k/app-spiral.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=spiral > spiral-token
-	kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
+	cat k/katt-app1.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=app1 > app1-token
+	kuma-dp run --name=app1 --cp-address=http://localhost:5681 --dataplane-token-file=app1-token --log-level=debug
 
 katt-app2-dp:
-	cat k/app-the.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=the > the-token
-	kuma-dp run --name=the --cp-address=http://localhost:5681 --dataplane-token-file=the-token --log-level=debug
+	cat k/app2.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=app2 > app2 -token
+	kuma-dp run --name=app2 --cp-address=http://localhost:5681 --dataplane-token-file=app2-token --log-level=debug
 
 defn-cp:
 	env \
@@ -304,10 +304,16 @@ defn-cp:
 		kuma-cp run
 
 defn-ingress:
-	$(MAKE) kumactl-global-cp
 	kumactl config control-planes add --address http://localhost:5681 --name defn-cp --overwrite
 	$(MAKE) kumactl-defn-cp
 	cat k/defn-ingress.yaml | kumactl apply -f -
 	kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
 	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
 
+defn-app:
+	sudo python -m http.server --bind 127.0.0.1 1030
+
+defn-app-dp:
+	cat k/defn-app.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=app > app-token
+	kuma-dp run --name=app --cp-address=http://localhost:5681 --dataplane-token-file=app-token --log-level=debug

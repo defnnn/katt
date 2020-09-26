@@ -12,9 +12,3 @@ networking:
   - port: 20010
     tags:
       kuma.io/service: app1_katt_svc_1010
-  - port: 20011
-    tags:
-      kuma.io/service: frontend_kuma-demo_svc_8080
-  - port: 20012
-    tags:
-      kuma.io/service: backend_kuma-demo_svc_3001
