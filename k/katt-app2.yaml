@@ -1,17 +1,20 @@
 type: Dataplane
 mesh: default
-name: spiral
+name: app2
 networking:
   address: 127.0.0.1
   inbound:
-  - port: 2010
-    servicePort: 1010
+  - port: 2020
+    servicePort: 1020
     tags:
-      kuma.io/service: the_spiral_svc_1010
+      kuma.io/service: app2_katt_svc_1020
   outbound:
-  - port: 20001
+  - port: 20010
+    tags:
+      kuma.io/service: app1_katt_svc_1010
+  - port: 20011
     tags:
       kuma.io/service: frontend_kuma-demo_svc_8080
-  - port: 20002
+  - port: 20012
     tags:
       kuma.io/service: backend_kuma-demo_svc_3001

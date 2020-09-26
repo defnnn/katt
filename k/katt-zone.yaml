@@ -1,4 +1,4 @@
 type: Zone
-name: defn
+name: katt
 ingress:
   address: 169.254.32.1:10001
