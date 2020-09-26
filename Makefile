@@ -292,8 +292,8 @@ katt-app1-dp:
 	kuma-dp run --name=app1 --cp-address=http://localhost:5681 --dataplane-token-file=app1-token --log-level=debug
 
 katt-app2-dp:
-	cat k/app2.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=app2 > app2 -token
+	cat k/katt-app2.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=app2 > app2-token
 	kuma-dp run --name=app2 --cp-address=http://localhost:5681 --dataplane-token-file=app2-token --log-level=debug
 
 defn-cp:
