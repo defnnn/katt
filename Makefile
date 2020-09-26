@@ -20,8 +20,9 @@ test: # Test manifests with kubeval
 
 setup: # Setup requirements for katt
 	$(MAKE) network || true
+	$(MAKE) dummy || true
 
-katts: # Bring up both katts: kind, mean
+thing: # Bring up both katts: kind, mean
 	$(MAKE) clean
 	$(MAKE) setup
 	$(MAKE) katt-kind wait
