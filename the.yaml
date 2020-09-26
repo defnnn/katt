@@ -1,0 +1,20 @@
+type: Dataplane
+mesh: default
+name: the
+networking:
+  address: 192.168.195.250
+  inbound:
+  - port: 2020
+    servicePort: 1020
+    tags:
+      kuma.io/service: teh_spiral_svc_1020
+  outbound:
+  - port: 20010
+    tags:
+      kuma.io/service: the_spiral_svc_1010
+  - port: 20011
+    tags:
+      kuma.io/service: frontend_kuma-demo_svc_8080
+  - port: 20012
+    tags:
+      kuma.io/service: backend_kuma-demo_svc_3001
