@@ -2,7 +2,7 @@ curl https://get.acme.sh | sh
 
 KUMA_MODE=remote \
 KUMA_MULTICLUSTER_REMOTE_ZONE=defn \
-KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://10.88.88.88:5685 kuma-cp run
+KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 kuma-cp run
 
 
 cat defn-zone.yaml | kumactl apply -f -

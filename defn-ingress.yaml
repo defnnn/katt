@@ -6,3 +6,5 @@ networking:
   ingress: {}
   inbound:
   - port: 10000
+    tags:
+      kuma.io/service: ingress
