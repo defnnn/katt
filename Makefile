@@ -112,9 +112,9 @@ kuma:
 	$(MAKE) kuma-inner PET="$(PET)"
 
 kuma-inner:
-	echo "---" | yq -y --arg pet "$(PET)" --arg address \
-		"$(shell $(kk) get svc -o json | jq -r '.items[] | select(.metadata.name == "kuma-ingress") | .status.loadBalancer.ingress[].ip')" '{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
-		| kumactl apply -f -
+	echo "---" | yq -y --arg pet "$(PET)" --arg address "$(shell pass katt/$(PET)/ip)" \
+		'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
+ 		| kumactl apply -f -
 
 kong:
 	$(k) apply -f https://bit.ly/k4k8s
