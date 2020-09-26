@@ -258,16 +258,27 @@ kuma-global-control-plane::
 
 kumactl:
 	kumactl config control-planes add --address http://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress'):5681 --name kitt --overwrite
+	$(MAKE) kumactl-global-cp
+
+kumactl-global-cp:
 	kumactl config control-planes switch --name kitt
+
+kumactl-defn-cp:
+	kumactl config control-planes switch --name defn-cp
 
 defn-cp:
 	env \
 		KUMA_MODE=remote \
 		KUMA_MULTICLUSTER_REMOTE_ZONE=defn \
-		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 \
+		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 \
 		kuma-cp run
 
 defn-ingress:
+	$(MAKE) kumactl-global-cp
+	kumactl config control-planes switch --name kitt
+	cat k/defn-zone.yaml | kumactl apply -f -
+	kumactl config control-planes add --address http://localhost:5681 --name defn-cp --overwrite
+	$(MAKE) kumactl-defn-cp
 	cat k/defn-ingress.yaml | kumactl apply -f -
 	kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
 	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug

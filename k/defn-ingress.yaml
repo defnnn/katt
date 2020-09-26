@@ -2,9 +2,9 @@ type: Dataplane
 mesh: default
 name: kuma-ingress
 networking:
-  address: 192.168.195.250
+  address: 169.254.32.1
   ingress: {}
   inbound:
-  - port: 10000
+  - port: 10001
     tags:
       kuma.io/service: ingress
