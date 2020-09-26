@@ -1,0 +1,7 @@
+kind: Zone
+mesh: default
+metadata:
+  name: defn
+spec:
+  ingress:
+    address: 192.168.195.250:10001
