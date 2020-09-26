@@ -77,9 +77,6 @@ dummy:
 	sudo ip addr add 169.254.32.3/32 dev dummy2 || true
 	sudo ip link set dev dummy2 up
 
-defn:
-	$(MAKE) metal cloudflared g2048
-
 wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
@@ -252,49 +249,65 @@ restore-global-control-plane-diff-inner:
 kuma-global-control-plane::
 	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
 	sleep 10
-	$(MAKE) kumactl
+	kumactl config control-planes add --address http://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress'):5681 --name global-cp --overwrite
+	$(MAKE) kumactl-global-cp
 	kumactl apply -f k/traffic-permission-allow-all-traffic.yaml
 	kumactl apply -f k/mesh-default.yaml
-
-kumactl:
-	kumactl config control-planes add --address http://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress'):5681 --name kitt --overwrite
-	$(MAKE) kumactl-global-cp
+	cat k/katt-zone.yaml | kumactl apply -f -
+	cat k/defn-zone.yaml | kumactl apply -f -
 
 kumactl-global-cp:
-	kumactl config control-planes switch --name kitt
+	kumactl config control-planes switch --name global-cp
+
+kumactl-katt-cp:
+	kumactl config control-planes switch --name katt-cp
 
 kumactl-defn-cp:
 	kumactl config control-planes switch --name defn-cp
+
+katt-cp:
+	env \
+		KUMA_MODE=remote \
+		KUMA_MULTICLUSTER_REMOTE_ZONE=katt \
+		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 \
+		kuma-cp run
+
+katt-ingress:
+	$(MAKE) kumactl-global-cp
+	kumactl config control-planes add --address http://localhost:5681 --name katt-cp --overwrite
+	$(MAKE) kumactl-katt-cp
+	cat k/katt-ingress.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=kuma-ingress > katt-ingress-token
+	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=katt-ingress-token --log-level=debug
+
+katt-app1:
+	sudo python -m http.server --bind 127.0.0.1 1010
+
+katt-app2:
+	sudo python -m http.server --bind 127.0.0.1 1020
+
+katt-app1-dp:
+	cat k/app-spiral.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=spiral > spiral-token
+	kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
+
+katt-app2-dp:
+	cat k/app-the.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=the > the-token
+	kuma-dp run --name=the --cp-address=http://localhost:5681 --dataplane-token-file=the-token --log-level=debug
 
 defn-cp:
 	env \
 		KUMA_MODE=remote \
 		KUMA_MULTICLUSTER_REMOTE_ZONE=defn \
-		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 \
+		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 \
 		kuma-cp run
 
 defn-ingress:
 	$(MAKE) kumactl-global-cp
-	kumactl config control-planes switch --name kitt
-	cat k/defn-zone.yaml | kumactl apply -f -
 	kumactl config control-planes add --address http://localhost:5681 --name defn-cp --overwrite
 	$(MAKE) kumactl-defn-cp
 	cat k/defn-ingress.yaml | kumactl apply -f -
 	kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
 	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
 
-defn-spiral:
-	sudo python -m http.server --bind 127.0.0.1 1010
-
-defn-the:
-	sudo python -m http.server --bind 127.0.0.1 1020
-
-defn-spiral-dp:
-	cat k/app-spiral.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=spiral > spiral-token
-	kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
-
-defn-the-dp:
-	cat k/app-the.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=the > the-token
-	kuma-dp run --name=the --cp-address=http://localhost:5681 --dataplane-token-file=the-token --log-level=debug
