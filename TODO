@@ -11,3 +11,9 @@ kumactl generate dataplane-token --dataplane=defn > defn-ingress-token
 kuma-dp run --name=defn --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
 
 cat defn-zone.yaml | kumactl apply -f -
+
+kumactl generate dataplane-token --dataplane=spiral > spiral-token
+
+cat spiral.yaml | kumactl apply -f -
+
+kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
