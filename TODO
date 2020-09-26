@@ -1,23 +1,5 @@
 curl https://get.acme.sh | sh
 
-KUMA_MODE=remote \
-KUMA_MULTICLUSTER_REMOTE_ZONE=defn \
-KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 kuma-cp run
-
-
 cat defn-zone.yaml | kumactl apply -f -
 
-
-cat defn-ingress.yaml | kumactl apply -f -
-kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
-kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
-
-
-cat spiral.yaml | kumactl apply -f -
-kumactl generate dataplane-token --dataplane=spiral > spiral-token
-kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
-
-
-cat the.yaml | kumactl apply -f -
-kumactl generate dataplane-token --dataplane=the > the-token
-kuma-dp run --name=the --cp-address=http://localhost:5681 --dataplane-token-file=the-token --log-level=debug
+sudo tcpdump -n -i any net 192.168.195.0/24 or port 10001

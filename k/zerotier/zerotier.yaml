@@ -45,11 +45,6 @@ spec:
               configMapKeyRef:
                 name: zerotier-config
                 key: ZT_NETWORK
-          - name: ZT_VIP
-            valueFrom:
-              configMapKeyRef:
-                name: zerotier-config
-                key: ZT_VIP
           - name: ZT_DEST
             valueFrom:
               configMapKeyRef:

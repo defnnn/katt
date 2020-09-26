@@ -21,10 +21,13 @@ test: # Test manifests with kubeval
 setup: # Setup requirements for katt
 	$(MAKE) network || true
 	$(MAKE) dummy || true
+	$(MAKE) build
 
 thing: # Bring up both katts: kind, mean
 	$(MAKE) clean
 	$(MAKE) setup
+	$(MAKE) up
+	$(MAKE) kuma-global-control-plane
 	$(MAKE) katt-kind wait
 	$(MAKE) katt-mean wait
 	$(MAKE) mean
@@ -38,8 +41,6 @@ katt-kind: # Bring up kind katt
 	$(MAKE) setup || true
 	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) katt-extras PET=kind
-	#kumactl install metrics | $(k) apply -f -
-	#$(k) apply -f k/kuma/grafana.yaml
 
 katt-mean: # Bring up mean katt
 	$(MAKE) clean-mean
@@ -48,20 +49,27 @@ katt-mean: # Bring up mean katt
 	kind create cluster --name mean --config k/mean.yaml
 	$(MAKE) katt-extras PET=mean
 
-clean: # Teardown katt
-	$(MAKE) clean-kind || true
-	$(MAKE) clean-mean || true
+clean: # Teardown
+	$(MAKE) clean-global-control-plane
+	$(MAKE) clean-kind
+	$(MAKE) clean-mean
+
+clean-global-control-plane:
+	-docker-compose down
 
 clean-kind:
-	kind delete cluster --name kind
+	-kind delete cluster --name kind
 
 clean-mean:
-	kind delete cluster --name mean
+	-kind delete cluster --name mean
 
 network:
 	docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind
 
 dummy:
+	sudo ip link add dummy0 type dummy || true
+	sudo ip addr add 169.254.32.1/32 dev dummy0 || true
+	sudo ip link set dev dummy0 up
 	sudo ip link add dummy1 type dummy || true
 	sudo ip addr add 169.254.32.2/32 dev dummy1 || true
 	sudo ip link set dev dummy1 up
@@ -104,7 +112,7 @@ kuma-mean:
 	$(MAKE) kuma PET=mean
 
 kuma:
-	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://$(shell docker inspect kitt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 | $(k) apply -f -
+	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 | $(k) apply -f -
 	$(MAKE) wait
 	kumactl install dns | $(k) apply -f -
 	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
@@ -171,7 +179,6 @@ restore-mean:
 restore-pet:
 	pass katt/$(PET)/ZT_DEST | perl -pe 's{\s*$$}{}'  > k/zerotier/config/ZT_DEST
 	pass katt/$(PET)/ZT_NETWORK | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_NETWORK
-	pass katt/$(PET)/ZT_VIP | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_VIP
 	mkdir -p k/zerotier/secret
 	pass katt/$(PET)/authtoken.secret | perl -pe 's{\s*$$}{}'  > k/zerotier/secret/ZT_AUTHTOKEN_SECRET
 	pass katt/$(PET)/identity.public | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_PUBLIC
@@ -191,7 +198,6 @@ restore-diff-mean:
 restore-diff-pet:
 	pdif katt/$(PET)/ZT_DEST k/zerotier/config/ZT_DEST
 	pdif katt/$(PET)/ZT_NETWORK k/zerotier/config/ZT_NETWORK
-	pdif katt/$(PET)/ZT_VIP k/zerotier/config/ZT_VIP
 	pdif katt/$(PET)/authtoken.secret k/zerotier/secret/ZT_AUTHTOKEN_SECRET
 	pdif katt/$(PET)/identity.public k/zerotier/secret/ZT_IDENTITY_PUBLIC
 	pdif katt/$(PET)/identity.secret k/zerotier/secret/ZT_IDENTITY_SECRET
@@ -208,3 +214,70 @@ kind:
 mean:
 	$(k) config use-context kind-mean
 	$(k) get nodes
+
+build:
+	docker-compose build
+
+up:
+	docker-compose rm -f -s
+	docker-compose up -d --remove-orphans
+
+restore-global-control-plane:
+	set -a; source .env; set +a; $(MAKE) restore-global-control-plane-inner
+
+restore-global-control-plane-inner:
+	mkdir -p etc/traefik/acme
+	pass kitt/$(katt_DOMAIN)/authtoken.secret | base64 -d | perl -pe 's{\s*$$}{}'  > etc/zerotier/zerotier-one/authtoken.secret
+	pass kitt/$(katt_DOMAIN)/identity.public | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.public
+	pass kitt/$(katt_DOMAIN)/identity.secret | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.secret
+	pass kitt/$(katt_DOMAIN)/acme.json | base64 -d > etc/traefik/acme/acme.json
+	chmod 0600 etc/traefik/acme/acme.json
+	pass kitt/$(katt_DOMAIN)/hook-customize| base64 -d > etc/zerotier/hooks/hook-customize
+	chmod 755 etc/zerotier/hooks/hook-customize
+	pass kitt/$(katt_DOMAIN)/cert.pem | base64 -d > etc/cloudflared/cert.pem
+	pass kitt/$(katt_DOMAIN)/env | base64 -d > .env
+
+restore-global-control-plane-diff:
+	set -a; source .env; set +a; $(MAKE) restore-global-control-plane-diff-inner
+
+restore-global-control-plane-diff-inner:
+	pdif kitt/$(katt_DOMAIN)/authtoken.secret etc/zerotier/zerotier-one/authtoken.secret
+	pdif kitt/$(katt_DOMAIN)/identity.public etc/zerotier/zerotier-one/identity.public
+	pdif kitt/$(katt_DOMAIN)/identity.secret etc/zerotier/zerotier-one/identity.secret
+	pdiff kitt/$(katt_DOMAIN)/acme.json etc/traefik/acme/acme.json
+	pdiff kitt/$(katt_DOMAIN)/hook-customize etc/zerotier/hooks/hook-customize
+	pdiff kitt/$(katt_DOMAIN)/cert.pem etc/cloudflared/cert.pem
+	pdiff kitt/$(katt_DOMAIN)/env .env
+
+kuma-global-control-plane::
+	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
+	sleep 10
+	$(MAKE) kumactl
+	kumactl apply -f k/traffic-permission-allow-all-traffic.yaml
+	kumactl apply -f k/mesh-default.yaml
+
+kumactl:
+	kumactl config control-planes add --address http://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress'):5681 --name kitt --overwrite
+	kumactl config control-planes switch --name kitt
+
+defn-cp:
+	env \
+		KUMA_MODE=remote \
+		KUMA_MULTICLUSTER_REMOTE_ZONE=defn \
+		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 \
+		kuma-cp run
+
+defn-ingress:
+	cat defn-ingress.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
+	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
+
+defn-spiral:
+	cat spiral.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=spiral > spiral-token
+	kuma-dp run --name=spiral --cp-address=http://localhost:5681 --dataplane-token-file=spiral-token --log-level=debug
+
+defn-the:
+	cat the.yaml | kumactl apply -f -
+	kumactl generate dataplane-token --dataplane=the > the-token
+	kuma-dp run --name=the --cp-address=http://localhost:5681 --dataplane-token-file=the-token --log-level=debug
