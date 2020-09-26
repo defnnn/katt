@@ -2,7 +2,7 @@ type: Dataplane
 mesh: default
 name: spiral
 networking:
-  address: 127.0.0.1
+  address: 192.168.195.250
   inbound:
   - port: 2010
     servicePort: 1010
