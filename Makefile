@@ -109,7 +109,7 @@ kuma-mean:
 	$(MAKE) kuma PET=mean
 
 kuma:
-	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 | $(k) apply -f -
+	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://192.168.195.116:5685 | $(k) apply -f -
 	$(MAKE) wait
 	kumactl install dns | $(k) apply -f -
 	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
@@ -117,8 +117,8 @@ kuma:
 	$(MAKE) kuma-inner PET="$(PET)"
 
 kuma-inner:
-	echo "---" | yq -y --arg pet "$(PET)" --arg address \
-		"$(shell $(kk) get svc -o json | jq -r '.items[] | select(.metadata.name == "kuma-ingress") | .status.loadBalancer.ingress[].ip')" '{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
+	echo "---" | yq -y --arg pet "$(PET)" --arg address "$(shell pass katt/$(PET)/ip)" \
+	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
 		| kumactl apply -f -
 
 kong:
@@ -249,7 +249,7 @@ restore-global-control-plane-diff-inner:
 kuma-global-control-plane::
 	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
 	sleep 10
-	kumactl config control-planes add --address http://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress'):5681 --name global-cp --overwrite
+	kumactl config control-planes add --address http://192.168.195.116:5681 --name global-cp --overwrite
 	$(MAKE) kumactl-global-cp
 	kumactl apply -f k/traffic-permission-allow-all-traffic.yaml
 	kumactl apply -f k/mesh-default.yaml
@@ -269,7 +269,7 @@ katt-cp:
 	env \
 		KUMA_MODE=remote \
 		KUMA_MULTICLUSTER_REMOTE_ZONE=katt \
-		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress' ):5685 \
+		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 \
 		kuma-cp run
 
 katt-ingress:

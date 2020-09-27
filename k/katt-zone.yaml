@@ -1,4 +1,4 @@
 type: Zone
 name: katt
 ingress:
-  address: 169.254.32.1:10001
+  address: 192.168.195.116:10001
