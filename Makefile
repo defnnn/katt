@@ -249,7 +249,7 @@ restore-global-control-plane-diff-inner:
 kuma-global-control-plane::
 	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
 	sleep 10
-	kumactl config control-planes add --address http://192.168.195.116:5681 --name global-cp --overwrite
+	kumactl config control-planes add --address http://169.254.32.1:5681 --name global-cp --overwrite
 	$(MAKE) kumactl-global-cp
 	kumactl apply -f k/traffic-permission-allow-all-traffic.yaml
 	kumactl apply -f k/mesh-default.yaml
