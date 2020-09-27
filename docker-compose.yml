@@ -96,8 +96,6 @@ services:
       - "traefik.http.routers.kuma-api.rule=Host(`kuma.${KITT_DOMAIN}`)"
       - "traefik.http.routers.kuma-api.service=kuma-api"
       - "traefik.http.services.kuma-api.loadbalancer.server.port=5681"
-    ports:
-      - ${KITT_IP}:5681:5681
     env_file: .env
     environment:
       KUMA_MODE: global
