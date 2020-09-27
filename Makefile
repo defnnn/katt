@@ -246,7 +246,7 @@ restore-global-control-plane-diff-inner:
 	pdiff kitt/$(katt_DOMAIN)/cert.pem etc/cloudflared/cert.pem
 	pdiff kitt/$(katt_DOMAIN)/env .env
 
-kuma-global-control-plane::
+kuma-global-control-plane:
 	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
 	sleep 10
 	kumactl config control-planes add --address http://169.254.32.1:5681 --name global-cp --overwrite
