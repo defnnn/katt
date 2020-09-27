@@ -224,27 +224,27 @@ restore-global-control-plane:
 
 restore-global-control-plane-inner:
 	mkdir -p etc/traefik/acme
-	pass kitt/$(katt_DOMAIN)/authtoken.secret | base64 -d | perl -pe 's{\s*$$}{}'  > etc/zerotier/zerotier-one/authtoken.secret
-	pass kitt/$(katt_DOMAIN)/identity.public | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.public
-	pass kitt/$(katt_DOMAIN)/identity.secret | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.secret
-	pass kitt/$(katt_DOMAIN)/acme.json | base64 -d > etc/traefik/acme/acme.json
+	pass kitt/$(KATT_DOMAIN)/authtoken.secret | base64 -d | perl -pe 's{\s*$$}{}'  > etc/zerotier/zerotier-one/authtoken.secret
+	pass kitt/$(KATT_DOMAIN)/identity.public | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.public
+	pass kitt/$(KATT_DOMAIN)/identity.secret | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.secret
+	pass kitt/$(KATT_DOMAIN)/acme.json | base64 -d > etc/traefik/acme/acme.json
 	chmod 0600 etc/traefik/acme/acme.json
-	pass kitt/$(katt_DOMAIN)/hook-customize| base64 -d > etc/zerotier/hooks/hook-customize
+	pass kitt/$(KATT_DOMAIN)/hook-customize| base64 -d > etc/zerotier/hooks/hook-customize
 	chmod 755 etc/zerotier/hooks/hook-customize
-	pass kitt/$(katt_DOMAIN)/cert.pem | base64 -d > etc/cloudflared/cert.pem
-	pass kitt/$(katt_DOMAIN)/env | base64 -d > .env
+	pass kitt/$(KATT_DOMAIN)/cert.pem | base64 -d > etc/cloudflared/cert.pem
+	pass kitt/$(KATT_DOMAIN)/env | base64 -d > .env
 
 restore-global-control-plane-diff:
 	set -a; source .env; set +a; $(MAKE) restore-global-control-plane-diff-inner
 
 restore-global-control-plane-diff-inner:
-	pdif kitt/$(katt_DOMAIN)/authtoken.secret etc/zerotier/zerotier-one/authtoken.secret
-	pdif kitt/$(katt_DOMAIN)/identity.public etc/zerotier/zerotier-one/identity.public
-	pdif kitt/$(katt_DOMAIN)/identity.secret etc/zerotier/zerotier-one/identity.secret
-	pdiff kitt/$(katt_DOMAIN)/acme.json etc/traefik/acme/acme.json
-	pdiff kitt/$(katt_DOMAIN)/hook-customize etc/zerotier/hooks/hook-customize
-	pdiff kitt/$(katt_DOMAIN)/cert.pem etc/cloudflared/cert.pem
-	pdiff kitt/$(katt_DOMAIN)/env .env
+	pdif kitt/$(KATT_DOMAIN)/authtoken.secret etc/zerotier/zerotier-one/authtoken.secret
+	pdif kitt/$(KATT_DOMAIN)/identity.public etc/zerotier/zerotier-one/identity.public
+	pdif kitt/$(KATT_DOMAIN)/identity.secret etc/zerotier/zerotier-one/identity.secret
+	pdiff kitt/$(KATT_DOMAIN)/acme.json etc/traefik/acme/acme.json
+	pdiff kitt/$(KATT_DOMAIN)/hook-customize etc/zerotier/hooks/hook-customize
+	pdiff kitt/$(KATT_DOMAIN)/cert.pem etc/cloudflared/cert.pem
+	pdiff kitt/$(KATT_DOMAIN)/env .env
 
 kuma-global-control-plane:
 	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
