@@ -38,7 +38,7 @@ network:
 katt kind mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
 	$(MAKE) setup
-	cue export --out yaml c/$A.cue c/kind-cluster.cue | kind create cluster --name $@ --config -
+	cue export --out yaml c/$@.cue c/kind-cluster.cue | kind create cluster --name $@ --config -
 	$(MAKE) use-$@
 	$(MAKE) cilium wait
 	$(MAKE) metal wait PET=$@
