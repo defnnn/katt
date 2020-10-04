@@ -5,7 +5,7 @@ _networking: {
 	serviceSubnet: "10.11.0.0/16"
 }
 
-_address_pools: "general":       "172.25.70.10-172.25.79.254"
+_address_pools: "general":       "172.25.16.1-172.25.19.254"
 _address_pools: "traefik":       "172.25.15.26/32"
 _address_pools: "traefik-proxy": "172.25.15.25/32"
 _address_pools: "kuma-ingress":  "172.25.15.24/32"
