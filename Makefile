@@ -35,20 +35,20 @@ network:
 katt: # Bring up katt
 	$(MAKE) clean-katt
 	$(MAKE) setup
-	kind create cluster --name katt --config k/katt.yaml
+	cue export --out yaml c/kind.cue c/katt.yaml | kind create cluster --name katt --config -
 	$(MAKE) use-katt
 
 kind: # Bring up kind
 	$(MAKE) clean-kind
 	$(MAKE) setup
-	kind create cluster --name kind --config k/kind.yaml
+	cue export --out yaml c/kind.cue c/kind.yaml | kind create cluster --name kind --config -
 	$(MAKE) use-kind
 	$(MAKE) cilium wait
 
 mean: # Bring up mean
 	$(MAKE) clean-mean
 	$(MAKE) setup
-	kind create cluster --name mean --config k/mean.yaml
+	cue export --out yaml c/kind.cue c/mean.yaml | kind create cluster --name mean --config -
 	$(MAKE) use-mean
 	$(MAKE) cilium wait
 
