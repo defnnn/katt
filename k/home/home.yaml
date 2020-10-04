@@ -17,71 +17,13 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
 
-      volumes:
-      - name: home-secret
-        secret:
-          secretName: home-secret
-      - name: cloudflared-config
-        configMap:
-          name: cloudflared-config
-      - name: cloudflared-secret
-        secret:
-          secretName: cloudflared-secret
-      - name: tun
-        hostPath:
-          path: /dev/net/tun
-          type: CharDevice
-      - name: zerotier-hooks
-        configMap:
-          name: zerotier-hooks
-          defaultMode: 0755
-      - name: zerotier-secret
-        secret:
-          secretName: zerotier-secret
-
       containers:
-      - name: zerotier
-        image: letfn/zerotier
-        imagePullPolicy: Always
-        volumeMounts:
-         - name: tun
-           mountPath: /dev/net/tun
-         - name: zerotier-hooks
-           mountPath: /service.d
-        securityContext:
-          capabilities:
-            add: ["NET_ADMIN", "NET_RAW", "SYS_ADMIN"]
-        env:
-          - name: ZT_NETWORK
-            valueFrom:
-              secretKeyRef:
-                name: zerotier-secret
-                key: ZT_NETWORK
-          - name: ZT_DEST
-            valueFrom:
-              secretKeyRef:
-                name: zerotier-secret
-                key: ZT_DEST
-          - name: ZT_AUTHTOKEN_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: zerotier-secret
-                key: ZT_AUTHTOKEN_SECRET
-          - name: ZT_IDENTITY_PUBLIC
-            valueFrom:
-              secretKeyRef:
-                name: zerotier-secret
-                key: ZT_IDENTITY_PUBLIC
-          - name: ZT_IDENTITY_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: zerotier-secret
-                key: ZT_IDENTITY_SECRET
-
       - name: home
         image: "localhost:5000/defn/home:jojomomojo"
         imagePullPolicy: Always
         command: ["/service", "sshd"]
+        ports:
+        - containerPort: 2222
         env:
         - name: POD_NAME
           valueFrom:
@@ -91,37 +33,19 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        volumeMounts:
-        - mountPath: /data/home-secret
-          name: home-secret
-          readOnly: true
-
-      - name: cloudflared
-        image: docker.io/cloudflare/cloudflared:2020.9.3
-        imagePullPolicy: Always
-        command: ["cloudflared", "tunnel"]
-        args:
-        - --no-autoupdate
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        resources:
-          limits:
-            cpu: 10m
-            memory: 20Mi
-          requests:
-            cpu: 10m
-            memory: 20Mi
-        volumeMounts:
-        - mountPath: /etc/cloudflared
-          name: cloudflared-config
-          readOnly: true
-        - mountPath: /usr/local/etc/cloudflared
-          name: cloudflared-secret
-          readOnly: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home
+  labels:
+    app: home
+  annotations:
+    metallb.universe.tf/address-pool: general
+spec:
+  type: LoadBalancer
+  selector:
+    app: home
+  ports:
+  - port: 22
+    targetPort: 2222

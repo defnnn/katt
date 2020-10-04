@@ -3,14 +3,3 @@ kind: Kustomization
 
 resources:
   - home.yaml
-
-configMapGenerator:
-- name: cloudflared-config
-  files:
-    - config.yaml
-- name: zerotier-hooks
-  files:
-    - hook-customize
-
-generators:
-  - sops.yaml
