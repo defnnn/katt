@@ -18,6 +18,13 @@ menu:
 test: # Test manifests with kubeval
 	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
 
+thing:
+	$(MAKE) clean
+	$(MAKE) setup
+	$(MAKE) katt
+	$(MAKE) kind
+	$(MAKE) mean
+
 setup: # Setup requirements for katt
 	$(MAKE) network
 
