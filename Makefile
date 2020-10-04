@@ -137,3 +137,6 @@ acme.json: ~/.acme.sh/$(DOMAIN)/fullchain.cer
 		-k 4096 \
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
+
+registry: # Run a local registry
+	k apply -f k/registry.yaml

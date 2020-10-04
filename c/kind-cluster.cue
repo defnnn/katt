@@ -20,6 +20,9 @@ containerdConfigPatches: [
 	"""
 		[plugins."io.containerd.grpc.v1.cri".containerd]
 		disable_snapshot_annotations = true
+
+		[plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+		endpoint = ["http://169.254.32.1:5000"]
 		""",
 ]
 

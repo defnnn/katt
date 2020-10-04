@@ -1,1 +1,1 @@
-k/katt,kind,mean.yaml managed with cuelang.  vary network
+docker run -d --restart=always -p "169.254.32.1:5000:5000" registry:2
