@@ -11,3 +11,14 @@ metadata:
   name: cloudflared-secret
 files:
   - cert.pem=cert.pem.sops
+---
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: zerotier-secret
+files:
+  - ZT_NETWORK=ZT_NETWORK.sops
+  - ZT_DEST=ZT_DEST.sops
+  - ZT_AUTHTOKEN_SECRET=ZT_AUTHTOKEN_SECRET.sops
+  - ZT_IDENTITY_PUBLIC=ZT_IDENTITY_PUBLIC.sops
+  - ZT_IDENTITY_SECRET=ZT_IDENTITY_SECRET.sops

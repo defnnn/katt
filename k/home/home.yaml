@@ -27,8 +27,57 @@ spec:
       - name: cloudflared-secret
         secret:
           secretName: cloudflared-secret
+      - name: tun
+        hostPath:
+          path: /dev/net/tun
+          type: CharDevice
+      - name: zerotier-hooks
+        configMap:
+          name: zerotier-hooks
+          defaultMode: 0755
+      - name: zerotier-secret
+        secret:
+          secretName: zerotier-secret
 
       containers:
+      - name: zerotier
+        image: letfn/zerotier
+        imagePullPolicy: Always
+        volumeMounts:
+         - name: tun
+           mountPath: /dev/net/tun
+         - name: zerotier-hooks
+           mountPath: /service.d
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "NET_RAW", "SYS_ADMIN"]
+        env:
+          - name: ZT_NETWORK
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_NETWORK
+          - name: ZT_DEST
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_DEST
+          - name: ZT_AUTHTOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_AUTHTOKEN_SECRET
+          - name: ZT_IDENTITY_PUBLIC
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_IDENTITY_PUBLIC
+          - name: ZT_IDENTITY_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_IDENTITY_SECRET
+
       - name: home
         image: "localhost:5000/defn/home:jojomomojo"
         imagePullPolicy: Always
@@ -76,4 +125,3 @@ spec:
         - mountPath: /usr/local/etc/cloudflared
           name: cloudflared-secret
           readOnly: true
----
