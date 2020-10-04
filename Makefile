@@ -25,17 +25,29 @@ network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then docker network rm kind; fi
 	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
-kind: # Bring up kind katt
+katt: # Bring up katt
+	$(MAKE) clean-katt
+	$(MAKE) setup
+	kind create cluster --name katt --config k/katt.yaml
+	$(MAKE) use-katt
+
+kind: # Bring up kind
 	$(MAKE) clean-kind
 	$(MAKE) setup
 	kind create cluster --name kind --config k/kind.yaml
-	#$(MAKE) katt-extras PET=kind
+	$(MAKE) use-kind
+	#$(MAKE) extras PET=kind
 
-mean: # Bring up mean katt
+mean: # Bring up mean
 	$(MAKE) clean-mean
 	$(MAKE) setup
 	kind create cluster --name mean --config k/mean.yaml
-	#$(MAKE) katt-extras PET=mean
+	$(MAKE) use-mean
+	#$(MAKE) extras PET=mean
+
+use-katt:
+	$(k) config use-context kind-katt
+	$(k) get nodes
 
 use-kind:
 	$(k) config use-context kind-kind
@@ -49,6 +61,9 @@ clean: # Teardown
 	$(MAKE) clean-kind
 	$(MAKE) clean-mean
 
+clean-katt:
+	-kind delete cluster --name katt
+
 clean-kind:
 	-kind delete cluster --name kind
 
@@ -59,7 +74,7 @@ wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
-katt-extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, knative, hubble
+extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, knative, hubble
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
 	$(MAKE) kuma
@@ -79,25 +94,6 @@ cilium:
 
 metal:
 	kustomize build k/metal | $(km) apply -f -
-
-kuma-kind:
-	$(MAKE) kuma PET=kind
-
-kuma-mean:
-	$(MAKE) kuma PET=mean
-
-kuma:
-	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://192.168.195.116:5685 | $(k) apply -f -
-	$(MAKE) wait
-	kumactl install dns | $(k) apply -f -
-	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
-	$(MAKE) wait
-	$(MAKE) kuma-inner PET="$(PET)"
-
-kuma-inner:
-	echo "---" | yq -y --arg pet "$(PET)" --arg address "$(shell pass katt/$(PET)/ip)" \
-	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
-		| kumactl apply -f -
 
 kong:
 	$(k) apply -f https://bit.ly/k4k8s
@@ -126,6 +122,26 @@ zerotier:
 
 home:
 	kustomize build k/home | $(k) apply -f -
+
+kuma-kind:
+	$(MAKE) kuma PET=kind
+
+kuma-mean:
+	$(MAKE) kuma PET=mean
+
+kuma:
+	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://192.168.195.116:5685 | $(k) apply -f -
+	$(MAKE) wait
+	kumactl install dns | $(k) apply -f -
+	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
+	$(MAKE) wait
+	$(MAKE) kuma-inner PET="$(PET)"
+
+kuma-inner:
+	echo "---" | yq -y --arg pet "$(PET)" --arg address "$(shell pass katt/$(PET)/ip)" \
+	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
+		| kumactl apply -f -
+
 
 cert: # Request certificate with acme.sh DOMAIN=
 	$(MAKE) ~/.acme.sh/$(DOMAIN)/fullchain.cer

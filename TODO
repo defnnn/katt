@@ -1,5 +1,1 @@
-curl https://get.acme.sh | sh
-
-cat defn-zone.yaml | kumactl apply -f -
-
-sudo tcpdump -n -i any net 192.168.195.0/24 or port 10001
+k/katt,kind,mean.yaml managed with cuelang.  vary network
