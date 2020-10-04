@@ -43,14 +43,14 @@ kind: # Bring up kind
 	$(MAKE) setup
 	kind create cluster --name kind --config k/kind.yaml
 	$(MAKE) use-kind
-	#$(MAKE) extras PET=kind
+	$(MAKE) cilium wait
 
 mean: # Bring up mean
 	$(MAKE) clean-mean
 	$(MAKE) setup
 	kind create cluster --name mean --config k/mean.yaml
 	$(MAKE) use-mean
-	#$(MAKE) extras PET=mean
+	$(MAKE) cilium wait
 
 use-katt:
 	$(k) config use-context kind-katt
