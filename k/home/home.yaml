@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   labels:
     app: home
@@ -10,6 +10,15 @@ spec:
   selector:
     matchLabels:
       app: home
+  volumeClaimTemplates:
+  - metadata:
+      name: home
+    spec:
+      accessModes: [ReadWriteOnce]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 10Gi
   template:
     metadata:
       labels:
@@ -17,11 +26,18 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
 
+      volumes:
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
+
       containers:
       - name: home
         image: "localhost:5000/defn/home:jojomomojo"
         imagePullPolicy: Always
         command: ["/service", "sshd"]
+        securityContext:
+          fsGroup: 1001
         ports:
         - containerPort: 2222
         env:
@@ -33,6 +49,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        volumeMounts:
+        - name: home
+          mountPath: /home/boot/.password-store
+        - name: docker
+          mountPath: /var/run/docker.sock
 ---
 apiVersion: v1
 kind: Service
