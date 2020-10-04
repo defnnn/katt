@@ -21,6 +21,9 @@ menu:
 test: # Test manifests with kubeval
 	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
 
+tilt:
+	tilt up --context kind-katt
+
 thing:
 	$(MAKE) clean
 	$(MAKE) setup
