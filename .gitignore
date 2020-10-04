@@ -4,3 +4,4 @@ cutout
 .env
 docker-compose.override.yml
 *-token
+acme.json

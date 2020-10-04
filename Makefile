@@ -13,7 +13,7 @@ kg := kubectl -n kong
 kv := kubectl -n knative-serving
 
 menu:
-	@perl -ne 'printf("%10s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
+	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
 test: # Test manifests with kubeval
 	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
@@ -21,9 +21,9 @@ test: # Test manifests with kubeval
 setup: # Setup requirements for katt
 	$(MAKE) network
 
-thing: # Bring up both katts: kind, mean
-	$(MAKE) clean
-	$(MAKE) setup
+network:
+	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then docker network rm kind; fi
+	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
 kind: # Bring up kind katt
 	$(MAKE) clean-kind
@@ -37,6 +37,14 @@ mean: # Bring up mean katt
 	kind create cluster --name mean --config k/mean.yaml
 	#$(MAKE) katt-extras PET=mean
 
+use-kind:
+	$(k) config use-context kind-kind
+	$(k) get nodes
+
+use-mean:
+	$(k) config use-context kind-mean
+	$(k) get nodes
+
 clean: # Teardown
 	$(MAKE) clean-kind
 	$(MAKE) clean-mean
@@ -46,10 +54,6 @@ clean-kind:
 
 clean-mean:
 	-kind delete cluster --name mean
-
-network:
-	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then docker network rm kind; fi
-	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
 wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
@@ -123,28 +127,25 @@ zerotier:
 home:
 	kustomize build k/home | $(k) apply -f -
 
-top: # Monitor hyperkit processes
-	top $(shell pgrep hyperkit | perl -pe 's{^}{-pid }')
+cert: # Request certificate with acme.sh DOMAIN=
+	$(MAKE) ~/.acme.sh/$(DOMAIN)/fullchain.cer
+	$(MAKE) acme.json
 
-k/traefik/secret/acme.json acme.json:
+acme.json: ~/.acme.sh/$(DOMAIN)/fullchain.cer
 	@jq -n \
 		--arg domain $(DOMAIN) \
-		--arg certificate "$(shell cat ~/.acme.sh/$(DOMAIN)/fullchain.cer | base64 -w 0)" \
-		--arg key "$(shell cat ~/.acme.sh/$(DOMAIN)/$(DOMAIN).key | base64 -w 0)" \
+		--arg certificate "$(shell cat ~/.acme.sh/$(DOMAIN)/fullchain.cer | ( base64 -w 0 2>/dev/null || base64 ) )" \
+		--arg key "$(shell cat ~/.acme.sh/$(DOMAIN)/$(DOMAIN).key | ( base64 -w 0 2>/dev/null || base64 ) )" \
 		'{le: { Certificates: [{Store: "default", certificate: $$certificate, key: $$key, domain: {main: $$domain, sans: ["*.\($$domain)"]}}]}}' \
 	> acme.json.1
 	mv acme.json.1 acme.json
 
-~/.acme.sh/$(DOMAIN)/fullchain.cer cert:
+~/.acme.sh/acme.sh:
+	curl https://get.acme.sh | sh
+
+~/.acme.sh/$(DOMAIN)/fullchain.cer: ~/.acme.sh/acme.sh # Request certificate with acme.sh
 	~/.acme.sh/acme.sh --issue --dns dns_cf \
 		-k 4096 \
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
 
-use-kind:
-	$(k) config use-context kind-kind
-	$(k) get nodes
-
-use-mean:
-	$(k) config use-context kind-mean
-	$(k) get nodes
