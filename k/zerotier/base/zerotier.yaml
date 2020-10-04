@@ -17,9 +17,6 @@ spec:
           hostPath:
             path: /dev/net/tun
             type: CharDevice
-        - name: zerotier-config
-          configMap:
-            name: zerotier-config
         - name: zerotier-hooks
           configMap:
             name: zerotier-hooks
@@ -42,13 +39,13 @@ spec:
         env:
           - name: ZT_NETWORK
             valueFrom:
-              configMapKeyRef:
-                name: zerotier-config
+              secretKeyRef:
+                name: zerotier-secret
                 key: ZT_NETWORK
           - name: ZT_DEST
             valueFrom:
-              configMapKeyRef:
-                name: zerotier-config
+              secretKeyRef:
+                name: zerotier-secret
                 key: ZT_DEST
           - name: ZT_AUTHTOKEN_SECRET
             valueFrom:

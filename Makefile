@@ -32,8 +32,10 @@ setup: # Setup requirements for katt
 	$(MAKE) network
 
 network:
-	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then docker network rm kind; fi
-	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
+	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \
+		docker network rm kind; fi
+	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then \
+		docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
 katt kind mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
@@ -48,10 +50,12 @@ extras-katt:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait PET=$(PET)
 	$(MAKE) traefik wait PET=$(PET)
+	$(MAKE) zerotier wait PET=$(PET)
 
 extras-kind extras-mean:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait PET=$(PET)
+	$(MAKE) zerotier wait PET=$(PET)
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -68,7 +72,7 @@ wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
-extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, knative, hubble
+extras:
 	$(MAKE) kuma
 	$(MAKE) zerotier wait
 	#$(MAKE) knative wait
@@ -109,7 +113,7 @@ cloudflared:
 	kustomize build k/cloudflared | $(kt) apply -f -
 
 zerotier:
-	kustomize build k/zerotier | $(k) apply -f -
+	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
 
 home:
 	kustomize build k/home | $(k) apply -f -
