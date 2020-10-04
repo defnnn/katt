@@ -1,2 +1,3 @@
 metal/config/config
 traefik/config/traefik.yaml
+*.enc
