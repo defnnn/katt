@@ -1,11 +1,13 @@
 SHELL := /bin/bash
 
+VERSION := 1.8.4
+
 cilium-repo:
 	helm repo add cilium https://helm.cilium.io
 	helm pull cilium/cilium
 
 cilium.yaml:
-	helm template cilium/cilium --version 1.8.3 \
+	helm template cilium/cilium --version $(VERSION) \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
 		--set global.nodeinit.enabled=true \
@@ -24,4 +26,4 @@ cilium.yaml:
 
 connectivity-check.yaml:
 	curl -sSL -o connectivity-check.yaml \
-		https://raw.githubusercontent.com/cilium/cilium/1.8.2/examples/kubernetes/connectivity-check/connectivity-check.yaml
+		https://raw.githubusercontent.com/cilium/cilium/$(VERSION)/examples/kubernetes/connectivity-check/connectivity-check.yaml
