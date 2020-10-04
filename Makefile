@@ -40,8 +40,18 @@ katt kind mean: # Bring up a kind cluster
 	$(MAKE) setup
 	cue export --out yaml c/$@.cue c/kind-cluster.cue | kind create cluster --name $@ --config -
 	$(MAKE) use-$@
+	$(MAKE) extras-$@ PET=$@
+	$(k) get --all-namespaces pods
+	$(k) cluster-info
+
+extras-katt:
 	$(MAKE) cilium wait
-	$(MAKE) metal wait PET=$@
+	$(MAKE) metal wait PET=$(PET)
+	$(MAKE) traefik wait PET=$(PET)
+
+extras-kind extras-mean:
+	$(MAKE) cilium wait
+	$(MAKE) metal wait PET=$(PET)
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -59,16 +69,11 @@ wait:
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
 extras: # Setup katt with cilium, metallb, kuma, traefik, zerotier, kong, knative, hubble
-	$(MAKE) cilium wait
-	$(MAKE) metal wait
 	$(MAKE) kuma
-	$(MAKE) traefik wait
 	$(MAKE) zerotier wait
 	#$(MAKE) knative wait
 	#$(MAKE) kong wait
 	#$(MAKE) hubble wait
-	$(k) get --all-namespaces pods
-	$(k) cluster-info
 
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
@@ -90,6 +95,7 @@ knative:
 	kubectl patch configmap/config-domain --namespace knative-serving --type merge --patch '{"data":{"$(PET).defn.jp":""}}'
 
 traefik:
+	cue export --out yaml c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f crds
 	kustomize build k/traefik | $(kt) apply -f -
 

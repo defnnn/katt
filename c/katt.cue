@@ -1,3 +1,5 @@
+_domain: "defn.jp"
+
 _networking: {
 	podSubnet:     "10.10.0.0/16"
 	serviceSubnet: "10.11.0.0/16"
