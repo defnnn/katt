@@ -42,20 +42,15 @@ katt kind mean: # Bring up a kind cluster
 	$(MAKE) setup
 	cue export --out yaml c/$@.cue c/kind-cluster.cue | kind create cluster --name $@ --config -
 	$(MAKE) use-$@
-	$(MAKE) extras-$@ PET=$@
+	env PET=$@ $(MAKE) extras-$@
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
-extras-katt:
+extras-%:
 	$(MAKE) cilium wait
-	$(MAKE) metal wait PET=$(PET)
-	$(MAKE) traefik wait PET=$(PET)
-	$(MAKE) zerotier wait PET=$(PET)
-
-extras-kind extras-mean:
-	$(MAKE) cilium wait
-	$(MAKE) metal wait PET=$(PET)
-	$(MAKE) zerotier wait PET=$(PET)
+	$(MAKE) metal wait
+	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait hubble wait home wait; fi
+	$(MAKE) zerotier wait
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -71,13 +66,6 @@ clean-%:
 wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
-
-extras:
-	$(MAKE) kuma
-	$(MAKE) zerotier wait
-	#$(MAKE) knative wait
-	#$(MAKE) kong wait
-	#$(MAKE) hubble wait
 
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
@@ -116,13 +104,7 @@ zerotier:
 	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
 
 home:
-	kustomize build k/home | $(k) apply -f -
-
-kuma-kind:
-	$(MAKE) kuma PET=kind
-
-kuma-mean:
-	$(MAKE) kuma PET=mean
+	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
 kuma:
 	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://192.168.195.116:5685 | $(k) apply -f -
@@ -130,13 +112,12 @@ kuma:
 	kumactl install dns | $(k) apply -f -
 	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
 	$(MAKE) wait
-	$(MAKE) kuma-inner PET="$(PET)"
+	$(MAKE) kuma-inner
 
 kuma-inner:
 	echo "---" | yq -y --arg pet "$(PET)" --arg address "$(shell pass katt/$(PET)/ip)" \
 	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
 		| kumactl apply -f -
-
 
 cert: # Request certificate with acme.sh DOMAIN=
 	$(MAKE) ~/.acme.sh/$(DOMAIN)/fullchain.cer

@@ -16,6 +16,13 @@ nodes: [{
 	}]
 }]
 
+containerdConfigPatches: [
+	"""
+		[plugins."io.containerd.grpc.v1.cri".containerd]
+		disable_snapshot_annotations = true
+		""",
+]
+
 kubeadmConfigPatches: [
 	"""
 		kind: ClusterConfiguration

@@ -1,0 +1,13 @@
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: home-secret
+files:
+  - trusted-user-ca-keys.pem=trusted-user-ca-keys.pem.sops
+---
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: cloudflared-secret
+files:
+  - cert.pem=cert.pem.sops

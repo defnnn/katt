@@ -18,9 +18,6 @@ spec:
       terminationGracePeriodSeconds: 60
 
       volumes:
-      - name: home-config
-        configMap:
-          name: home-config
       - name: home-secret
         secret:
           secretName: home-secret
@@ -46,15 +43,12 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         volumeMounts:
-        - mountPath: /data/home-config
-          name: home-config
-          readOnly: true
         - mountPath: /data/home-secret
           name: home-secret
           readOnly: true
 
       - name: cloudflared
-        image: docker.io/cloudflare/cloudflared:2020.8.2
+        image: docker.io/cloudflare/cloudflared:2020.9.3
         imagePullPolicy: Always
         command: ["cloudflared", "tunnel"]
         args:
@@ -79,7 +73,7 @@ spec:
         - mountPath: /etc/cloudflared
           name: cloudflared-config
           readOnly: true
-        - mountPath: /data/cloudflared-secret
+        - mountPath: /usr/local/etc/cloudflared
           name: cloudflared-secret
           readOnly: true
 ---

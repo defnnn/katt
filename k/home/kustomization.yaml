@@ -5,17 +5,9 @@ resources:
   - home.yaml
 
 configMapGenerator:
-- name: home-config
-  files:
-    - config/hello.txt
 - name: cloudflared-config
   files:
-    - config/config.yaml
+    - config.yaml
 
-secretGenerator:
-- name: home-secret
-  files:
-    - secret/trusted-user-ca-keys.pem
-- name: cloudflared-secret
-  files:
-    - secret/cert.pem
+generators:
+  - sops.yaml
