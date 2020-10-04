@@ -49,7 +49,7 @@ katt kind mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
-	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait hubble wait home wait; fi
+	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait hubble wait; fi
 	$(MAKE) zerotier wait
 
 use-%:
@@ -99,9 +99,6 @@ g2048:
 
 zerotier:
 	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
-
-home:
-	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
 kuma:
 	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://192.168.195.116:5685 | $(k) apply -f -
