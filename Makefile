@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .PHONY: cutout
 
-DOMAIN := ooooooooooooooooooooooooooooo.ooo
+DOMAIN := defn.jp
 
 k := kubectl
 ks := kubectl -n kube-system
@@ -20,20 +20,10 @@ test: # Test manifests with kubeval
 
 setup: # Setup requirements for katt
 	$(MAKE) network || true
-	$(MAKE) dummy || true
-	$(MAKE) build
 
 thing: # Bring up both katts: kind, mean
 	$(MAKE) clean
 	$(MAKE) setup
-	$(MAKE) up
-	$(MAKE) kuma-global-control-plane
-	$(MAKE) katt-kind wait
-	$(MAKE) katt-mean wait
-	$(MAKE) mean
-	$(k) apply -f k/kuma/demo-be.yaml
-	$(MAKE) kind
-	$(k) apply -f k/kuma/demo-fe.yaml
 
 katt-kind: # Bring up kind katt
 	$(MAKE) clean-kind
@@ -50,12 +40,8 @@ katt-mean: # Bring up mean katt
 	$(MAKE) katt-extras PET=mean
 
 clean: # Teardown
-	$(MAKE) clean-global-control-plane
 	$(MAKE) clean-kind
 	$(MAKE) clean-mean
-
-clean-global-control-plane:
-	-docker-compose down
 
 clean-kind:
 	-kind delete cluster --name kind
@@ -64,18 +50,8 @@ clean-mean:
 	-kind delete cluster --name mean
 
 network:
-	docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind
-
-dummy:
-	sudo ip link add dummy0 type dummy || true
-	sudo ip addr add 169.254.32.1/32 dev dummy0 || true
-	sudo ip link set dev dummy0 up
-	sudo ip link add dummy1 type dummy || true
-	sudo ip addr add 169.254.32.2/32 dev dummy1 || true
-	sudo ip link set dev dummy1 up
-	sudo ip link add dummy2 type dummy || true
-	sudo ip addr add 169.254.32.3/32 dev dummy2 || true
-	sudo ip link set dev dummy2 up
+	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then docker network rm kind; fi
+	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
 wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
@@ -167,43 +143,6 @@ k/traefik/secret/acme.json acme.json:
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
 
-restore-kind:
-	$(MAKE) restore-pet PET=kind
-
-restore-mean:
-	$(MAKE) restore-pet PET=mean
-
-restore-pet:
-	pass katt/$(PET)/ZT_DEST | perl -pe 's{\s*$$}{}'  > k/zerotier/config/ZT_DEST
-	pass katt/$(PET)/ZT_NETWORK | perl -pe 's{\s*$$}{}' > k/zerotier/config/ZT_NETWORK
-	mkdir -p k/zerotier/secret
-	pass katt/$(PET)/authtoken.secret | perl -pe 's{\s*$$}{}'  > k/zerotier/secret/ZT_AUTHTOKEN_SECRET
-	pass katt/$(PET)/identity.public | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_PUBLIC
-	pass katt/$(PET)/identity.secret | perl -pe 's{\s*$$}{}' > k/zerotier/secret/ZT_IDENTITY_SECRET
-	pass katt/$(PET)/hook-customize | base64 -d > k/zerotier/config/hook-customize
-	pass katt/$(PET)/acme.json | base64 -d > k/traefik/secret/acme.json
-	pass katt/$(PET)/traefik.yaml | base64 -d > k/traefik/config/traefik.yaml
-	pass katt/$(PET)/metal/config | base64 -d > k/metal/config/config
-	pass katt/$(PET)/metal/secretkey | base64 -d > k/metal/config/secretkey
-
-restore-diff-kind:
-	$(MAKE) restore-diff-pet PET=kind
-
-restore-diff-mean:
-	$(MAKE) restore-diff-pet PET=mean
-
-restore-diff-pet:
-	pdif katt/$(PET)/ZT_DEST k/zerotier/config/ZT_DEST
-	pdif katt/$(PET)/ZT_NETWORK k/zerotier/config/ZT_NETWORK
-	pdif katt/$(PET)/authtoken.secret k/zerotier/secret/ZT_AUTHTOKEN_SECRET
-	pdif katt/$(PET)/identity.public k/zerotier/secret/ZT_IDENTITY_PUBLIC
-	pdif katt/$(PET)/identity.secret k/zerotier/secret/ZT_IDENTITY_SECRET
-	pdiff katt/$(PET)/hook-customize k/zerotier/config/hook-customize
-	pdiff katt/$(PET)/acme.json k/traefik/secret/acme.json
-	pdiff katt/$(PET)/traefik.yaml k/traefik/config/traefik.yaml
-	pdiff katt/$(PET)/metal/config k/metal/config/config
-	pdiff katt/$(PET)/metal/secretkey k/metal/config/secretkey
-
 kind:
 	$(k) config use-context kind-kind
 	$(k) get nodes
@@ -211,109 +150,3 @@ kind:
 mean:
 	$(k) config use-context kind-mean
 	$(k) get nodes
-
-build:
-	docker-compose build
-
-up:
-	docker-compose rm -f -s
-	docker-compose up -d --remove-orphans
-
-restore-global-control-plane:
-	set -a; source .env; set +a; $(MAKE) restore-global-control-plane-inner
-
-restore-global-control-plane-inner:
-	mkdir -p etc/traefik/acme
-	pass kitt/$(KATT_DOMAIN)/authtoken.secret | base64 -d | perl -pe 's{\s*$$}{}'  > etc/zerotier/zerotier-one/authtoken.secret
-	pass kitt/$(KATT_DOMAIN)/identity.public | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.public
-	pass kitt/$(KATT_DOMAIN)/identity.secret | base64 -d | perl -pe 's{\s*$$}{}' > etc/zerotier/zerotier-one/identity.secret
-	pass kitt/$(KATT_DOMAIN)/acme.json | base64 -d > etc/traefik/acme/acme.json
-	chmod 0600 etc/traefik/acme/acme.json
-	pass kitt/$(KATT_DOMAIN)/hook-customize| base64 -d > etc/zerotier/hooks/hook-customize
-	chmod 755 etc/zerotier/hooks/hook-customize
-	pass kitt/$(KATT_DOMAIN)/cert.pem | base64 -d > etc/cloudflared/cert.pem
-	pass kitt/$(KATT_DOMAIN)/env | base64 -d > .env
-
-restore-global-control-plane-diff:
-	set -a; source .env; set +a; $(MAKE) restore-global-control-plane-diff-inner
-
-restore-global-control-plane-diff-inner:
-	pdif kitt/$(KATT_DOMAIN)/authtoken.secret etc/zerotier/zerotier-one/authtoken.secret
-	pdif kitt/$(KATT_DOMAIN)/identity.public etc/zerotier/zerotier-one/identity.public
-	pdif kitt/$(KATT_DOMAIN)/identity.secret etc/zerotier/zerotier-one/identity.secret
-	pdiff kitt/$(KATT_DOMAIN)/acme.json etc/traefik/acme/acme.json
-	pdiff kitt/$(KATT_DOMAIN)/hook-customize etc/zerotier/hooks/hook-customize
-	pdiff kitt/$(KATT_DOMAIN)/cert.pem etc/cloudflared/cert.pem
-	pdiff kitt/$(KATT_DOMAIN)/env .env
-
-kuma-global-control-plane:
-	sudo rsync -ia ~/work/kuma/bin/. /usr/local/bin/.
-	sleep 10
-	kumactl config control-planes add --address http://$(shell docker inspect katt_kuma_1 | jq -r '.[].NetworkSettings.Networks.kind.IPAddress'):5681 --name global-cp --overwrite
-	$(MAKE) kumactl-global-cp
-	kumactl apply -f k/traffic-permission-allow-all-traffic.yaml
-	kumactl apply -f k/mesh-default.yaml
-	cat k/katt-zone.yaml | kumactl apply -f -
-	cat k/defn-zone.yaml | kumactl apply -f -
-
-kumactl-global-cp:
-	kumactl config control-planes switch --name global-cp
-
-kumactl-katt-cp:
-	kumactl config control-planes switch --name katt-cp
-
-kumactl-defn-cp:
-	kumactl config control-planes switch --name defn-cp
-
-katt-cp:
-	env \
-		KUMA_MODE=remote \
-		KUMA_MULTICLUSTER_REMOTE_ZONE=katt \
-		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 \
-		kuma-cp run
-
-katt-ingress:
-	$(MAKE) kumactl-global-cp
-	kumactl config control-planes add --address http://localhost:5681 --name katt-cp --overwrite
-	$(MAKE) kumactl-katt-cp
-	cat k/katt-ingress.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=kuma-ingress > katt-ingress-token
-	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=katt-ingress-token --log-level=debug
-
-katt-app1:
-	sudo python -m http.server --bind 127.0.0.1 1010
-
-katt-app2:
-	sudo python -m http.server --bind 127.0.0.1 1020
-
-katt-app1-dp:
-	cat k/katt-app1.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=app1 > app1-token
-	kuma-dp run --name=app1 --cp-address=http://localhost:5681 --dataplane-token-file=app1-token --log-level=debug
-
-katt-app2-dp:
-	cat k/katt-app2.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=app2 > app2-token
-	kuma-dp run --name=app2 --cp-address=http://localhost:5681 --dataplane-token-file=app2-token --log-level=debug
-
-defn-cp:
-	env \
-		KUMA_MODE=remote \
-		KUMA_MULTICLUSTER_REMOTE_ZONE=defn \
-		KUMA_MULTICLUSTER_REMOTE_GLOBAL_ADDRESS=grpcs://192.168.195.116:5685 \
-		kuma-cp run
-
-defn-ingress:
-	kumactl config control-planes add --address http://localhost:5681 --name defn-cp --overwrite
-	$(MAKE) kumactl-defn-cp
-	cat k/defn-ingress.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=kuma-ingress > defn-ingress-token
-	kuma-dp run --name=kuma-ingress --cp-address=http://localhost:5681 --dataplane-token-file=defn-ingress-token --log-level=debug
-
-defn-app:
-	sudo python -m http.server --bind 127.0.0.1 1030
-
-defn-app-dp:
-	cat k/defn-app.yaml | kumactl apply -f -
-	kumactl generate dataplane-token --dataplane=app > app-token
-	kuma-dp run --name=app --cp-address=http://localhost:5681 --dataplane-token-file=app-token --log-level=debug
