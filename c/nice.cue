@@ -1,6 +1,6 @@
 _networking: {
-	podSubnet:     "10.20.0.0/16"
-	serviceSubnet: "10.21.0.0/16"
+	podSubnet:     "10.25.0.0/16"
+	serviceSubnet: "10.26.0.0/16"
 }
 
 _address_pools: "general":       "172.25.26.1-172.25.29.254"
