@@ -4,6 +4,9 @@ SHELL := /bin/bash
 
 DOMAIN := defn.jp
 
+first = $(word 1, $(subst -, ,$@))
+second = $(word 2, $(subst -, ,$@))
+
 k := kubectl
 ks := kubectl -n kube-system
 km := kubectl -n metallb-system
@@ -32,50 +35,24 @@ network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then docker network rm kind; fi
 	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
-katt: # Bring up katt
-	$(MAKE) clean-katt
+katt kind mean: # Bring up a kind cluster
+	$(MAKE) clean-$@
 	$(MAKE) setup
-	cue export --out yaml c/kind.cue c/katt.yaml | kind create cluster --name katt --config -
-	$(MAKE) use-katt
-
-kind: # Bring up kind
-	$(MAKE) clean-kind
-	$(MAKE) setup
-	cue export --out yaml c/kind.cue c/kind.yaml | kind create cluster --name kind --config -
-	$(MAKE) use-kind
+	cue export --out yaml c/$A.cue c/kind-cluster.cue | kind create cluster --name $@ --config -
+	$(MAKE) use-$@
 	$(MAKE) cilium wait
+	$(MAKE) metal wait PET=$@
 
-mean: # Bring up mean
-	$(MAKE) clean-mean
-	$(MAKE) setup
-	cue export --out yaml c/kind.cue c/mean.yaml | kind create cluster --name mean --config -
-	$(MAKE) use-mean
-	$(MAKE) cilium wait
-
-use-katt:
-	$(k) config use-context kind-katt
-	$(k) get nodes
-
-use-kind:
-	$(k) config use-context kind-kind
-	$(k) get nodes
-
-use-mean:
-	$(k) config use-context kind-mean
+use-%:
+	$(k) config use-context kind-$(second)
 	$(k) get nodes
 
 clean: # Teardown
 	$(MAKE) clean-kind
 	$(MAKE) clean-mean
 
-clean-katt:
-	-kind delete cluster --name katt
-
-clean-kind:
-	-kind delete cluster --name kind
-
-clean-mean:
-	-kind delete cluster --name mean
+clean-%:
+	-kind delete cluster --name $(second)
 
 wait:
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
@@ -100,6 +77,7 @@ cilium:
 		sleep 5; done
 
 metal:
+	cue export --out yaml c/$(PET).cue c/metal.cue > k/metal/config/config
 	kustomize build k/metal | $(km) apply -f -
 
 kong:
@@ -171,4 +149,3 @@ acme.json: ~/.acme.sh/$(DOMAIN)/fullchain.cer
 		-k 4096 \
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
-

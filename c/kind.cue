@@ -1,32 +1,11 @@
-kind:       "Cluster"
-apiVersion: "kind.x-k8s.io/v1alpha4"
-
-networking: {
-	disableDefaultCNI: true
+_networking: {
+	podSubnet:     "10.20.0.0/16"
+	serviceSubnet: "10.21.0.0/16"
 }
 
-nodes: [{
-	role:  "control-plane"
-	image: "kindest/node:v1.19.1@sha256:98cf5288864662e37115e362b23e4369c8c4a408f99cbc06e58ac30ddc721600"
-	extraMounts: [{
-		hostPath:      "/var/run/docker.sock"
-		containerPath: "/var/run/docker.sock"
-	}]
-}]
-
-kubeadmConfigPatches: [
-	"""
-		kind: ClusterConfiguration
-		metadata:
-		  name: config
-		apiServer:
-		  certSANs:
-		  - localhost
-		  - 127.0.0.1
-		  - kubernetes
-		  - kubernetes.default.svc
-		  - kubernetes.default.svc.cluster.local
-		  - kind
-
-		""",
-]
+_address_pools: "my-ip-space":   "172.25.80.10-172.25.89.254"
+_address_pools: "traefik":       "172.25.25.26/32"
+_address_pools: "traefik-proxy": "172.25.25.25/32"
+_address_pools: "kuma-ingress":  "172.25.25.24/32"
+_address_pools: "pihole":        "172.25.25.1/32"
+_address_pools: "home":          "172.25.25.100/32"

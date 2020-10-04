@@ -1,0 +1,29 @@
+"address-pools": [{
+	name:     "my-ip-space"
+	protocol: "layer2"
+	addresses: [_address_pools["my-ip-space"]]
+}, {
+	name:     "traefik"
+	protocol: "layer2"
+	addresses: [_address_pools["traefik"]]
+}, {
+	name:     "traefik-proxy"
+	protocol: "layer2"
+	addresses: [...]
+	addresses: [_address_pools["traefik-proxy"]]
+}, {
+	name:     "kuma-ingress"
+	protocol: "layer2"
+	addresses: [...]
+	addresses: [_address_pools["kuma-ingress"]]
+}, {
+	name:     "pihole"
+	protocol: "layer2"
+	addresses: [...]
+	addresses: [_address_pools["pihole"]]
+}, {
+	name:     "home"
+	protocol: "layer2"
+	addresses: [...]
+	addresses: [_address_pools["home"]]
+}]
