@@ -1,3 +1,0 @@
-hostname: t.yourodmain
-url: http://traefik-proxy
-origincert: /data/cloudflared-secret/cert.pem

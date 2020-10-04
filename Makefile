@@ -97,9 +97,6 @@ hubble:
 g2048:
 	kustomize build k/g2048 | $(k) apply -f -
 
-cloudflared:
-	kustomize build k/cloudflared | $(kt) apply -f -
-
 zerotier:
 	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
 
