@@ -3,8 +3,8 @@ kind: SopsSecretGenerator
 metadata:
   name: zerotier-secret
 files:
-  - ZT_NETWORK.enc
-  - ZT_DEST.enc
-  - ZT_AUTHTOKEN_SECRET.enc
-  - ZT_IDENTITY_PUBLIC.enc
-  - ZT_IDENTITY_SECRET.enc
+  - ZT_NETWORK.sops
+  - ZT_DEST.sops
+  - ZT_AUTHTOKEN_SECRET.sops
+  - ZT_IDENTITY_PUBLIC.sops
+  - ZT_IDENTITY_SECRET.sops
