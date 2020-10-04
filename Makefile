@@ -28,7 +28,7 @@ thing:
 	$(MAKE) clean
 	$(MAKE) setup
 	$(MAKE) katt
-	$(MAKE) kind
+	$(MAKE) nice
 	$(MAKE) mean
 
 setup: # Setup requirements for katt
@@ -40,10 +40,10 @@ network:
 	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then \
 		docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
-katt kind mean: # Bring up a kind cluster
+katt nice mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
 	$(MAKE) setup
-	cue export --out yaml c/$@.cue c/kind-cluster.cue | kind create cluster --name $@ --config -
+	cue export --out yaml c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
 	$(MAKE) use-$@
 	env PET=$@ $(MAKE) extras-$@
 	$(k) get --all-namespaces pods
@@ -60,7 +60,8 @@ use-%:
 	$(k) get nodes
 
 clean: # Teardown
-	$(MAKE) clean-kind
+	$(MAKE) clean-katt
+	$(MAKE) clean-nice
 	$(MAKE) clean-mean
 
 clean-%:

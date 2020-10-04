@@ -1,7 +1,7 @@
 "address-pools": [{
-	name:     "my-ip-space"
+	name:     "general"
 	protocol: "layer2"
-	addresses: [_address_pools["my-ip-space"]]
+	addresses: [_address_pools["general"]]
 }, {
 	name:     "traefik"
 	protocol: "layer2"
