@@ -19,6 +19,14 @@ spec:
       resources:
         requests:
           storage: 10Gi
+  - metadata:
+      name: work
+    spec:
+      accessModes: [ReadWriteOnce]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 50Gi
   template:
     metadata:
       labels:
@@ -52,6 +60,8 @@ spec:
         volumeMounts:
         - name: home
           mountPath: /home/boot/.password-store
+        - name: work
+          mountPath: /home/boot/work
         - name: docker
           mountPath: /var/run/docker.sock
 ---
