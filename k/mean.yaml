@@ -5,8 +5,6 @@ networking:
   disableDefaultCNI: true
   podSubnet: "10.30.0.0/16"
   serviceSubnet: "10.31.0.0/16"
-  apiServerAddress: "169.254.32.3"
-  apiServerPort: 443
 
 nodes:
 - role: control-plane

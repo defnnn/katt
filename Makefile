@@ -19,25 +19,23 @@ test: # Test manifests with kubeval
 	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
 
 setup: # Setup requirements for katt
-	$(MAKE) network || true
+	$(MAKE) network
 
 thing: # Bring up both katts: kind, mean
 	$(MAKE) clean
 	$(MAKE) setup
 
-katt-kind: # Bring up kind katt
+kind: # Bring up kind katt
 	$(MAKE) clean-kind
-	$(MAKE) restore-pet PET=kind
-	$(MAKE) setup || true
+	$(MAKE) setup
 	kind create cluster --name kind --config k/kind.yaml
-	$(MAKE) katt-extras PET=kind
+	#$(MAKE) katt-extras PET=kind
 
-katt-mean: # Bring up mean katt
+mean: # Bring up mean katt
 	$(MAKE) clean-mean
-	$(MAKE) restore-pet PET=mean
-	$(MAKE) setup || true
+	$(MAKE) setup
 	kind create cluster --name mean --config k/mean.yaml
-	$(MAKE) katt-extras PET=mean
+	#$(MAKE) katt-extras PET=mean
 
 clean: # Teardown
 	$(MAKE) clean-kind
@@ -143,10 +141,10 @@ k/traefik/secret/acme.json acme.json:
 		-d $(DOMAIN) \
 		-d '*.$(DOMAIN)'
 
-kind:
+use-kind:
 	$(k) config use-context kind-kind
 	$(k) get nodes
 
-mean:
+use-mean:
 	$(k) config use-context kind-mean
 	$(k) get nodes
