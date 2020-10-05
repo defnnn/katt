@@ -1,0 +1,8 @@
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: external-dns-secret
+files:
+  - CF_API_TOKEN=CF_API_TOKEN.sops
+  - EXTERNAL_DNS_DOMAIN=EXTERNAL_DNS_DOMAIN.sops
+  - EXTERNAL_DNS_ZONE_ID=EXTERNAL_DNS_ZONE_ID.sops

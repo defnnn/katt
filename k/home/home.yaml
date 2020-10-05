@@ -73,6 +73,7 @@ metadata:
     app: home
   annotations:
     metallb.universe.tf/address-pool: general
+    external-dns.alpha.kubernetes.io/hostname: home.katt.defn.jp
 spec:
   type: LoadBalancer
   selector:

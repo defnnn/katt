@@ -14,6 +14,7 @@ kk := kubectl -n kuma-system
 kt := kubectl -n traefik
 kg := kubectl -n kong
 kv := kubectl -n knative-serving
+kd := kubectl -n external-dns
 
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
@@ -95,6 +96,9 @@ traefik:
 	cue export --out yaml c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f crds
 	kustomize build k/traefik | $(kt) apply -f -
+
+external-dns:
+	kustomize build --enable_alpha_plugins k/external-dns | $(k) apply -f -
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
