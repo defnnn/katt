@@ -3,8 +3,8 @@ _domain: "defn.jp"
 _workers: [0, 1, 2]
 
 _networking: {
-	podSubnet:     "10.15.0.0/16"
-	serviceSubnet: "10.16.0.0/16"
+	serviceSubnet: "10.15.0.0/16"
+	podSubnet:     "10.16.0.0/16"
 }
 
 _address_pools: "general":       "172.25.16.1-172.25.19.254"
