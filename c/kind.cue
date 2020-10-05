@@ -30,13 +30,13 @@ nodes: [
 						containerPort: 80
 						hostPort:      80
 						listenAddress: "169.254.32.1"
-						protocol:      TCP
+						protocol:      "TCP"
 					},
 					{
 						containerPort: 443
 						hostPort:      443
 						listenAddress: "169.254.32.1"
-						protocol:      TCP
+						protocol:      "TCP"
 					},
 				]
 			}
