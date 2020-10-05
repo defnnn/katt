@@ -14,9 +14,43 @@ nodes: [
 		{
 			if n == 0 {
 				role: "control-plane"
+
+				kubeadmConfigPatches: [
+					"""
+          kind: InitConfiguration
+          nodeRegistration:
+            kubeletExtraArgs:
+              node-labels: \"index=\(n)\"
+
+          """,
+				]
+
+				extraPortMappings: [
+					{
+						containerPort: 80
+						hostPort:      80
+						listenAddress: "169.254.32.1"
+						protocol:      TCP
+					},
+					{
+						containerPort: 443
+						hostPort:      443
+						listenAddress: "169.254.32.1"
+						protocol:      TCP
+					},
+				]
 			}
 			if n > 0 {
 				role: "worker"
+				kubeadmConfigPatches: [
+					"""
+          kind: JoinConfiguration
+          nodeRegistration:
+            kubeletExtraArgs:
+              node-labels: \"index=\(n)\"
+
+          """,
+				]
 			}
 
 			image: "kindest/node:v1.19.1@sha256:98cf5288864662e37115e362b23e4369c8c4a408f99cbc06e58ac30ddc721600"
@@ -26,15 +60,6 @@ nodes: [
 				containerPath: "/var/run/docker.sock"
 			}]
 
-			kubeadmConfigPatches: [
-				"""
-        kind: JoinConfiguration
-        nodeRegistration:
-          kubeletExtraArgs:
-            node-labels: \"index=\(n)\"
-
-        """,
-			]
 		}
 	},
 ]
