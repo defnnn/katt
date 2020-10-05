@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: zerotier
 spec:
@@ -34,8 +34,12 @@ spec:
          - name: zerotier-hooks
            mountPath: /service.d
         securityContext:
-          capabilities:
-            add: ["NET_ADMIN", "NET_RAW", "SYS_ADMIN"]
+            privileged: true
+            capabilities:
+              add:
+              - NET_ADMIN
+              - SYS_ADMIN
+              - CAP_NET_ADMIN
         env:
           - name: ZT_NETWORK
             valueFrom:
