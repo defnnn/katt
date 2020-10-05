@@ -131,10 +131,10 @@ spec:
         app: traefik
     spec:
       nodeSelector:
-        "ingress-ready": true
+        index: "0"
       tolerations:
         - key: "node-role.kubernetes.io/master"
-          operator: "Equal",
+          operator: "Equal"
           effect: "NoSchedule"
 
       serviceAccountName: traefik
