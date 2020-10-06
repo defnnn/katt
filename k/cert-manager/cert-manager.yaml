@@ -26146,7 +26146,7 @@ spec:
     spec:
       containers:
       - args:
-        - --v=2
+        - --v=4
         - --cluster-resource-namespace=$(POD_NAMESPACE)
         - --leader-election-namespace=kube-system
         env:
