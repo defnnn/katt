@@ -24,21 +24,6 @@ nodes: [
 
           """,
 				]
-
-				extraPortMappings: [
-					{
-						containerPort: 80
-						hostPort:      80
-						listenAddress: "169.254.32.1"
-						protocol:      "TCP"
-					},
-					{
-						containerPort: 443
-						hostPort:      443
-						listenAddress: "169.254.32.1"
-						protocol:      "TCP"
-					},
-				]
 			}
 			if n > 0 {
 				role: "worker"

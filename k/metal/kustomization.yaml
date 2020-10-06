@@ -1,5 +1,8 @@
 namespace: metallb-system
 
+generatorOptions:
+  disableNameSuffixHash: true
+
 resources:
   - github.com/metallb/metallb//manifests?ref=v0.9.3
 
@@ -12,6 +15,3 @@ secretGenerator:
 - name: memberlist
   files:
     - config/secretkey
-
-generatorOptions:
- disableNameSuffixHash: true

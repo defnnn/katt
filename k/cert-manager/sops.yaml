@@ -1,0 +1,8 @@
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: cert-manager-secret
+  namespace: cert-manager
+disableNameSuffixHash: true
+files:
+  - CF_API_TOKEN=CF_API_TOKEN.sops

@@ -42,6 +42,7 @@ network:
 		docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
 katt nice mean: # Bring up a kind cluster
+	if [[ "$@" == "katt" ]]; then $(MAKE) registry; fi
 	$(MAKE) clean-$@
 	$(MAKE) setup
 	cue export --out yaml c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
@@ -53,9 +54,9 @@ katt nice mean: # Bring up a kind cluster
 
 extras-%:
 	$(MAKE) cilium wait
-	$(MAKE) metal wait
-	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait hubble wait; fi
 	$(MAKE) zerotier wait
+	$(MAKE) metal wait
+	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -99,6 +100,9 @@ traefik:
 
 external-dns:
 	kustomize build --enable_alpha_plugins k/external-dns | $(k) apply -f -
+
+cert-manager:
+	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
