@@ -42,7 +42,6 @@ network:
 		docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
 katt nice mean: # Bring up a kind cluster
-	if [[ "$@" == "katt" ]]; then $(MAKE) registry; fi
 	$(MAKE) clean-$@
 	$(MAKE) setup
 	cue export --out yaml c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
