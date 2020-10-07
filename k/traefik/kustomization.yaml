@@ -8,8 +8,3 @@ configMapGenerator:
 - name: traefik-config
   files:
     - config/traefik.yaml
-
-secretGenerator:
-- name: traefik-secret
-  files:
-    - secret/acme.json

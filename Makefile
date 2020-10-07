@@ -150,3 +150,9 @@ acme.json: ~/.acme.sh/$(DOMAIN)/fullchain.cer
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
+
+plugins:
+	curl -sSL -o kubectl-cert-manager.tar.gz https://github.com/jetstack/cert-manager/releases/download/v1.0.1/kubectl-cert_manager-linux-amd64.tar.gz
+	tar xvfz kubectl-cert-manager.tar.gz  kubectl-cert_manager
+	mv kubectl-cert_manager ~/bin/
+	rm kubectl-cert-manager.tar.gz

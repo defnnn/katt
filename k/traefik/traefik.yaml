@@ -142,10 +142,6 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: false
       volumes:
-        - name: traefik-secret
-          secret:
-            secretName: traefik-secret
-            defaultMode: 0600
         - name: traefik-config
           configMap:
             name: traefik-config
@@ -166,8 +162,6 @@ spec:
           containerPort: 8080
           protocol: TCP
         volumeMounts:
-          - name: traefik-secret
-            mountPath: /data/traefik-secret
           - name: traefik-config
             mountPath: /etc/traefik
 ---
@@ -188,3 +182,24 @@ spec:
     services:
     - name: traefik
       port: 80
+    middlewares:
+      - name: redirect-https
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+spec:
+  defaultCertificate:
+    secretName: wild.katt.defn.jp
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: traefik
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: false
+    port: "443"
