@@ -57,6 +57,7 @@ extras-%:
 	$(MAKE) zerotier wait
 	$(MAKE) metal wait
 	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
+	if [[ "$@" == "extras-katt" ]]; then k apply -f acme.yaml; fi 
 
 use-%:
 	$(k) config use-context kind-$(second)
