@@ -126,33 +126,11 @@ kuma-inner:
 	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
 		| kumactl apply -f -
 
-cert: # Request certificate with acme.sh DOMAIN=
-	$(MAKE) ~/.acme.sh/$(DOMAIN)/fullchain.cer
-	$(MAKE) acme.json
-
-acme.json: ~/.acme.sh/$(DOMAIN)/fullchain.cer
-	@jq -n \
-		--arg domain $(DOMAIN) \
-		--arg certificate "$(shell cat ~/.acme.sh/$(DOMAIN)/fullchain.cer | ( base64 -w 0 2>/dev/null || base64 ) )" \
-		--arg key "$(shell cat ~/.acme.sh/$(DOMAIN)/$(DOMAIN).key | ( base64 -w 0 2>/dev/null || base64 ) )" \
-		'{le: { Certificates: [{Store: "default", certificate: $$certificate, key: $$key, domain: {main: $$domain, sans: ["*.\($$domain)"]}}]}}' \
-	> acme.json.1
-	mv acme.json.1 acme.json
-
-~/.acme.sh/acme.sh:
-	curl https://get.acme.sh | sh
-
-~/.acme.sh/$(DOMAIN)/fullchain.cer: ~/.acme.sh/acme.sh # Request certificate with acme.sh
-	~/.acme.sh/acme.sh --issue --dns dns_cf \
-		-k 4096 \
-		-d $(DOMAIN) \
-		-d '*.$(DOMAIN)'
-
 registry: # Run a local registry
 	k apply -f k/registry.yaml
 
 plugins:
-	curl -sSL -o kubectl-cert-manager.tar.gz https://github.com/jetstack/cert-manager/releases/download/v1.0.1/kubectl-cert_manager-linux-amd64.tar.gz
+	curl -sSL -o kubectl-cert-manager.tar.gz https://github.com/jetstack/cert-manager/releases/download/v1.0.1/kubectl-cert_manager-darwin-amd64.tar.gz
 	tar xvfz kubectl-cert-manager.tar.gz  kubectl-cert_manager
 	mv kubectl-cert_manager ~/bin/
 	rm kubectl-cert-manager.tar.gz
