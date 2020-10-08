@@ -1,0 +1,4 @@
+setup dummy addresses
+join zerotier network
+run registry
+download, tag, and upload defn/home:jojomomojo image
