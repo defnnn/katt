@@ -46,7 +46,6 @@ katt nice mean: # Bring up a kind cluster
 	$(MAKE) setup
 	cue export --out yaml c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
 	$(MAKE) registry
-	$(MAKE) registry
 	$(MAKE) use-$@
 	env PET=$@ $(MAKE) extras-$@
 	$(k) get --all-namespaces pods
@@ -128,6 +127,7 @@ kuma-inner:
 		| kumactl apply -f -
 
 registry: # Run a local registry
+	-docker run -d -p 5000:5000 --restart=always --name registry registry:2
 	k apply -f k/registry.yaml
 
 plugins:
