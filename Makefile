@@ -45,9 +45,10 @@ katt nice mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
 	$(MAKE) setup
 	cue export --out yaml c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
+	$(MAKE) registry
+	$(MAKE) registry
 	$(MAKE) use-$@
 	env PET=$@ $(MAKE) extras-$@
-	$(MAKE) registry
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
