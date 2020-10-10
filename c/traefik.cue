@@ -13,6 +13,12 @@ api: {
 
 providers: kubernetesCRD: {}
 
+providers: kubernetesIngress: {
+	ingressClass: "traefik"
+	ingressEndpoint:
+		publishedService: "traefik/traefik-proxy"
+}
+
 entryPoints: {
 	traefik: address: ":8080"
 	http: address:    ":80"

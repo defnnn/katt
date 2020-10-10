@@ -56,7 +56,7 @@ extras-%:
 	$(MAKE) zerotier wait
 	$(MAKE) metal wait
 	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
-	if [[ "$@" == "extras-katt" ]]; then k apply -f acme.yaml; fi 
+	if [[ "$@" == "extras-katt" ]]; then $(MAKE) home wait; fi 
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -106,6 +106,9 @@ cert-manager:
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
+
+home:
+	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
 g2048:
 	kustomize build k/g2048 | $(k) apply -f -

@@ -6,6 +6,7 @@ metadata:
     app: home
   name: home
 spec:
+  serviceName: home
   replicas: 1
   selector:
     matchLabels:
@@ -34,6 +35,9 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
 
+      securityContext:
+        fsGroup: 1001
+
       volumes:
       - name: docker
         hostPath:
@@ -44,8 +48,6 @@ spec:
         image: "localhost:5000/defn/home:jojomomojo"
         imagePullPolicy: Always
         command: ["/service", "sshd"]
-        securityContext:
-          fsGroup: 1001
         ports:
         - containerPort: 2222
         env:

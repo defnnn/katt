@@ -60,6 +60,7 @@ spec:
         - --provider=cloudflare
         - --registry=txt
         - --source=service
+        - --source=ingress
         env:
           - name: EXTERNAL_DNS_ZONE_ID_FILTER
             valueFrom:
