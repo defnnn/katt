@@ -95,7 +95,7 @@ metadata:
     app: traefik-proxy
   annotations:
     metallb.universe.tf/address-pool: traefik-proxy
-    external-dns.alpha.kubernetes.io/hostname: t.katt.defn.jp
+    external-dns.alpha.kubernetes.io/hostname: traefik.katt.defn.jp
 spec:
   type: LoadBalancer
   selector:
