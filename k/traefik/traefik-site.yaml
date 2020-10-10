@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+  namespace: traefik
+  annotations:
+    kuma.io/sidecar-injection: enabled

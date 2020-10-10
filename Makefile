@@ -95,7 +95,7 @@ knative:
 
 traefik:
 	cue export --out yaml c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
-	$(kt) apply -f crds
+	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
 external-dns:
