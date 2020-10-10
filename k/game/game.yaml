@@ -2,38 +2,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: g2048
+  name: game
 spec:
   selector:
     matchLabels:
-      app: g2048
+      app: game
   template:
     metadata:
       labels:
-        app: g2048
+        app: game
     spec:
       containers:
       - image: alexwhen/docker-2048
         imagePullPolicy: Always
-        name: g2048
+        name: game
         ports:
         - containerPort: 80
 ---
  apiVersion: v1
  kind: Service
  metadata:
-   name: g2048
+   name: game
    labels:
-     app: g2048
+     app: game
    annotations:
      metallb.universe.tf/address-pool: general
  spec:
    type: LoadBalancer
    selector:
-     app: g2048
+     app: game
    ports:
    - port: 80
-     name: g2048
+     name: game
      targetPort: 80
 ---
 apiVersion: networking.k8s.io/v1
@@ -41,18 +41,18 @@ kind: Ingress
 metadata:
   name: game
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: https
-    external-dns.alpha.kubernetes.io/hostname: g2048.katt.defn.jp
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
   rules:
-  - host: g2048.katt.defn.jp
+  - host: game.katt.defn.jp
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: g2048
+            name: game
             port:
               number: 80

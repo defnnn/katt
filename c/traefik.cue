@@ -1,36 +1,25 @@
 accessLog: {}
+
 log: {
 	level:  "DEBUG"
 	format: "json"
 }
 
-ping: {}
+api: dashboard: "true"
 
-api: {
-	insecure:  true
-	dashboard: true
-}
+ping: "true"
 
 providers: kubernetesCRD: {}
 
 providers: kubernetesIngress: {
 	ingressClass: "traefik"
 	ingressEndpoint:
-		publishedService: "traefik/traefik-proxy"
+		publishedService: "traefik/traefik"
 }
 
 entryPoints: {
-	traefik: address: ":8080"
-	http: address:    ":80"
-	https: {
-		address: ":443"
-		http: tls: {
-			certResolver: "le"
-			domains: [{
-				main: "*\(_domain)"
-			}]
-		}
-	}
+  http: address: ":8888/tcp"
+  traefik: address: ":9000/tcp"
+  web: address: ":8000/tcp"
+  websecure: address: ":8443/tcp"
 }
-
-certificatesResolvers: le: acme: storage: "/data/traefik-secret/acme.json"

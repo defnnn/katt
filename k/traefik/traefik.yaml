@@ -25,6 +25,7 @@ rules:
   - apiGroups:
       - ""
     resources:
+      - pods
       - services
       - endpoints
       - secrets
@@ -110,6 +111,7 @@ spec:
       annotations:
         kuma.io/gateway: enabled
       labels:
+        app: traefik
         app.kubernetes.io/name: traefik
         helm.sh/chart: traefik-9.4.3
         app.kubernetes.io/managed-by: Helm
@@ -172,13 +174,7 @@ spec:
           - name: tmp
             mountPath: /tmp
         args:
-          - "--entryPoints.traefik.address=:9000/tcp"
-          - "--entryPoints.web.address=:8000/tcp"
-          - "--entryPoints.websecure.address=:8443/tcp"
-          - "--api.dashboard=true"
-          - "--ping=true"
-          - "--providers.kubernetescrd"
-          - "--providers.kubernetesingress"
+          - "--configFile=/data/traefik.yaml"
       volumes:
         - name: data
           configMap:
@@ -202,6 +198,7 @@ items:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: RELEASE-NAME
       annotations:
+        external-dns.alpha.kubernetes.io/hostname: traefik.katt.defn.jp
     spec:
       type: LoadBalancer
       selector:

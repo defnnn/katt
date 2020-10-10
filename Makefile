@@ -110,8 +110,8 @@ hubble:
 home:
 	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
-g2048:
-	kustomize build k/g2048 | $(k) apply -f -
+game:
+	kustomize build k/game | $(k) apply -f -
 
 zerotier:
 	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
