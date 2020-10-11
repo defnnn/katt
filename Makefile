@@ -56,7 +56,7 @@ extras-%:
 	$(MAKE) zerotier wait
 	$(MAKE) metal wait
 	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
-	if [[ "$@" == "extras-katt" ]]; then $(MAKE) home wait; fi 
+	if [[ "$@" == "extras-katt" ]]; then $(MAKE) home game; fi 
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -71,6 +71,7 @@ clean-%:
 	-kind delete cluster --name $(second)
 
 wait:
+	sleep 5
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 

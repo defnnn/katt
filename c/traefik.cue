@@ -1,7 +1,7 @@
 accessLog: {}
 
 log: {
-	level:  "DEBUG"
+  level: "INFO"
 	format: "json"
 }
 
@@ -18,8 +18,7 @@ providers: kubernetesIngress: {
 }
 
 entryPoints: {
-  http: address: ":8888/tcp"
   traefik: address: ":9000/tcp"
-  web: address: ":8000/tcp"
+  http: address: ":8000/tcp"
   websecure: address: ":8443/tcp"
 }

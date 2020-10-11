@@ -25,7 +25,6 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - pods
       - services
       - endpoints
       - secrets
@@ -123,7 +122,6 @@ spec:
         - key: "node-role.kubernetes.io/master"
           operator: "Equal"
           effect: "NoSchedule"
-
       serviceAccountName: traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: false
@@ -154,7 +152,7 @@ spec:
         - name: "traefik"
           containerPort: 9000
           protocol: "TCP"
-        - name: "web"
+        - name: "http"
           containerPort: 8000
           protocol: "TCP"
         - name: "websecure"
@@ -198,7 +196,6 @@ items:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: RELEASE-NAME
       annotations:
-        external-dns.alpha.kubernetes.io/hostname: traefik.katt.defn.jp
     spec:
       type: LoadBalancer
       selector:
@@ -206,32 +203,10 @@ items:
         app.kubernetes.io/instance: RELEASE-NAME
       ports:
       - port: 80
-        name: web
-        targetPort: "web"
+        name: http
+        targetPort: "http"
         protocol: "TCP"
       - port: 443
         name: websecure
         targetPort: "websecure"
         protocol: "TCP"
----
-# Source: traefik/templates/dashboard-hook-ingressroute.yaml
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: traefik-dashboard
-  annotations:
-    helm.sh/hook: "post-install,post-upgrade"
-  labels:
-    app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.4.3
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: RELEASE-NAME
-spec:
-  entryPoints:
-    - traefik
-  routes:
-  - match: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-    kind: Rule
-    services:
-    - name: api@internal
-      kind: TraefikService
