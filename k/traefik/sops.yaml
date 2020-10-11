@@ -1,8 +1,0 @@
-apiVersion: goabout.com/v1beta1
-kind: SopsSecretGenerator
-metadata:
-  name: wild-katt-defn-jp
-files:
-  - tls.crt=wild.katt.defn.jp.tlscrt.sops
-  - tls.key=wild.katt.defn.jp.tlskey.sops
-disableNameSuffixHash: true
