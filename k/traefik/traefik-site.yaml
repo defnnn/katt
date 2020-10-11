@@ -52,3 +52,11 @@ spec:
     services:
     - name: api@internal
       kind: TraefikService
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+spec:
+  defaultCertificate:
+    secretName: wild.katt.defn.jp
