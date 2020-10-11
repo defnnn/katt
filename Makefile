@@ -55,6 +55,7 @@ extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) zerotier wait
 	$(MAKE) metal wait
+	if [[ "$@" == "extras-katt" ]]; then $(MAKE) external-secrets wait; fi
 	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
 	if [[ "$@" == "extras-katt" ]]; then $(MAKE) home game; fi 
 
@@ -101,6 +102,9 @@ traefik:
 
 external-dns:
 	kustomize build --enable_alpha_plugins k/external-dns | $(k) apply -f -
+
+external-secrets:
+	kustomize build --enable_alpha_plugins k/external-secrets | $(k) apply -f -
 
 cert-manager:
 	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -

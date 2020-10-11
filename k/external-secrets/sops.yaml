@@ -1,0 +1,7 @@
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: external-secrets-secret
+files:
+  - AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID.sops
+  - AWS_SECRET_ACCESS_KEY=AWS_SECRET_ACCESS_KEY.sops
