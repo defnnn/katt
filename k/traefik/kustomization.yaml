@@ -11,3 +11,6 @@ configMapGenerator:
 - name: traefik-config
   files:
     - config/traefik.yaml
+
+generators:
+  - sops.yaml
