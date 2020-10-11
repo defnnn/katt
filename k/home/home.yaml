@@ -11,23 +11,7 @@ spec:
   selector:
     matchLabels:
       app: home
-  volumeClaimTemplates:
-  - metadata:
-      name: home
-    spec:
-      accessModes: [ReadWriteOnce]
-      storageClassName: standard
-      resources:
-        requests:
-          storage: 10Gi
-  - metadata:
-      name: work
-    spec:
-      accessModes: [ReadWriteOnce]
-      storageClassName: standard
-      resources:
-        requests:
-          storage: 50Gi
+  volumeClaimTemplates: []
   template:
     metadata:
       labels:
@@ -42,6 +26,9 @@ spec:
       - name: docker
         hostPath:
           path: /var/run/docker.sock
+      - name: mnt
+        hostPath:
+          path: /mnt
 
       containers:
       - name: home
@@ -60,12 +47,10 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         volumeMounts:
-        - name: home
-          mountPath: /home/boot/.password-store
-        - name: work
-          mountPath: /home/boot/work
         - name: docker
           mountPath: /var/run/docker.sock
+        - name: mnt
+          mountPath: /mnt
 ---
 apiVersion: v1
 kind: Service

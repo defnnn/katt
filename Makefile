@@ -106,6 +106,9 @@ external-dns:
 external-secrets:
 	kustomize build --enable_alpha_plugins k/external-secrets | $(k) apply -f -
 
+kubernetes-dashboard:
+	kustomize build --enable_alpha_plugins k/kubernetes-dashboard | $(k) apply -f -
+
 cert-manager:
 	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
 
