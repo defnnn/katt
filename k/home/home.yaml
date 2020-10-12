@@ -32,7 +32,7 @@ spec:
 
       containers:
       - name: home
-        image: "localhost:5000/defn/home:jojomomojo"
+        image: "defn/home:jojomomojo"
         imagePullPolicy: Always
         command: ["/service", "sshd"]
         ports:
