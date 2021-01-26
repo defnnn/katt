@@ -1,12 +1,19 @@
 SHELL := /bin/bash
 
-VERSION := 1.8.4
+VERSION := 1.9.3
 
-cilium-repo:
-	helm repo add cilium https://helm.cilium.io
-	helm pull cilium/cilium
+menu:
+	@perl -ne 'printf("%30s: %s\n","$$1","$$2") if m{^([\w+-\.]+):[^#]+#\s(.+)$$}' Makefile
 
-cilium.yaml:
+vendor: # Add cilium repo
+	helm repo add cilium https://helm.cilium.io --force-update
+	helm repo update
+	$(MAKE) cilium.yaml connectivity-check.yaml
+
+.PHONY: cilium.yaml connectivity-check.yaml
+
+cilium.yaml: # Generate cilium.yaml
+	rm -f cilium.yaml
 	helm template cilium/cilium --version $(VERSION) \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
@@ -24,6 +31,7 @@ cilium.yaml:
 		--set global.hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,http}" \
 		> cilium.yaml
 
-connectivity-check.yaml:
+connectivity-check.yaml: # Get cilium connectivity check manifest
+	rm -f connectivity-check.yaml
 	curl -sSL -o connectivity-check.yaml \
 		https://raw.githubusercontent.com/cilium/cilium/$(VERSION)/examples/kubernetes/connectivity-check/connectivity-check.yaml

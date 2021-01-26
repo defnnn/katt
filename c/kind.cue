@@ -46,7 +46,7 @@ nodes: [
 					containerPath: "/var/run/docker.sock"
 				},
 				{
-					hostPath:      "/mnt"
+					hostPath:      "/tmp/mnt"
 					containerPath: "/mnt"
 				},
 			]
