@@ -34,6 +34,7 @@ thing:
 
 setup: # Setup requirements for katt
 	$(MAKE) network
+	$(MAKE) registry-docker
 
 network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \
@@ -135,8 +136,10 @@ kuma-inner:
 	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
 		| kumactl apply -f -
 
-registry: # Run a local registry
+registry-docker:
 	-docker run -d -p 5000:5000 --restart=always --name registry registry:2
+
+registry: # Run a local registry
 	k apply -f k/registry.yaml
 
 plugins:
