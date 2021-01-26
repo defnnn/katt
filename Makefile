@@ -37,7 +37,7 @@ setup: # Setup requirements for katt
 
 network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \
-		docker network rm kind; fi
+		docker network rm kind || true; fi
 	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then \
 		docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 kind; fi
 
