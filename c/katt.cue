@@ -1,6 +1,6 @@
 _domain: "katt.defn.jp"
 
-_workers: [0]
+_workers: [0, 1]
 
 _networking: {
 	serviceSubnet: "10.15.0.0/16"
