@@ -4,7 +4,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 resources:
-  - github.com/metallb/metallb//manifests?ref=v0.9.3
+  - github.com/metallb/metallb//manifests?ref=v0.9.5
 
 configMapGenerator:
 - name: config
