@@ -54,7 +54,6 @@ katt nice mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
-	if [[ "$@" == "extras-katt" ]]; then $(MAKE) external-secrets wait; fi
 	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
 
 use-%:
