@@ -5,6 +5,7 @@ namespace: traefik
 
 resources:
   - vendor.yaml
+  - site.yaml
 
 configMapGenerator:
 - name: config-traefik

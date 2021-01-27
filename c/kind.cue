@@ -3,6 +3,8 @@ _workers: [...int] | *[0]
 kind:       "Cluster"
 apiVersion: "kind.x-k8s.io/v1alpha4"
 
+featureGates: RemoveSelfLink: false 
+
 networking: {
 	disableDefaultCNI: true
 	podSubnet:         _networking.podSubnet

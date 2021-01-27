@@ -3,24 +3,24 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: traefik
+  name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/instance: katt
   annotations:
 ---
 # Source: traefik/templates/rbac/clusterrole.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: traefik
+  name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/instance: katt
 rules:
   - apiGroups:
       - ""
@@ -69,38 +69,38 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: traefik
+  name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/instance: katt
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: traefik
+  name: katt-traefik
 subjects:
   - kind: ServiceAccount
-    name: traefik
+    name: katt-traefik
     namespace: default
 ---
 # Source: traefik/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: traefik
+  name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/instance: katt
   annotations:
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: traefik
-      app.kubernetes.io/instance: RELEASE-NAME
+      app.kubernetes.io/instance: katt
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -113,15 +113,15 @@ spec:
         app.kubernetes.io/name: traefik
         helm.sh/chart: traefik-9.13.0
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/instance: katt
     spec:
-      serviceAccountName: traefik
+      serviceAccountName: katt-traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: false
       containers:
       - image: "traefik:2.4.0"
         imagePullPolicy: IfNotPresent
-        name: traefik
+        name: katt-traefik
         resources:
         readinessProbe:
           httpGet:
@@ -189,18 +189,18 @@ items:
   - apiVersion: v1
     kind: Service
     metadata:
-      name: traefik
+      name: katt-traefik
       labels:
         app.kubernetes.io/name: traefik
         helm.sh/chart: traefik-9.13.0
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/instance: katt
       annotations:
     spec:
       type: LoadBalancer
       selector:
         app.kubernetes.io/name: traefik
-        app.kubernetes.io/instance: RELEASE-NAME
+        app.kubernetes.io/instance: katt
       ports:
       - port: 80
         name: web
@@ -215,14 +215,14 @@ items:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: traefik-dashboard
+  name: katt-traefik-dashboard
   annotations:
     helm.sh/hook: "post-install,post-upgrade"
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/instance: katt
 spec:
   entryPoints:
     - traefik
