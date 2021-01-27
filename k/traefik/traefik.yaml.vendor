@@ -6,7 +6,7 @@ metadata:
   name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.4.3
+    helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: RELEASE-NAME
   annotations:
@@ -18,7 +18,7 @@ metadata:
   name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.4.3
+    helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: RELEASE-NAME
 rules:
@@ -59,6 +59,7 @@ rules:
       - tlsoptions
       - tlsstores
       - traefikservices
+      - serverstransports
     verbs:
       - get
       - list
@@ -71,7 +72,7 @@ metadata:
   name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.4.3
+    helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: RELEASE-NAME
 roleRef:
@@ -81,7 +82,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: traefik
-    namespace: defn
+    namespace: default
 ---
 # Source: traefik/templates/deployment.yaml
 apiVersion: apps/v1
@@ -90,7 +91,7 @@ metadata:
   name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.4.3
+    helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: RELEASE-NAME
   annotations:
@@ -105,12 +106,12 @@ spec:
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
-  template:
+  template: 
     metadata:
       annotations:
       labels:
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-9.4.3
+        helm.sh/chart: traefik-9.13.0
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: RELEASE-NAME
     spec:
@@ -118,7 +119,7 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: false
       containers:
-      - image: traefik:2.3.1
+      - image: "traefik:2.4.0"
         imagePullPolicy: IfNotPresent
         name: traefik
         resources:
@@ -191,7 +192,7 @@ items:
       name: traefik
       labels:
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-9.4.3
+        helm.sh/chart: traefik-9.13.0
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: RELEASE-NAME
       annotations:
@@ -219,7 +220,7 @@ metadata:
     helm.sh/hook: "post-install,post-upgrade"
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.4.3
+    helm.sh/chart: traefik-9.13.0
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: RELEASE-NAME
 spec:
