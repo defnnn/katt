@@ -4,6 +4,8 @@ SHELL := /bin/bash
 
 DOMAIN := defn.jp
 
+PET := katt
+
 first = $(word 1, $(subst -, ,$@))
 second = $(word 2, $(subst -, ,$@))
 
@@ -54,7 +56,10 @@ katt nice mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
-	if [[ "$@" == "extras-katt" ]]; then $(MAKE) traefik wait; $(MAKE) hubble wait; $(MAKE) external-dns wait; $(MAKE) cert-manager wait; fi
+	if [[ "$@" == "extras-katt" ]]; then \
+		$(MAKE) traefik wait; \
+		$(MAKE) hubble wait; \
+		fi
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -95,7 +100,9 @@ knative:
 traefik:
 	cue export --out yaml c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
-	kustomize build k/traefik | $(kt) apply -f -
+	mkdir -p k/traefik/b
+	kustomize build k/traefik > k/traefik/b/build.yaml
+	cat k/traefik/b/build.yaml | $(kt) apply -f -
 
 external-dns:
 	kustomize build --enable_alpha_plugins k/external-dns | $(k) apply -f -

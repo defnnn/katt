@@ -6,3 +6,4 @@ docker-compose.override.yml
 *-token
 acme.json
 venv
+k/*/b

@@ -3,7 +3,7 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: RELEASE-NAME-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
@@ -15,7 +15,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: RELEASE-NAME-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
@@ -69,7 +69,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: RELEASE-NAME-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
@@ -78,17 +78,17 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: RELEASE-NAME-traefik
+  name: traefik
 subjects:
   - kind: ServiceAccount
-    name: RELEASE-NAME-traefik
+    name: traefik
     namespace: default
 ---
 # Source: traefik/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: RELEASE-NAME-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
     helm.sh/chart: traefik-9.13.0
@@ -115,13 +115,13 @@ spec:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: RELEASE-NAME
     spec:
-      serviceAccountName: RELEASE-NAME-traefik
+      serviceAccountName: traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: false
       containers:
       - image: "traefik:2.4.0"
         imagePullPolicy: IfNotPresent
-        name: RELEASE-NAME-traefik
+        name: traefik
         resources:
         readinessProbe:
           httpGet:
@@ -189,7 +189,7 @@ items:
   - apiVersion: v1
     kind: Service
     metadata:
-      name: RELEASE-NAME-traefik
+      name: traefik
       labels:
         app.kubernetes.io/name: traefik
         helm.sh/chart: traefik-9.13.0
@@ -215,7 +215,7 @@ items:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: RELEASE-NAME-traefik-dashboard
+  name: traefik-dashboard
   annotations:
     helm.sh/hook: "post-install,post-upgrade"
   labels:

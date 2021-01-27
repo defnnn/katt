@@ -4,10 +4,9 @@ kind: Kustomization
 namespace: traefik
 
 resources:
-  - traefik.yaml
-  - traefik-site.yaml
+  - vendor.yaml
 
 configMapGenerator:
-- name: traefik-config
+- name: config-traefik
   files:
     - config/traefik.yaml
