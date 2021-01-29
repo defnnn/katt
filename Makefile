@@ -35,8 +35,9 @@ thing:
 	$(MAKE) mean
 
 setup: # Setup requirements for katt
+	asdf install
 	$(MAKE) network
-	$(MAKE) registry-docker
+	-$(MAKE) registry-docker
 
 network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \
