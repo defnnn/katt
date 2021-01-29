@@ -43,7 +43,7 @@ network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \
 		docker network rm kind || true; fi
 	if test -z "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')"; then \
-		docker network create --subnet 172.25.0.0/16 --ip-range 172.25.1.0/24 -o com.docker.network.bridge.enable_ip_masquerade=true -o com.docker.network.bridge.enable_icc=true kind; fi
+		docker network create --subnet 172.25.1.0/20 --ip-range 172.25.1.0/24 -o com.docker.network.bridge.enable_ip_masquerade=true -o com.docker.network.bridge.enable_icc=true kind; fi
 
 katt nice mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
