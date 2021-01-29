@@ -9,7 +9,6 @@ services:
   zerotier:
     image: defn/zerotier
     env_file: .env
-    network_mode: host
     cap_add:
     - NET_ADMIN
     - SYS_ADMIN
@@ -19,3 +18,8 @@ services:
     volumes:
     - ./etc/zerotier:/var/lib/zerotier-one
     restart: always
+
+networks:
+  default:
+    external:
+      name: kind
