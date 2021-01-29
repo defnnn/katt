@@ -27,12 +27,11 @@ test: # Test manifests with kubeval
 tilt:
 	tilt up --context kind-katt
 
-thing:
+zero:
 	$(MAKE) clean
-	$(MAKE) setup
-	$(MAKE) katt
-	$(MAKE) nice
-	$(MAKE) mean
+
+one:
+	$(MAKE) setup katt
 
 setup: # Setup requirements for katt
 	asdf install
@@ -70,6 +69,8 @@ clean: # Teardown
 	$(MAKE) clean-katt
 	$(MAKE) clean-nice
 	$(MAKE) clean-mean
+	$(MAKE) down
+	docker network rm kind
 
 clean-%:
 	-kind delete cluster --name $(second)

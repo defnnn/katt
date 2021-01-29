@@ -46,3 +46,18 @@ spec:
               secretKeyRef:
                 name: zerotier-secret
                 key: ZT_NETWORK
+          - name: ZT_IDENTITY_PUBLIC
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_IDENTITY_PUBLIC
+          - name: ZT_IDENTITY_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_IDENTITY_SECRET
+          - name: ZT_AUTHTOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: zerotier-secret
+                key: ZT_AUTHTOKEN_SECRET
