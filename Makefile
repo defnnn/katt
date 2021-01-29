@@ -162,6 +162,9 @@ pull:
 logs:
 	docker-compose logs -f
 
+bash:
+	docker-compose exec home bash -il
+
 registry: # Run a local registry
 	k apply -f k/registry.yaml
 

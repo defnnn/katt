@@ -4,6 +4,7 @@ kind:       "Cluster"
 apiVersion: "kind.x-k8s.io/v1alpha4"
 
 featureGates: RemoveSelfLink: false 
+featureGates: EphemeralContainers: true
 
 networking: {
 	disableDefaultCNI: true

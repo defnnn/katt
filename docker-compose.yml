@@ -4,6 +4,8 @@ services:
   zerotier:
     image: defn/zerotier
     env_file: .env
+    ports:
+      - 5000:5000/tcp
     cap_add:
     - NET_ADMIN
     - SYS_ADMIN
@@ -15,8 +17,6 @@ services:
     restart: always
   registry:
     image: registry:2
-    ports:
-      - 5000:5000/tcp
     network_mode: service:zerotier
     pid: service:zerotier
     restart: always
