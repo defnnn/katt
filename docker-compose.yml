@@ -1,11 +1,6 @@
 version: '3.7'
 
 services:
-  registry:
-    image: registry:2
-    ports:
-      - 5000:5000/tcp
-    restart: always
   zerotier:
     image: defn/zerotier
     env_file: .env
@@ -18,6 +13,17 @@ services:
     volumes:
     - ./etc/zerotier:/var/lib/zerotier-one
     restart: always
+  registry:
+    image: registry:2
+    ports:
+      - 5000:5000/tcp
+    network_mode: service:zerotier
+    pid: service:zerotier
+    restart: always
+  home:
+    image: defn/home:home
+    network_mode: service:zerotier
+    pid: service:zerotier
 
 networks:
   default:
