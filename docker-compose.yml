@@ -6,3 +6,16 @@ services:
     ports:
       - 5000:5000/tcp
     restart: always
+  zerotier:
+    image: defn/zerotier
+    env_file: .env
+    network_mode: host
+    cap_add:
+    - NET_ADMIN
+    - SYS_ADMIN
+    - CAP_SYS_RAWIO
+    devices:
+    - /dev/net/tun
+    volumes:
+    - ./etc/zerotier:/var/lib/zerotier-one
+    restart: always

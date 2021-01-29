@@ -159,6 +159,9 @@ recycle: # Recycle home container
 pull:
 	docker-compose pull
 
+logs:
+	docker-compose logs -f
+
 registry: # Run a local registry
 	k apply -f k/registry.yaml
 

@@ -7,3 +7,4 @@ docker-compose.override.yml
 acme.json
 venv
 k/*/b
+etc/zerotier
