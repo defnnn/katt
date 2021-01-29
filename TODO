@@ -1,0 +1,1 @@
+kt debug -it pod/katt-traefik-6cfdd68878-87k4m --image=defn/home:home -- bash -il
