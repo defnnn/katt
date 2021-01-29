@@ -1,0 +1,25 @@
+{
+	"data": "ENC[AES256_GCM,data:1XIYzxFVF0q2uQHgIXYieg==,iv:82xU1DEpBqbsOhNw9VMO11PdogKnGoKfLQ7+MF9fK6U=,tag:ivWoWzwAMoJPSXcHTfLt4g==,type:str]",
+	"sops": {
+		"kms": null,
+		"gcp_kms": null,
+		"azure_kv": null,
+		"hc_vault": null,
+		"lastmodified": "2021-01-29T22:11:32Z",
+		"mac": "ENC[AES256_GCM,data:J9OOpov+0CJ8Nym8uyW5Aycb/soP3EC2QeeZ9JAL6KfDBD+RJIqPhEKE1gZ20uMmTSB5g9FRqhGJ/T6iVOHJBL9bM7+9ue7uAt5+d7H2flxOKUcZXDK8agjp7OO4lWIuEbL9bXl9qYX+wIB8UCfrRHGyuNN+FKjRcOVTJ2NT820=,iv:Cw4c0w667RRN5CAMImnxso1T3aCiMynI6KCwySN5fco=,tag:f715PcpBkyAFaTLX0Wn4TQ==,type:str]",
+		"pgp": [
+			{
+				"created_at": "2021-01-29T22:11:31Z",
+				"enc": "-----BEGIN PGP MESSAGE-----\n\nwcBMAwoGsTXRg+wqAQgAWLPkrd81+hXWd9QiCfrBdeMEPKsJ32vl/bXSEsB9/6YE\nfTefvvTknaCEzJb3+1ajKqSOIuQJpSwsAFH17Jc9Kd/AXEdEi3UO/asZLrC4BQNI\nC/REcfv99mzJi0JNvUF9qHG10wMxUHF6dMWgbWX+ymRLKOH57AG54FBJmXtWNOE3\ntpvLlgkpeSm791iEypBejGkeNEPVy4X3TnKh+ORX+xiQ32MKuOS9hpfgzZrrfLdo\nJtc3UFddtYSAGgQy+s4GKJ0UCowDNaU9IdRg/I4gSlmvL4PJq/vuINsIhTCDxJq6\nEomx0NvdMDQxrbAfbIRnzoZNGI/1DRxYtkIB7v6zfdLgAeTCZGtpehVVuO7FTEKd\nMDPP4Ymv4J/gueHkW+Bu4mH6uzfgyuX9X1jpmqY3Pq/KOLcAcVC2SfAkwtPN7A6Y\nAkWp/Hwma+AA5F64GURMh/t5QBcGPEqK0JDixvGF5uEG4wA=\n=6iQM\n-----END PGP MESSAGE-----",
+				"fp": "376D08553D52BA09177C1CAE39C7135BA906A2AC"
+			},
+			{
+				"created_at": "2021-01-29T22:11:31Z",
+				"enc": "-----BEGIN PGP MESSAGE-----\n\nwcBMA/61lBBnlXhjAQgAOHkgEuhuQb3BYbwT2XGOtAeTJSXb5Zeyrap/BudfT6AD\nWXRdXUuot+8daC4BqXBx0biQdihR79Z0xV6Z8eEufxDu8h9FJ2jwItI7CpGS/EEf\n54YyqDoyG5BgoKN50CkxHEOwRzVJlfWo79nVHQOEZWi/Iab0sGD6SnzI+REf1Bs6\nAFahpj7b6PGfNNmdI4L5Viekzxnu3eu8C/jmN3typKajHdcs1ghsUc2t85nCNoEw\n9Agc1Yn6MiAmTM8ZflOBvzafpYJLEwTkfdbYA85d21DO3r76y6dAnZ06jxRcK2We\nC8MEfaqXva3stq2bL0Mn3RGdjALi5sNhpM7nsrZWz9LgAeMpDb6AmrhI3uGuRuAc\n4MDhxG/gsOLlda774JPl0/NHQ5dcknyLgp9R+P9tSoLq5S67N8/G2qPhS0aVVKLg\n3uT6WezfjNBC2ICFsMD68BGE4vlnCV/hXSIA\n=F3XG\n-----END PGP MESSAGE-----",
+				"fp": "3178BBF6880CADCCB59BA8C4C9C04B8E91603697"
+			}
+		],
+		"unencrypted_suffix": "_unencrypted",
+		"version": "3.6.1"
+	}
+}

@@ -1,0 +1,6 @@
+apiVersion: goabout.com/v1beta1
+kind: SopsSecretGenerator
+metadata:
+  name: zerotier-secret
+files:
+  - ZT_NETWORK=ZT_NETWORK.sops
