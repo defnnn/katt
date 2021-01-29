@@ -37,7 +37,7 @@ thing:
 setup: # Setup requirements for katt
 	asdf install
 	$(MAKE) network
-	-$(MAKE) registry-docker
+	$(MAKE) up
 
 network:
 	if ! test "$$(docker network inspect kind | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \
@@ -142,8 +142,22 @@ kuma-inner:
 	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
 		| kumactl apply -f -
 
-registry-docker:
-	-docker run -d -p 5000:5000 --restart=always --name registry registry:2
+up: # Bring up homd
+	docker-compose up -d --remove-orphans
+
+down: # Bring down home
+	docker-compose down --remove-orphans
+
+recreate: # Recreate home container
+	$(MAKE) down
+	$(MAKE) up
+
+recycle: # Recycle home container
+	$(MAKE) pull
+	$(MAKE) recreate
+
+pull:
+	docker-compose pull
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
