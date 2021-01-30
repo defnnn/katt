@@ -202,6 +202,10 @@ items:
         app.kubernetes.io/name: traefik
         app.kubernetes.io/instance: katt
       ports:
+      - port: 8779
+        name: test
+        targetPort: "web"
+        protocol: "TCP"
       - port: 80
         name: web
         targetPort: "web"

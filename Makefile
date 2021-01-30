@@ -39,8 +39,13 @@ setup: # Setup requirements for katt
 	$(MAKE) network
 
 network:
+	sudo mount bpffs /sys/fs/bpf -t bpf
 	if test -z "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
-		docker network create --subnet 172.25.1.0/24 --ip-range 172.25.1.0/24 -o com.docker.network.bridge.enable_ip_masquerade=true -o com.docker.network.bridge.enable_icc=true kind; fi
+		docker network create --subnet 172.25.1.0/24 --ip-range 172.25.1.0/24 \
+			-o com.docker.network.bridge.enable_ip_masquerade=true \
+			-o com.docker.network.bridge.enable_icc=true \
+			-o com.docker.network.bridge.name=kind0 \
+			kind; fi
 
 katt nice mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
@@ -54,10 +59,8 @@ katt nice mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
-	if [[ "$@" == "extras-katt" ]]; then \
-		$(MAKE) traefik wait; \
-		$(MAKE) hubble wait; \
-		fi
+	$(MAKE) zerotier wait
+	$(MAKE) traefik wait
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -69,6 +72,7 @@ clean: # Teardown
 	$(MAKE) clean-mean
 	$(MAKE) down
 	docker network rm kind
+	sudo systemctl restart docker
 
 clean-%:
 	-kind delete cluster --name $(second)
@@ -80,7 +84,6 @@ wait:
 
 cilium:
 	kustomize build k/cilium | $(ks) apply -f -
-	$(MAKE) wait
 	while $(ks) get nodes | grep NotReady; do \
 		sleep 5; done
 
@@ -160,9 +163,6 @@ pull:
 
 logs:
 	docker-compose logs -f
-
-bash:
-	docker-compose exec home bash -il
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml

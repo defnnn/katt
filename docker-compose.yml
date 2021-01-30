@@ -1,29 +1,9 @@
 version: '3.7'
 
 services:
-  zerotier:
-    image: defn/zerotier
-    env_file: .env
-    ports:
-      - 5000:5000/tcp
-    cap_add:
-    - NET_ADMIN
-    - SYS_ADMIN
-    - CAP_SYS_RAWIO
-    devices:
-    - /dev/net/tun
-    volumes:
-    - ./etc/zerotier:/var/lib/zerotier-one
-    restart: always
   registry:
     image: registry:2
-    network_mode: service:zerotier
-    pid: service:zerotier
     restart: always
-  home:
-    image: defn/home:home
-    network_mode: service:zerotier
-    pid: service:zerotier
 
 networks:
   default:

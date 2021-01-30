@@ -1,8 +1,4 @@
 "address-pools": [{
-	name:     "general"
-	protocol: "layer2"
-	addresses: [_address_pools["general"]]
-}, {
 	name:     "traefik"
 	protocol: "layer2"
 	addresses: [_address_pools["traefik"]]

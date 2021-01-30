@@ -45,6 +45,10 @@ nodes: [
 
 			extraMounts: [
 				{
+					hostPath:      "/sys/fs/bpf",
+					containerPath: "/sys/fs/bpf"
+				},
+				{
 					hostPath:      "/var/run/docker.sock"
 					containerPath: "/var/run/docker.sock"
 				},

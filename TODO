@@ -1,1 +1,13 @@
 kt debug -it pod/katt-traefik-6cfdd68878-87k4m --image=defn/home:home -- bash -il
+
+sudo route delete -ifscope utun2 -net 172.25.15/24
+
+sudo mount bpffs /sys/fs/bpf -t bpf
+
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+sudo /sbin/iptables -t nat -A POSTROUTING -j MASQUERADE
+
+sudo systemctl disable systemd-resolved
+sudo systemctl stop systemd-resolved
+sudo rm /etc/resolv.conf
+echo nameserver 1.1.1.1 | sudo tee /etc/resolv.conf
