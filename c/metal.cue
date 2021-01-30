@@ -18,8 +18,8 @@
 	addresses: [...]
 	addresses: [_address_pools["pihole"]]
 }, {
-	name:     "home"
+	name:     "general"
 	protocol: "layer2"
 	addresses: [...]
-	addresses: [_address_pools["home"]]
+	addresses: [_address_pools["general"]]
 }]

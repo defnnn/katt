@@ -63,6 +63,7 @@ katt nice mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
+	$(MAKE) cert-manager wait
 	$(MAKE) traefik wait
 
 use-%:

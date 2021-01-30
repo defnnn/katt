@@ -1,0 +1,70 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  namespace: cert-manager
+spec:
+  acme:
+    email: youremail
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+    - dns01:
+        cnameStrategy: None
+        cloudflare:
+          email: yourcfemail
+          apiTokenSecretRef:
+            name: cert-manager-secret
+            key: CF_API_TOKEN
+      selector:
+        dnsZones:
+        - yourzone
+        - yoursub.yourzone
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    email: youremail
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+    - dns01:
+        cnameStrategy: None
+        cloudflare:
+          email: yourcfemail
+          apiTokenSecretRef:
+            name: cert-manager-secret
+            key: CF_API_TOKEN
+      selector:
+        dnsZones:
+        - yourzone
+        - yoursub.yourzone
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wild.yoursub.yourzone
+  namespace: traefik
+spec:
+  secretName: wild.yoursub.yourzone
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  dnsNames:
+  - '*.yoursub.yourzone'
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: traefik
+spec:
+  defaultCertificate:
+    secretName: wild.yoursub.yourzone
