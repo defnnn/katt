@@ -118,6 +118,8 @@ spec:
       serviceAccountName: katt-traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: false
+      nodeSelector:
+          index: "0"
       containers:
       - image: "traefik:2.4.0"
         imagePullPolicy: IfNotPresent
@@ -146,9 +148,11 @@ spec:
           containerPort: 9000
           protocol: "TCP"
         - name: "web"
+          hostPort: 80
           containerPort: 8000
           protocol: "TCP"
         - name: "websecure"
+          hostPort: 443
           containerPort: 8443
           protocol: "TCP"
         securityContext:
@@ -165,8 +169,6 @@ spec:
           - name: tmp
             mountPath: /tmp
         args:
-          - "--global.checknewversion"
-          - "--global.sendanonymoususage"
           - "--entryPoints.traefik.address=:9000/tcp"
           - "--entryPoints.web.address=:8000/tcp"
           - "--entryPoints.websecure.address=:8443/tcp"
@@ -202,10 +204,6 @@ items:
         app.kubernetes.io/name: traefik
         app.kubernetes.io/instance: katt
       ports:
-      - port: 8779
-        name: test
-        targetPort: "web"
-        protocol: "TCP"
       - port: 80
         name: web
         targetPort: "web"

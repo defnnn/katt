@@ -3,7 +3,7 @@ _workers: [...int] | *[0]
 kind:       "Cluster"
 apiVersion: "kind.x-k8s.io/v1alpha4"
 
-featureGates: RemoveSelfLink: false 
+featureGates: RemoveSelfLink:      false
 featureGates: EphemeralContainers: true
 
 networking: {
@@ -43,9 +43,22 @@ nodes: [
 
 			image: "kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab"
 
+			extraPortMappings: [
+				{
+					containerPort: 8000
+					hostPort:      80
+					protocol:      "TCP"
+				},
+				{
+					containerPort: 8443
+					hostPort:      443
+					protocol:      "TCP"
+				},
+			]
+
 			extraMounts: [
 				{
-					hostPath:      "/sys/fs/bpf",
+					hostPath:      "/sys/fs/bpf"
 					containerPath: "/sys/fs/bpf"
 				},
 				{

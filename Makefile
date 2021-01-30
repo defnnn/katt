@@ -33,6 +33,10 @@ zero:
 one:
 	$(MAKE) setup katt
 	$(MAKE) up
+	docker exec katt-control-plane apt-get update
+	docker exec katt-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
+	docker exec katt-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
+	docker exec katt-control-plane socat tcp4-listen:8000,reuseaddr,fork TCP:127.0.0.1:80 &
 
 setup: # Setup requirements for katt
 	asdf install
@@ -59,7 +63,6 @@ katt nice mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
-	$(MAKE) zerotier wait
 	$(MAKE) traefik wait
 
 use-%:
