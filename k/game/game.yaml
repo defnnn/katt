@@ -26,7 +26,7 @@ spec:
    labels:
      app: game
    annotations:
-     metallb.universe.tf/address-pool: general
+     metallb.universe.tf/address-pool: home
  spec:
    type: LoadBalancer
    selector:
@@ -46,7 +46,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: game.katt.defn.jp
+  - host: game.defn.jp
     http:
       paths:
       - path: /
