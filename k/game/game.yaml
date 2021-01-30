@@ -46,7 +46,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: game.defn.jp
+  - host: game.ryokan.defn.jp
     http:
       paths:
       - path: /
