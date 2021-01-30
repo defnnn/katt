@@ -32,11 +32,11 @@ zero:
 
 one:
 	$(MAKE) setup katt
+	$(MAKE) up
 
 setup: # Setup requirements for katt
 	asdf install
 	$(MAKE) network
-	$(MAKE) up
 
 network:
 	if ! test "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')" = 172.25.0.0/16; then \

@@ -1,10 +1,10 @@
 _domain: "katt.defn.jp"
 
-_workers: [0,1]
+_workers: [0]
 
 _networking: {
-	serviceSubnet: "10.15.0.0/16"
-	podSubnet:     "10.16.0.0/16"
+	serviceSubnet: "10.17.0.0/16"
+	podSubnet:     "10.18.0.0/16"
 }
 
 _address_pools: "general":       "172.25.32.1-172.25.32.254"
