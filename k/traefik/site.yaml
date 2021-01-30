@@ -12,3 +12,42 @@ metadata:
   name: traefik
 spec:
   controller: traefik.io/ingress-controller
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: traefik
+  namespace: kube-system
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: traefik.ryokan.defn.jp
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: traefik
+            port:
+              number: 9000
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard-secure
+  labels:
+    app.kubernetes.io/name: traefik
+spec:
+  tls: {}
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostRegexp(`traefik.{domain:.+}`)
+    kind: Rule
+    services:
+    - name: api@internal
+      kind: TraefikService
