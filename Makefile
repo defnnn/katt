@@ -122,7 +122,7 @@ kubernetes-dashboard:
 	kustomize build --enable_alpha_plugins k/kubernetes-dashboard | $(k) apply -f -
 
 cert-manager:
-	kustomize build --enable_alpha_plugins k/cert-manager | $(kc) apply -f -
+	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
