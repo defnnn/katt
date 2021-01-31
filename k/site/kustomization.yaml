@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - game.yaml
+  - acme.yaml
