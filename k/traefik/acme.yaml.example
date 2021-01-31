@@ -21,7 +21,6 @@ spec:
       selector:
         dnsZones:
         - yourzone
-        - yoursub.yourzone
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -45,7 +44,6 @@ spec:
       selector:
         dnsZones:
         - yourzone
-        - yoursub.yourzone
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

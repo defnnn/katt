@@ -94,6 +94,7 @@ kubeadmConfigPatches: [
 		    - localhost
 		    - 127.0.0.1
 		    - \(_apiAddress)
+		    - \(_apiHostname)
 		    - kubernetes
 		    - kubernetes.default.svc
 		    - kubernetes.default.svc.cluster.local
