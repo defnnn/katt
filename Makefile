@@ -55,7 +55,7 @@ network:
 
 katt nice mean: # Bring up a kind cluster
 	$(MAKE) clean-$@
-	cue export --out yaml c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
+	cue export --out yaml c/site.cue c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
 	$(MAKE) registry
 	$(MAKE) use-$@
 	env PET=$@ $(MAKE) extras-$@
@@ -94,7 +94,7 @@ cilium:
 		sleep 5; done
 
 metal:
-	cue export --out yaml c/$(PET).cue c/metal.cue > k/metal/config/config
+	cue export --out yaml c/site.cue c/$(PET).cue c/metal.cue > k/metal/config/config
 	kustomize build k/metal | $(km) apply -f -
 
 kong:
@@ -107,7 +107,7 @@ knative:
 	kubectl patch configmap/config-domain --namespace knative-serving --type merge --patch '{"data":{"$(PET).defn.jp":""}}'
 
 traefik:
-	cue export --out yaml c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
+	cue export --out yaml c/site.cue c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
