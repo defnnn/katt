@@ -10,6 +10,8 @@ networking: {
 	disableDefaultCNI: true
 	podSubnet:         _networking.podSubnet
 	serviceSubnet:     _networking.serviceSubnet
+	apiServerAddress:  "100.73.201.63"
+	apiServerPort:     6443
 }
 
 nodes: [
@@ -24,7 +26,6 @@ nodes: [
           nodeRegistration:
             kubeletExtraArgs:
               node-labels: \"index=\(n)\"
-
           """,
 				]
 			}
@@ -36,7 +37,6 @@ nodes: [
           nodeRegistration:
             kubeletExtraArgs:
               node-labels: \"index=\(n)\"
-
           """,
 				]
 			}
@@ -91,12 +91,12 @@ kubeadmConfigPatches: [
 		  name: config
 		apiServer:
 		  certSANs:
-		  - localhost
-		  - 127.0.0.1
-		  - kubernetes
-		  - kubernetes.default.svc
-		  - kubernetes.default.svc.cluster.local
-		  - kind
-
+		    - localhost
+		    - 127.0.0.1
+		    - 100.73.201.63
+		    - kubernetes
+		    - kubernetes.default.svc
+		    - kubernetes.default.svc.cluster.local
+		    - kind
 		""",
 ]
