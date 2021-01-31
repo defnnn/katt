@@ -6,7 +6,6 @@ namespace: traefik
 resources:
   - vendor.yaml
   - site.yaml
-  - acme.yaml
 
 configMapGenerator:
 - name: config-traefik

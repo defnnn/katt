@@ -34,7 +34,9 @@ zero:
 	$(MAKE) clean
 
 one:
-	$(MAKE) setup katt
+	$(MAKE) setup
+	$(MAKE) katt
+	$(MAKE) site
 	$(MAKE) up
 	docker exec katt-control-plane apt-get update
 	docker exec katt-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
@@ -119,8 +121,8 @@ hubble:
 home:
 	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
-game:
-	kustomize build k/game | $(k) apply -f -
+site:
+	kustomize build k/site | $(k) apply -f -
 
 zerotier:
 	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
