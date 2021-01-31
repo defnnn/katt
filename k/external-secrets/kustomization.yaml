@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: external-secrets
 
 resources:
-  - external-secrets.yaml
-  - external-secrets-site.yaml
+  - vendor.yaml
+  - site.yaml
 
 generators:
   - sops.yaml

@@ -138,10 +138,6 @@ spec:
           resources:
             {}
           env:
-          - name: "AWS_DEFAULT_REGION"
-            value: "us-west-2"
-          - name: "AWS_REGION"
-            value: "us-west-2"
           - name: "LOG_LEVEL"
             value: "info"
           - name: "LOG_MESSAGE_KEY"
@@ -150,18 +146,10 @@ spec:
             value: "3001"
           - name: "POLLER_INTERVAL_MILLISECONDS"
             value: "10000"
-          - name: "VAULT_ADDR"
-            value: "http://127.0.0.1:8200"
-          # Params for env vars populated from k8s secrets
-          - name: AWS_ACCESS_KEY_ID
+          - name: "HELLO"
             valueFrom:
               secretKeyRef:
                 name: external-secrets-secret
-                key: AWS_ACCESS_KEY_ID
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: external-secrets-secret
-                key: AWS_SECRET_ACCESS_KEY
+                key: HELLO
       securityContext:
         runAsNonRoot: true

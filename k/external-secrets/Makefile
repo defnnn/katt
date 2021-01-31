@@ -5,7 +5,8 @@ vendor: # Add external-secrets repo
 	helm repo add external-secrets https://external-secrets.github.io/kubernetes-external-secrets/ --force-update
 	helm repo update
 	helm template external-secrets/kubernetes-external-secrets | sed 's#RELEASE-NAME-kubernetes-external-secrets#external-secrets#g' > external-secrets.yaml.vendor
+	rm -rf crds kubernetes-external-secrets
+	git clone https://github.com/external-secrets/kubernetes-external-secrets
+	mv kubernetes-external-secrets/charts/kubernetes-external-secrets/crds .
+	rm -rf kubernetes-external-secrets
 
-secrets: # Make secrets with sops
-	echo -n world >  HELLO.sops
-	sops -e -i HELLO.sops

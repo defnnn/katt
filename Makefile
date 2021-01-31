@@ -17,6 +17,8 @@ kt := kubectl -n traefik
 kg := kubectl -n kong
 kv := kubectl -n knative-serving
 kd := kubectl -n external-dns
+kx := kubectl -n external-secrets
+kc := kubectl -n cert-manager
 
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
@@ -113,13 +115,14 @@ external-dns:
 	kustomize build --enable_alpha_plugins k/external-dns | $(k) apply -f -
 
 external-secrets:
-	kustomize build --enable_alpha_plugins k/external-secrets | $(k) apply -f -
+	$(kx) apply -f k/external-secrets/crds
+	kustomize build --enable_alpha_plugins k/external-secrets | $(kx) apply -f -
 
 kubernetes-dashboard:
 	kustomize build --enable_alpha_plugins k/kubernetes-dashboard | $(k) apply -f -
 
 cert-manager:
-	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
+	kustomize build --enable_alpha_plugins k/cert-manager | $(kc) apply -f -
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
