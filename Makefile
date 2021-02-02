@@ -15,6 +15,7 @@ km := kubectl -n metallb-system
 kt := kubectl -n traefik
 kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
+kld := kubectl -n linkerd
 
 kk := kubectl -n kuma-system
 kg := kubectl -n kong
@@ -95,6 +96,11 @@ cilium:
 	kustomize build k/cilium | $(ks) apply -f -
 	while $(ks) get nodes | grep NotReady; do \
 		sleep 5; done
+
+linkerd:
+	linkerd check --pre
+	kustomize build k/linkerd | $(k) apply -f -
+	linkerd check
 
 metal:
 	cue export --out yaml c/site.cue c/$(PET).cue c/metal.cue > k/metal/config/config
