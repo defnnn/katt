@@ -37,12 +37,18 @@ one:
 	$(MAKE) katt
 	$(MAKE) site
 	$(MAKE) up
+	$(MAKE) zt
 
 socat:
 	docker exec katt-control-plane apt-get update
 	docker exec katt-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
 	docker exec katt-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
 	docker exec katt-control-plane socat tcp4-listen:8000,reuseaddr,fork TCP:127.0.0.1:80 &
+
+zt:
+	docker exec katt-control-plane apt-get update
+	docker exec katt-control-plane apt-get install -y gnupg2
+	curl -s https://install.zerotier.com | docker exec -i katt-control-plane bash
 
 setup: # Setup requirements for katt
 	asdf install
