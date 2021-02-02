@@ -7,7 +7,7 @@ featureGates: RemoveSelfLink:      false
 featureGates: EphemeralContainers: true
 
 networking: {
-	disableDefaultCNI: true
+	disableDefaultCNI: false
 	podSubnet:         _networking.podSubnet
 	serviceSubnet:     _networking.serviceSubnet
 	apiServerAddress:  "\(_apiAddress)"

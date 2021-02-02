@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .PHONY: cutout
 
-DOMAIN := defn.jp
+network := cilium
 
 PET := katt
 
@@ -63,11 +63,12 @@ katt nice mean: # Bring up a kind cluster
 	$(MAKE) registry
 	$(MAKE) use-$@
 	env PET=$@ $(MAKE) extras-$@
+	$(MAKE) site
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
 extras-%:
-	$(MAKE) cilium wait
+	$(MAKE) $(network) wait
 	$(MAKE) cert-manager wait
 	$(MAKE) traefik wait
 	$(MAKE) metal wait
