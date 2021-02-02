@@ -36,8 +36,8 @@ one:
 	$(MAKE) setup
 	$(MAKE) katt
 	$(MAKE) site
-	$(MAKE) up
 	$(MAKE) zt
+	$(MAKE) up
 
 socat:
 	docker exec katt-control-plane apt-get update
@@ -69,7 +69,6 @@ katt nice mean: # Bring up a kind cluster
 	$(MAKE) registry
 	$(MAKE) use-$@
 	env PET=$@ $(MAKE) extras-$@
-	$(MAKE) site
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
@@ -97,7 +96,7 @@ clean-%:
 
 wait:
 	sleep 5
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u)" != "Running true" ]]; do \
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false')" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
 cilium:
