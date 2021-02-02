@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: hubble.katt.defn.jp
+  - host: hubble.ryokan.defn.jp
     http:
       paths:
       - path: /

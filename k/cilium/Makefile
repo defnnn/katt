@@ -8,12 +8,12 @@ menu:
 vendor: # Add cilium repo
 	helm repo add cilium https://helm.cilium.io --force-update
 	helm repo update
-	$(MAKE) cilium.yaml connectivity-check.yaml
+	$(MAKE) vendor.yaml connectivity-check.yaml
 
-.PHONY: cilium.yaml connectivity-check.yaml
+.PHONY: vendor.yaml connectivity-check.yaml
 
-cilium.yaml: # Generate cilium.yaml
-	rm -f cilium.yaml
+vendor.yaml: # Generate vendor.yaml
+	rm -f vendor.yaml
 	helm template cilium/cilium --version $(VERSION) \
 		--namespace kube-system \
 		--set global.kubeProxyReplacement=partial \
@@ -29,7 +29,7 @@ cilium.yaml: # Generate cilium.yaml
 		--set global.hubble.relay.enabled=true \
 		--set global.hubble.ui.enabled=true \
 		--set global.hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,http}" \
-		> cilium.yaml
+		> vendor.yaml
 
 connectivity-check.yaml: # Get cilium connectivity check manifest
 	rm -f connectivity-check.yaml

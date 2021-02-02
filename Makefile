@@ -2,8 +2,6 @@ SHELL := /bin/bash
 
 .PHONY: cutout
 
-network := cilium
-
 PET := katt
 
 first = $(word 1, $(subst -, ,$@))
@@ -39,6 +37,8 @@ one:
 	$(MAKE) katt
 	$(MAKE) site
 	$(MAKE) up
+
+socat:
 	docker exec katt-control-plane apt-get update
 	docker exec katt-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
 	docker exec katt-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
@@ -68,10 +68,11 @@ katt nice mean: # Bring up a kind cluster
 	$(k) cluster-info
 
 extras-%:
-	$(MAKE) $(network) wait
+	$(MAKE) cilium wait
 	$(MAKE) cert-manager wait
 	$(MAKE) traefik wait
 	$(MAKE) metal wait
+	$(MAKE) hubble wait
 
 use-%:
 	$(k) config use-context kind-$(second)

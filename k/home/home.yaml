@@ -32,9 +32,8 @@ spec:
 
       containers:
       - name: home
-        image: "defn/home:jojomomojo"
+        image: "defn/home:home"
         imagePullPolicy: Always
-        command: ["/service", "sshd"]
         ports:
         - containerPort: 2222
         env:
@@ -60,7 +59,7 @@ metadata:
     app: home
   annotations:
     metallb.universe.tf/address-pool: general
-    external-dns.alpha.kubernetes.io/hostname: home.katt.defn.jp
+    external-dns.alpha.kubernetes.io/hostname: home.ryokan.defn.jp
 spec:
   type: LoadBalancer
   selector:
