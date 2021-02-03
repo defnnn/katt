@@ -198,6 +198,7 @@ items:
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: katt
       annotations:
+        metallb.universe.tf/address-pool: traefik-proxy
     spec:
       type: LoadBalancer
       selector:

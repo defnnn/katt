@@ -10,8 +10,6 @@ networking: {
 	disableDefaultCNI: true
 	podSubnet:         _networking.podSubnet
 	serviceSubnet:     _networking.serviceSubnet
-	apiServerAddress:  "\(_apiAddress)"
-	apiServerPort:     6443
 }
 
 nodes: [
@@ -44,16 +42,6 @@ nodes: [
 			image: "kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab"
 
 			extraPortMappings: [
-				{
-					containerPort: 8000
-					hostPort:      80
-					protocol:      "TCP"
-				},
-				{
-					containerPort: 8443
-					hostPort:      443
-					protocol:      "TCP"
-				},
 			]
 
 			extraMounts: [
@@ -101,8 +89,6 @@ kubeadmConfigPatches: [
 		  certSANs:
 		    - localhost
 		    - 127.0.0.1
-		    - \(_apiAddress)
-		    - \(_apiHostname)
 		    - kubernetes
 		    - kubernetes.default.svc
 		    - kubernetes.default.svc.cluster.local
