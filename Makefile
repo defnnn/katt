@@ -35,9 +35,9 @@ zero:
 one:
 	$(MAKE) setup
 	$(MAKE) katt
-	$(MAKE) site
 	$(MAKE) vpn
 	$(MAKE) up
+	$(MAKE) site
 
 socat:
 	docker exec katt-control-plane apt-get update

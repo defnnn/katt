@@ -8,7 +8,7 @@ menu:
 vendor: # Add cilium repo
 	helm repo add cilium https://helm.cilium.io --force-update
 	helm repo update
-	$(MAKE) vendor.yaml connectivity-check.yaml
+	$(MAKE) vendor.yaml
 
 .PHONY: vendor.yaml connectivity-check.yaml
 
@@ -30,8 +30,3 @@ vendor.yaml: # Generate vendor.yaml
 		--set global.hubble.ui.enabled=true \
 		--set global.hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,http}" \
 		> vendor.yaml
-
-connectivity-check.yaml: # Get cilium connectivity check manifest
-	rm -f connectivity-check.yaml
-	curl -sSL -o connectivity-check.yaml \
-		https://raw.githubusercontent.com/cilium/cilium/$(VERSION)/examples/kubernetes/connectivity-check/connectivity-check.yaml
