@@ -66,8 +66,16 @@ nodes: [
 					containerPath: "/var/run/docker.sock"
 				},
 				{
-					hostPath:      "/tmp/mnt"
+					hostPath:      "/mnt/katt"
 					containerPath: "/mnt"
+				},
+				{
+					hostPath:      "/mnt/katt-zerotier"
+					containerPath: "/var/lib/zerotier-one"
+				},
+				{
+					hostPath:      "/mnt/katt-tailscale"
+					containerPath: "/var/lib/tailscale"
 				},
 			]
 		}

@@ -36,7 +36,7 @@ one:
 	$(MAKE) setup
 	$(MAKE) katt
 	$(MAKE) site
-	$(MAKE) zt
+	$(MAKE) vpn
 	$(MAKE) up
 
 socat:
@@ -45,10 +45,14 @@ socat:
 	docker exec katt-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
 	docker exec katt-control-plane socat tcp4-listen:8000,reuseaddr,fork TCP:127.0.0.1:80 &
 
-zt:
+vpn:
 	docker exec katt-control-plane apt-get update
 	docker exec katt-control-plane apt-get install -y gnupg2
-	curl -s https://install.zerotier.com | docker exec -i katt-control-plane bash
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i katt-control-plane apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i katt-control-plane tee /etc/apt/sources.list.d/tailscale.list
+	curl -fsSL https://install.zerotier.com | docker exec -i katt-control-plane bash
+	docker exec -i katt-control-plane apt-get install -y tailscale || true
+	docker exec -i katt-control-plane systemctl start tailscaled
 
 setup: # Setup requirements for katt
 	asdf install
