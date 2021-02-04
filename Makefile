@@ -151,7 +151,7 @@ home:
 	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
 site:
-	kustomize build k/site | $(k) apply -f -
+	kustomize build k/site | linkerd inject - | $(k) apply -f -
 
 zerotier:
 	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
