@@ -1,5 +1,3 @@
-_domain: "katt.defn.jp"
-
 _workers: [0]
 
 _networking: {

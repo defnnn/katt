@@ -72,13 +72,14 @@ katt nice mean: # Bring up a kind cluster
 	cue export --out yaml c/site.cue c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
 	$(MAKE) registry
 	$(MAKE) use-$@
+	$(MAKE) cilium wait
+	$(MAKE) cert-manager wait
+	$(MAKE) linkerd wait
 	env PET=$@ $(MAKE) extras-$@
 	$(k) get --all-namespaces pods
 	$(k) cluster-info
 
 extras-%:
-	$(MAKE) cilium wait
-	$(MAKE) cert-manager wait
 	$(MAKE) traefik wait
 	$(MAKE) metal wait
 	$(MAKE) hubble wait
@@ -104,14 +105,25 @@ wait:
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
 cilium:
-	kustomize build k/cilium | $(ks) apply -f -
+	helm install cilium cilium/cilium --version 1.9.3 \
+		--namespace kube-system \
+		--set nodeinit.enabled=true \
+		--set kubeProxyReplacement=partial \
+		--set hostServices.enabled=false \
+		--set externalIPs.enabled=true \
+		--set nodePort.enabled=true \
+		--set hostPort.enabled=true \
+		--set bpf.masquerade=false \
+		--set image.pullPolicy=IfNotPresent \
+		--set ipam.mode=kubernetes
 	while $(ks) get nodes | grep NotReady; do \
 		sleep 5; done
 
 linkerd:
 	linkerd check --pre
-	kustomize build k/linkerd | $(k) apply -f -
+	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
+	$(kld) apply -f k/linkerd/ingress.yaml
 
 metal:
 	cue export --out yaml c/site.cue c/$(PET).cue c/metal.cue > k/metal/config/config
