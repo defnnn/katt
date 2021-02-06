@@ -8,11 +8,6 @@
 	addresses: [...]
 	addresses: [_address_pools["traefik-proxy"]]
 }, {
-	name:     "kuma-ingress"
-	protocol: "layer2"
-	addresses: [...]
-	addresses: [_address_pools["kuma-ingress"]]
-}, {
 	name:     "pihole"
 	protocol: "layer2"
 	addresses: [...]

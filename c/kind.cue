@@ -54,15 +54,15 @@ nodes: [
 					containerPath: "/var/run/docker.sock"
 				},
 				{
-					hostPath:      "/mnt/katt"
+					hostPath:      "/mnt/\(_pet)"
 					containerPath: "/mnt"
 				},
 				{
-					hostPath:      "/mnt/katt-zerotier"
+					hostPath:      "/mnt/\(_pet)-zerotier"
 					containerPath: "/var/lib/zerotier-one"
 				},
 				{
-					hostPath:      "/mnt/katt-tailscale"
+					hostPath:      "/mnt/\(_pet)-tailscale"
 					containerPath: "/var/lib/tailscale"
 				},
 			]

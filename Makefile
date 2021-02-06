@@ -35,27 +35,33 @@ zero:
 one:
 	$(MAKE) setup
 	$(MAKE) katt
-	$(MAKE) vpn
-	$(MAKE) up
-	$(MAKE) site
+
+two:
+	$(MAKE) setup
+	$(MAKE) catt
+
+both:
+	$(MAKE) setup
+	$(MAKE) -j 2 katt catt
 
 socat:
-	docker exec katt-control-plane apt-get update
-	docker exec katt-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
-	docker exec katt-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
-	docker exec katt-control-plane socat tcp4-listen:8000,reuseaddr,fork TCP:127.0.0.1:80 &
+	docker exec $(PET)-control-plane apt-get update
+	docker exec $(PET)-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
+	docker exec $(PET)-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
+	docker exec $(PET)-control-plane socat tcp4-listen:8000,reuseaddr,fork TCP:127.0.0.1:80 &
 
 vpn:
-	docker exec katt-control-plane apt-get update
-	docker exec katt-control-plane apt-get install -y gnupg2
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i katt-control-plane apt-key add -
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i katt-control-plane tee /etc/apt/sources.list.d/tailscale.list
-	curl -fsSL https://install.zerotier.com | docker exec -i katt-control-plane bash
-	docker exec -i katt-control-plane apt-get install -y tailscale || true
-	docker exec -i katt-control-plane systemctl start tailscaled
+	docker exec $(PET)-control-plane apt-get update
+	docker exec $(PET)-control-plane apt-get install -y gnupg2
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i $(PET)-control-plane apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i $(PET)-control-plane tee /etc/apt/sources.list.d/tailscale.list
+	curl -fsSL https://install.zerotier.com | docker exec -i $(PET)-control-plane bash
+	docker exec -i $(PET)-control-plane apt-get install -y tailscale || true
+	docker exec -i $(PET)-control-plane systemctl start tailscaled
 
-setup: # Setup requirements for katt
+setup: # Setup install, network requirements
 	asdf install
+	brew install linkerd
 	$(MAKE) network
 
 network:
@@ -67,10 +73,9 @@ network:
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
 
-katt nice mean: # Bring up a kind cluster
+katt catt: # Bring up a kind cluster
 	$(MAKE) clean-$@
 	cue export --out yaml c/site.cue c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
-	$(MAKE) registry
 	$(MAKE) use-$@
 	$(MAKE) cilium wait
 	$(MAKE) cert-manager wait
@@ -82,7 +87,10 @@ katt nice mean: # Bring up a kind cluster
 extras-%:
 	$(MAKE) traefik wait
 	$(MAKE) metal wait
+	$(MAKE) kruise wait
 	$(MAKE) hubble wait
+	$(MAKE) vpn wait
+	$(MAKE) up
 
 use-%:
 	$(k) config use-context kind-$(second)
@@ -90,10 +98,9 @@ use-%:
 
 clean: # Teardown
 	$(MAKE) clean-katt
-	$(MAKE) clean-nice
-	$(MAKE) clean-mean
+	$(MAKE) clean-catt
 	$(MAKE) down
-	docker network rm kind
+	docker network rm kind || true
 	sudo systemctl restart docker
 
 clean-%:
@@ -105,6 +112,8 @@ wait:
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
 cilium:
+	helm repo add cilium https://helm.cilium.io/ --force-update
+	helm repo update
 	helm install cilium cilium/cilium --version 1.9.3 \
 		--namespace kube-system \
 		--set nodeinit.enabled=true \
@@ -128,6 +137,9 @@ linkerd:
 metal:
 	cue export --out yaml c/site.cue c/$(PET).cue c/metal.cue > k/metal/config/config
 	kustomize build k/metal | $(km) apply -f -
+
+kruise:
+	kustomize build k/kruise | $(k) apply -f -
 
 traefik:
 	cue export --out yaml c/site.cue c/$(PET).cue c/traefik.cue > k/traefik/config/traefik.yaml
@@ -178,29 +190,3 @@ logs:
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
-
-kong:
-	$(k) apply -f https://bit.ly/k4k8s
-
-knative:
-	kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-crds.yaml
-	kubectl apply --filename https://github.com/knative/serving/releases/download/v0.16.0/serving-core.yaml
-	kubectl patch configmap/config-network --namespace knative-serving --type merge --patch '{"data":{"ingress.class":"kong"}}'
-	kubectl patch configmap/config-domain --namespace knative-serving --type merge --patch '{"data":{"$(PET).defn.jp":""}}'
-
-external-dns:
-	kustomize build --enable_alpha_plugins k/external-dns | $(k) apply -f -
-
-kuma:
-	kumactl install control-plane --mode=remote --zone=$(PET) --kds-global-address grpcs://192.168.195.116:5685 | $(k) apply -f -
-	$(MAKE) wait
-	kumactl install dns | $(k) apply -f -
-	sleep 10; kumactl install ingress | $(k) apply -f - || (sleep 30; kumactl install ingress | $(k) apply -f -)
-	$(MAKE) wait
-	$(MAKE) kuma-inner
-
-kuma-inner:
-	echo "---" | yq -y --arg pet "$(PET)" --arg address "$(shell pass katt/$(PET)/ip)" \
-	'{type: "Zone", name: $$pet, ingress: { address: "\($$address):10001" }}' \
-		| kumactl apply -f -
-
