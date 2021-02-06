@@ -1,17 +1,8 @@
 "address-pools": [{
-	name:     "traefik"
-	protocol: "layer2"
-	addresses: [_address_pools["traefik"]]
-}, {
 	name:     "traefik-proxy"
 	protocol: "layer2"
 	addresses: [...]
 	addresses: [_address_pools["traefik-proxy"]]
-}, {
-	name:     "pihole"
-	protocol: "layer2"
-	addresses: [...]
-	addresses: [_address_pools["pihole"]]
 }, {
 	name:     "general"
 	protocol: "layer2"

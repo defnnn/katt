@@ -4,8 +4,3 @@ services:
   registry:
     image: registry:2
     restart: always
-
-networks:
-  default:
-    external:
-      name: kind

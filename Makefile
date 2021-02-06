@@ -32,27 +32,9 @@ tilt:
 zero:
 	$(MAKE) clean
 
-one:
-	$(MAKE) setup
-	$(MAKE) katt
-
-two:
-	$(MAKE) setup
-	$(MAKE) catt
-
-both:
-	$(MAKE) setup
-	$(MAKE) -j 2 katt catt
-
-socat:
-	docker exec $(PET)-control-plane apt-get update
-	docker exec $(PET)-control-plane apt-get install -y dnsutils lsof net-tools iputils-{ping,arping} curl socat
-	docker exec $(PET)-control-plane socat tcp4-listen:8443,reuseaddr,fork TCP:127.0.0.1:443 &
-	docker exec $(PET)-control-plane socat tcp4-listen:8000,reuseaddr,fork TCP:127.0.0.1:80 &
-
 vpn:
 	docker exec $(PET)-control-plane apt-get update
-	docker exec $(PET)-control-plane apt-get install -y gnupg2
+	docker exec $(PET)-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i $(PET)-control-plane apt-key add -
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i $(PET)-control-plane tee /etc/apt/sources.list.d/tailscale.list
 	curl -fsSL https://install.zerotier.com | docker exec -i $(PET)-control-plane bash
@@ -62,45 +44,46 @@ vpn:
 setup: # Setup install, network requirements
 	asdf install
 	brew install linkerd
-	$(MAKE) network
 
-network:
+network-katt:
 	sudo mount bpffs /sys/fs/bpf -t bpf
-	if test -z "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
+	if test -z "$$(docker network inspect kind-katt 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
 		docker network create --subnet 172.25.1.0/24 --ip-range 172.25.1.0/24 \
 			-o com.docker.network.bridge.enable_ip_masquerade=true \
 			-o com.docker.network.bridge.enable_icc=true \
-			-o com.docker.network.bridge.name=kind0 \
-			kind; fi
+			-o com.docker.network.bridge.name=kind-katt0 \
+			kind-katt; fi
+
+network-catt:
+	sudo mount bpffs /sys/fs/bpf -t bpf
+	if test -z "$$(docker network inspect kind-catt 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
+		docker network create --subnet 172.26.1.0/24 --ip-range 172.26.1.0/24 \
+			-o com.docker.network.bridge.enable_ip_masquerade=true \
+			-o com.docker.network.bridge.enable_icc=true \
+			-o com.docker.network.bridge.name=kind-catt0 \
+			kind-catt; fi
 
 katt catt: # Bring up a kind cluster
-	$(MAKE) clean-$@
-	cue export --out yaml c/site.cue c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
-	$(MAKE) use-$@
+	$(MAKE) network-$@
+	cue export --out yaml c/site.cue c/$@.cue c/kind.cue | env KIND_EXPERIMENTAL_DOCKER_NETWORK=katt-$@ kind create cluster --name $@ --config -
+	$(k) config use-context kind-$@
+	$(MAKE) PET=$@ vpn wait
 	$(MAKE) cilium wait
 	$(MAKE) cert-manager wait
 	$(MAKE) linkerd wait
-	env PET=$@ $(MAKE) extras-$@
-	$(k) get --all-namespaces pods
-	$(k) cluster-info
-
-extras-%:
-	$(MAKE) traefik wait
-	$(MAKE) metal wait
+	$(MAKE) PET=$@ traefik wait
+	$(MAKE) PET=$@ metal wait
 	$(MAKE) kruise wait
 	$(MAKE) hubble wait
-	$(MAKE) vpn wait
-	$(MAKE) up
-
-use-%:
-	$(k) config use-context kind-$(second)
-	$(k) get nodes
+	$(MAKE) site
+	$(kt) apply -f k/site/$@.yaml
 
 clean: # Teardown
 	$(MAKE) clean-katt
 	$(MAKE) clean-catt
 	$(MAKE) down
-	docker network rm kind || true
+	docker network rm kind-katt || true
+	docker network rm kind-catt || true
 	sudo systemctl restart docker
 
 clean-%:
@@ -164,9 +147,6 @@ home:
 
 site:
 	kustomize build k/site | linkerd inject - | $(k) apply -f -
-
-zerotier:
-	kustomize build --enable_alpha_plugins k/zerotier/$(PET) | $(k) apply -f -
 
 up: # Bring up homd
 	docker-compose up -d --remove-orphans
