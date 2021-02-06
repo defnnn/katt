@@ -55,10 +55,10 @@ network:
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
 
-katt catt: # Bring up a kind cluster
-	$(MAKE) network-$@
-	cue export --out yaml c/site.cue c/$@.cue c/kind.cue | kind create cluster --name $@ --config -
-	$(k) config use-context kind-$@
+katt: # Bring up a kind cluster
+	$(MAKE) network
+	cue export --out yaml c/site.cue c/katt.cue c/kind.cue | kind create cluster --name katt --config -
+	$(k) config use-context kind-katt
 	$(MAKE) vpn wait
 	$(MAKE) cilium wait
 	$(MAKE) metal wait
@@ -68,7 +68,7 @@ katt catt: # Bring up a kind cluster
 	$(MAKE) kruise wait
 	$(MAKE) hubble wait
 	$(MAKE) site
-	$(k) apply -f k/site/$@.yaml
+	$(k) apply -f k/site/katt.yaml
 
 clean: # Teardown
 	$(MAKE) clean-katt
