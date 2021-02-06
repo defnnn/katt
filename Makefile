@@ -30,6 +30,9 @@ tilt:
 zero:
 	$(MAKE) clean
 
+one:
+	$(MAKE) katt
+
 vpn:
 	docker exec katt-control-plane apt-get update
 	docker exec katt-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
