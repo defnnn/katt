@@ -48,8 +48,8 @@ setup: # Setup install, network requirements
 
 network:
 	sudo mount bpffs /sys/fs/bpf -t bpf
-	if test -z "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
-		docker network create --subnet 172.25.1.0/24 --ip-range 172.25.1.0/24 \
+	. .env && if test -z "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
+		docker network create --subnet $${KATT_KIND_CIDR} --ip-range $${KATT_KIND_CIDR} \
 			-o com.docker.network.bridge.enable_ip_masquerade=true \
 			-o com.docker.network.bridge.enable_icc=true \
 			-o com.docker.network.bridge.name=kind0 \
