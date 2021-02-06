@@ -76,7 +76,7 @@ katt catt: # Bring up a kind cluster
 	$(MAKE) kruise wait
 	$(MAKE) hubble wait
 	$(MAKE) site
-	$(kt) apply -f k/site/$@.yaml
+	$(k) apply -f k/site/$@.yaml
 
 clean: # Teardown
 	$(MAKE) clean-katt
