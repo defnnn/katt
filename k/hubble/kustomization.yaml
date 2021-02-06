@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   - vendor.yaml
-  - site.yaml
+  - ingress.yaml

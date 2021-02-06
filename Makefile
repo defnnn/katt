@@ -63,7 +63,7 @@ katt: # Bring up a kind cluster
 	cue export --out yaml c/site.cue c/katt.cue c/kind.cue | kind create cluster --name katt --config -
 	$(MAKE) vpn
 	$(MAKE) cilium wait
-	$(MAKE) linkerd wait
+	$(MAKE) linkerd-install linkerd  wait
 	$(MAKE) metal cert-manager traefik kruise hubble wait
 	$(MAKE) site wait
 
@@ -99,10 +99,12 @@ cilium:
 	while $(ks) get nodes | grep NotReady; do \
 		sleep 5; done
 
-linkerd:
+linkerd-install:
 	linkerd check --pre
 	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
+
+linkerd:
 	$(kld) apply -f k/linkerd/ingress.yaml
 
 metal:
