@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+function main {
+  kubectl --context kind-katt "$@"
+}
+
+main "$@"
