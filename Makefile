@@ -64,14 +64,10 @@ katt: # Bring up a kind cluster
 	$(k) config use-context kind-katt
 	$(MAKE) vpn wait
 	$(MAKE) cilium wait
-	$(MAKE) metal wait
-	$(MAKE) cert-manager wait
-	$(MAKE) linkerd wait
-	$(MAKE) traefik wait
-	$(MAKE) kruise wait
-	$(MAKE) hubble wait
-	$(MAKE) site
-	$(k) apply -f k/site/katt.yaml
+	$(MAKE) linkerd
+	$(MAKE) metal cert-manager traefik wait
+	$(MAKE) kruise hubble wait
+	$(MAKE) site wait
 
 clean: # Teardown
 	$(MAKE) clean-katt
