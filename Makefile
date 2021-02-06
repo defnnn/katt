@@ -42,9 +42,12 @@ vpn:
 	docker exec -i katt-control-plane apt-get install -y tailscale || true
 	docker exec -i katt-control-plane systemctl start tailscaled
 
-setup: # Setup install, network requirements
+setup: c/site.cue .env # Setup install, network requirements
 	asdf install
 	brew install linkerd
+
+c/site.cue .env:
+	cp $@.env $@
 
 network:
 	sudo mount bpffs /sys/fs/bpf -t bpf
