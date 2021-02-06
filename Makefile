@@ -61,12 +61,10 @@ network:
 katt: # Bring up a kind cluster
 	$(MAKE) network
 	cue export --out yaml c/site.cue c/katt.cue c/kind.cue | kind create cluster --name katt --config -
-	$(k) config use-context kind-katt
-	$(MAKE) vpn wait
+	$(MAKE) vpn
 	$(MAKE) cilium wait
-	$(MAKE) linkerd
-	$(MAKE) metal cert-manager traefik wait
-	$(MAKE) kruise hubble wait
+	$(MAKE) linkerd wait
+	$(MAKE) metal cert-manager traefik kruise hubble wait
 	$(MAKE) site wait
 
 clean: # Teardown
