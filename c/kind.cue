@@ -2,7 +2,7 @@ _workers: [...int] | *[0]
 
 _pet: "katt"
 
-_apiServerAddress: "0.0.0.0"
+_apiServerAddress: string
 _apiServerPort:    6443
 
 kind:       "Cluster"
@@ -100,6 +100,7 @@ kubeadmConfigPatches: [
 		    - kubernetes.default.svc
 		    - kubernetes.default.svc.cluster.local
 		    - kind
+		    - \(_apiServerAddress)
 		    - \(_petHostname)
 		""",
 ]

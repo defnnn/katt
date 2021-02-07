@@ -49,6 +49,9 @@ setup: c/site.cue .env # Setup install, network requirements
 c/site.cue .env:
 	cp $@.env $@
 
+c/host.cue:
+	echo "_apiServerAddress: \"$$(ifconfig eth0 | grep 'inet ' | awk '{print $$2}')\"" > $@
+
 network:
 	sudo mount bpffs /sys/fs/bpf -t bpf
 	. .env && if test -z "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
@@ -60,7 +63,7 @@ network:
 
 katt: # Bring up a kind cluster
 	$(MAKE) network
-	cue export --out yaml c/site.cue c/kind.cue | kind create cluster --name katt --config -
+	cue export --out yaml c/host.cue c/site.cue c/kind.cue | kind create cluster --name katt --config -
 	$(MAKE) vpn
 	$(MAKE) cilium wait
 	$(MAKE) linkerd  wait
@@ -105,14 +108,14 @@ linkerd:
 	linkerd check
 
 metal:
-	cue export --out yaml c/site.cue c/metal.cue > k/metal/config/config
+	cue export --out yaml c/host.cue c/site.cue c/metal.cue > k/metal/config/config
 	kustomize build k/metal | $(km) apply -f -
 
 kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
 traefik:
-	cue export --out yaml c/site.cue c/katt.cue c/traefik.cue > k/traefik/config/traefik.yaml
+	cue export --out yaml c/host.cue c/site.cue c/katt.cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
