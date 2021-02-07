@@ -1,8 +1,18 @@
+---
+gloo:
+  gateway:
+    enabled: true
+  ingress:
+    enabled: true
+  settings:
+    integrations:
+      knative:
+        enabled: false
 gateway:
+  enabled: true
+ingress:
   enabled: true
 settings:
   integrations:
-    ingress:
-      enabled: false
     knative:
       enabled: false
