@@ -117,7 +117,7 @@ kruise:
 	kustomize build k/traefik | $(kt) apply -f -
 
 gloo:
-	cat k/gloo/install.yaml | glooctl install gateway --values -
+	glooctl install gateway --with-admin-console
 	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
 
 external-secrets:
