@@ -24,10 +24,6 @@ menu:
 test: # Test manifests with kubeval
 	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
 
-setup: # Setup install, network requirements
-	asdf install
-	brew install linkerd
-
 zero:
 	$(MAKE) PET=$(PET) clean
 	$(MAKE) PET=$(PET) network
