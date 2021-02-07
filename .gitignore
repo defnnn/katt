@@ -1,7 +1,7 @@
 data
 public
 cutout
-.env
+.env*
 docker-compose.override.yml
 *-token
 acme.json
