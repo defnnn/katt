@@ -35,6 +35,12 @@ ryokan tatami:
 	$(MAKE) PET=$@ zero
 	echo "_apiServerAddress: \"$$(host $@.defn.jp | awk '{print $$NF}')\"" > c/.$@.cue
 	cue export --out yaml c/.$@.cue c/$@.cue c/kind.cue | ssh $@ ./env.sh kind create cluster --config -
+	$(MAKE) $@-config
+
+%-config:
+	mkdir -p ~/.kube
+	rsync -ia $(first):.kube/config ~/.kube/$(first).conf
+	env KUBECONFIG=$$HOME/.kube/$(first).conf k cluster-info
 
 vpn:
 	docker exec kind-control-plane apt-get update
