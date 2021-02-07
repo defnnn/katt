@@ -121,6 +121,7 @@ gloo:
 	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
 	curl -sSL https://raw.githubusercontent.com/solo-io/gloo/v1.2.9/example/petstore/petstore.yaml | linkerd inject - | $(k) apply -f -
 	glooctl add route --path-exact /all-pets --dest-name default-petstore-8080 --prefix-rewrite /api/pets
+	glooctl install knative || true
 
 external-secrets:
 	$(kx) apply -f k/external-secrets/crds
