@@ -9,12 +9,11 @@ k := kubectl
 ks := kubectl -n kube-system
 km := kubectl -n metallb-system
 kt := kubectl -n traefik
+kg := kubectl -n gloo-system
 kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
 kld := kubectl -n linkerd
 
-kk := kubectl -n kuma-system
-kg := kubectl -n kong
 kv := kubectl -n knative-serving
 kd := kubectl -n external-dns
 
@@ -73,8 +72,9 @@ ryokan tatami:
 
 katt: # Install all the goodies
 	$(MAKE) cilium wait
-	$(MAKE) linkerd  wait
-	$(MAKE) $(PET)-metal $(PET)-traefik cert-manager kruise hubble wait
+	$(MAKE) linkerd wait
+	$(MAKE) $(PET)-metal
+	$(MAKE) gloo cert-manager kruise hubble wait
 	$(MAKE) site wait
 
 wait:
@@ -115,6 +115,10 @@ kruise:
 	cue export --out yaml c/.$(first).cue c/$(first).cue c/kind.cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
+
+gloo:
+	cat k/gloo/install.yaml | glooctl install gateway --values -
+	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
 
 external-secrets:
 	$(kx) apply -f k/external-secrets/crds
