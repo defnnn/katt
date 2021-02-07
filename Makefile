@@ -24,27 +24,18 @@ menu:
 test: # Test manifests with kubeval
 	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
 
-tilt:
-	tilt up --context kind-katt
+setup: # Setup install, network requirements
+	asdf install
+	brew install linkerd
 
 zero:
 	$(MAKE) PET=$(PET) clean
 	$(MAKE) PET=$(PET) network
 
-ryokan tatami:
-	$(MAKE) PET=$@ zero
-	echo "_apiServerAddress: \"$$(host $@.defn.jp | awk '{print $$NF}')\"" > c/.$@.cue
-	cue export --out yaml c/.$@.cue c/$@.cue c/kind.cue | ssh $@ ./env.sh kind create cluster --config -
-	$(MAKE) $@-config
-	$(MAKE) PET=$@ vpn
-
-%-config:
-	mkdir -p ~/.kube
-	rsync -ia $(first):.kube/config ~/.kube/$(first).conf
-	env KUBECONFIG=$$HOME/.kube/$(first).conf k cluster-info
-
-%-katt:
-	env KUBECONFIG=$$HOME/.kube/$(first).conf $(MAKE) katt
+clean: # Teardown
+	-ssh $(PET) ./env.sh kind delete cluster
+	ssh $(PET) docker network rm kind || true
+	ssh $(PET) sudo systemctl restart docker
 
 vpn:
 	ssh $(PET) docker exec kind-control-plane apt-get update
@@ -55,10 +46,6 @@ vpn:
 	ssh $(PET) docker exec -i kind-control-plane apt-get install -y tailscale || true
 	ssh $(PET) docker exec -i kind-control-plane systemctl start tailscaled
 
-setup: # Setup install, network requirements
-	asdf install
-	brew install linkerd
-
 network:
 	ssh $(PET) sudo mount bpffs /sys/fs/bpf -t bpf
 	. .env.$(PET) && if test -z "$$(ssh $(PET) docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
@@ -68,16 +55,31 @@ network:
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
 
+ryokan tatami:
+	$(MAKE) $@-kind
+	$(MAKE) $@-config
+	$(MAKE) $@-katt
+
+%-kind:
+	$(MAKE) PET=$(first) zero
+	echo "_apiServerAddress: \"$$(host $(first).defn.jp | awk '{print $$NF}')\"" > c/.$(first).cue
+	cue export --out yaml c/.$(first).cue c/$(first).cue c/kind.cue | ssh $(first) ./env.sh kind create cluster --config -
+	$(MAKE) $(first)-config
+	$(MAKE) PET=$(first) vpn
+
+%-config:
+	mkdir -p ~/.kube
+	rsync -ia $(first):.kube/config ~/.kube/$(first).conf
+	env KUBECONFIG=$$HOME/.kube/$(first).conf k cluster-info
+
+%-katt:
+	env KUBECONFIG=$$HOME/.kube/$(first).conf $(MAKE) PET=$(first) katt
+
 katt: # Install all the goodies
 	$(MAKE) cilium wait
 	$(MAKE) linkerd  wait
-	$(MAKE) metal cert-manager traefik kruise hubble wait
+	$(MAKE) $(PET)-metal $(PET)-traefik cert-manager kruise hubble wait
 	$(MAKE) site wait
-
-clean: # Teardown
-	-ssh $(PET) ./env.sh kind delete cluster
-	ssh $(PET) docker network rm kind || true
-	ssh $(PET) sudo systemctl restart docker
 
 wait:
 	sleep 5
@@ -106,15 +108,15 @@ linkerd:
 	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
 
-metal:
-	cue export --out yaml c/site.cue c/metal.cue > k/metal/config/config
-	kustomize build k/metal | $(km) apply -f -
-
 kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
-traefik:
-	cue export --out yaml c/site.cue c/traefik.cue > k/traefik/config/traefik.yaml
+%-metal:
+	cue export --out yaml c/.$(first).cue c/$(first).cue c/metal.cue > k/metal/config/config
+	kustomize build k/metal | $(km) apply -f -
+
+%-traefik:
+	cue export --out yaml c/.$(first).cue c/$(first).cue c/kind.cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
