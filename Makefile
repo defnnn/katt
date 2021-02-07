@@ -28,11 +28,13 @@ tilt:
 	tilt up --context kind-katt
 
 zero:
-	$(MAKE) clean
-	$(MAKE) network
+	$(MAKE) PET=$(PET) clean
+	$(MAKE) PET=$(PET) network
 
-one:
-	$(MAKE) katt
+ryokan tatami:
+	$(MAKE) PET=$@ zero
+	echo "_apiServerAddress: \"$$(host $@.defn.jp | awk '{print $$NF}')\"" > c/.$@.cue
+	cue export --out yaml c/.$@.cue c/$@.cue c/kind.cue | ssh $@ ./env.sh kind create cluster --config -
 
 vpn:
 	docker exec kind-control-plane apt-get update
@@ -48,16 +50,13 @@ setup: # Setup install, network requirements
 	brew install linkerd
 
 network:
-	sudo mount bpffs /sys/fs/bpf -t bpf
-	. /mnt/katt-site/.env && if test -z "$$(docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
-		docker network create --subnet $${KATT_KIND_CIDR} --ip-range $${KATT_KIND_CIDR} \
+	ssh $(PET) sudo mount bpffs /sys/fs/bpf -t bpf
+	. .env.$(PET) && if test -z "$$(ssh $(PET) docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
+		ssh $(PET) docker network create --subnet $${KATT_KIND_CIDR} --ip-range $${KATT_KIND_CIDR} \
 			-o com.docker.network.bridge.enable_ip_masquerade=true \
 			-o com.docker.network.bridge.enable_icc=true \
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
-
-ryokan tatami:
-	cue export --out yaml <(echo "_apiServerAddress: \"$$(ifconfig eth0 | grep 'inet ' | awk '{print $$2}')\"") c/$@.cue c/kind.cue | kind create cluster --config -
 
 katt: # Install all the goodies
 	$(MAKE) vpn
@@ -67,10 +66,9 @@ katt: # Install all the goodies
 	$(MAKE) site wait
 
 clean: # Teardown
-	-kind delete cluster
-	$(MAKE) down
-	docker network rm kind || true
-	sudo systemctl restart docker
+	-ssh $(PET) ./env.sh kind delete cluster
+	ssh $(PET) docker network rm kind || true
+	ssh $(PET) sudo systemctl restart docker
 
 wait:
 	sleep 5
