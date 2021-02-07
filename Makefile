@@ -74,7 +74,7 @@ katt: # Install all the goodies
 	$(MAKE) cilium wait
 	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-metal $(PET)-traefik
-	$(MAKE) gloo cert-manager kruise hubble wait
+	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
 wait:
@@ -103,6 +103,9 @@ linkerd:
 	linkerd check --pre
 	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
+
+flagger:
+	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -
 
 kruise:
 	kustomize build k/kruise | $(k) apply -f -
