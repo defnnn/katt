@@ -60,7 +60,7 @@ network:
 
 katt: # Bring up a kind cluster
 	$(MAKE) network
-	cue export --out yaml c/site.cue c/katt.cue c/kind.cue | kind create cluster --name katt --config -
+	cue export --out yaml c/site.cue c/kind.cue | kind create cluster --name katt --config -
 	$(MAKE) vpn
 	$(MAKE) cilium wait
 	$(MAKE) linkerd  wait
@@ -105,7 +105,7 @@ linkerd:
 	linkerd check
 
 metal:
-	cue export --out yaml c/site.cue c/katt.cue c/metal.cue > k/metal/config/config
+	cue export --out yaml c/site.cue c/metal.cue > k/metal/config/config
 	kustomize build k/metal | $(km) apply -f -
 
 kruise:

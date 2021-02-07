@@ -1,3 +1,5 @@
+_petHostname: "yourHostname"
+
 _networking: {
 	serviceSubnet: "10.32.0.0/17"
 	podSubnet:     "10.32.128.0/17"

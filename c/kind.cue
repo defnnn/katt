@@ -1,5 +1,10 @@
 _workers: [...int] | *[0]
 
+_pet: "katt"
+
+_apiServerAddress: "0.0.0.0"
+_apiServerPort:    6443
+
 kind:       "Cluster"
 apiVersion: "kind.x-k8s.io/v1alpha4"
 
@@ -10,6 +15,8 @@ networking: {
 	disableDefaultCNI: true
 	podSubnet:         _networking.podSubnet
 	serviceSubnet:     _networking.serviceSubnet
+	apiServerAddress:  _apiServerAddress
+	apiServerPort:     _apiServerPort
 }
 
 nodes: [
@@ -93,5 +100,6 @@ kubeadmConfigPatches: [
 		    - kubernetes.default.svc
 		    - kubernetes.default.svc.cluster.local
 		    - kind
+		    - \(_petHostname)
 		""",
 ]
