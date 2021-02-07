@@ -73,9 +73,9 @@ ryokan tatami:
 katt: # Install all the goodies
 	$(MAKE) cilium wait
 	$(MAKE) linkerd wait
-	$(MAKE) $(PET)-metal
+	$(MAKE) $(PET)-metal $(PET)-traefik
 	$(MAKE) gloo cert-manager kruise hubble wait
-	$(MAKE) site wait
+	$(MAKE) $(PET)-site wait
 
 wait:
 	sleep 5
@@ -112,13 +112,15 @@ kruise:
 	kustomize build k/metal | $(km) apply -f -
 
 %-traefik:
-	cue export --out yaml c/.$(first).cue c/$(first).cue c/kind.cue c/traefik.cue > k/traefik/config/traefik.yaml
+	cue export --out yaml c/.$(first).cue c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
 gloo:
 	glooctl install gateway --with-admin-console
 	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
+	curl -sSL https://raw.githubusercontent.com/solo-io/gloo/v1.2.9/example/petstore/petstore.yaml | linkerd inject - | $(k) apply -f -
+	glooctl add route --path-exact /all-pets --dest-name default-petstore-8080 --prefix-rewrite /api/pets
 
 external-secrets:
 	$(kx) apply -f k/external-secrets/crds
@@ -136,8 +138,9 @@ hubble:
 home:
 	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
 
-site:
+%-site:
 	kustomize build k/site | linkerd inject - | $(k) apply -f -
+	$(k) apply -f k/site/$(first).yaml
 
 up: # Bring up homd
 	docker-compose up -d --remove-orphans
