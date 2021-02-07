@@ -36,6 +36,7 @@ ryokan tatami:
 	echo "_apiServerAddress: \"$$(host $@.defn.jp | awk '{print $$NF}')\"" > c/.$@.cue
 	cue export --out yaml c/.$@.cue c/$@.cue c/kind.cue | ssh $@ ./env.sh kind create cluster --config -
 	$(MAKE) $@-config
+	$(MAKE) PET=$@ vpn
 
 %-config:
 	mkdir -p ~/.kube
@@ -43,13 +44,13 @@ ryokan tatami:
 	env KUBECONFIG=$$HOME/.kube/$(first).conf k cluster-info
 
 vpn:
-	docker exec kind-control-plane apt-get update
-	docker exec kind-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i kind-control-plane apt-key add -
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i kind-control-plane tee /etc/apt/sources.list.d/tailscale.list
-	curl -fsSL https://install.zerotier.com | docker exec -i kind-control-plane bash
-	docker exec -i kind-control-plane apt-get install -y tailscale || true
-	docker exec -i kind-control-plane systemctl start tailscaled
+	ssh $(PET) docker exec kind-control-plane apt-get update
+	ssh $(PET) docker exec kind-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | ssh $(PET) docker exec -i kind-control-plane apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | ssh $(PET) docker exec -i kind-control-plane tee /etc/apt/sources.list.d/tailscale.list
+	curl -fsSL https://install.zerotier.com | ssh $(PET) docker exec -i kind-control-plane bash
+	ssh $(PET) docker exec -i kind-control-plane apt-get install -y tailscale || true
+	ssh $(PET) docker exec -i kind-control-plane systemctl start tailscaled
 
 setup: # Setup install, network requirements
 	asdf install
