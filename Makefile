@@ -42,7 +42,7 @@ vpn:
 	docker exec -i katt-control-plane apt-get install -y tailscale || true
 	docker exec -i katt-control-plane systemctl start tailscaled
 
-setup: c/site.cue .env # Setup install, network requirements
+setup: c/site.cue c/host.cue .env # Setup install, network requirements
 	asdf install
 	brew install linkerd
 
@@ -115,7 +115,7 @@ kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
 traefik:
-	cue export --out yaml c/host.cue c/site.cue c/katt.cue c/traefik.cue > k/traefik/config/traefik.yaml
+	cue export --out yaml c/host.cue c/site.cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
