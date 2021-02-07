@@ -29,28 +29,26 @@ tilt:
 
 zero:
 	$(MAKE) clean
+	$(MAKE) network
 
 one:
 	$(MAKE) katt
 
 vpn:
-	docker exec katt-control-plane apt-get update
-	docker exec katt-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i katt-control-plane apt-key add -
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i katt-control-plane tee /etc/apt/sources.list.d/tailscale.list
-	curl -fsSL https://install.zerotier.com | docker exec -i katt-control-plane bash
-	docker exec -i katt-control-plane apt-get install -y tailscale || true
-	docker exec -i katt-control-plane systemctl start tailscaled
+	docker exec kind-control-plane apt-get update
+	docker exec kind-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | docker exec -i kind-control-plane apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | docker exec -i kind-control-plane tee /etc/apt/sources.list.d/tailscale.list
+	curl -fsSL https://install.zerotier.com | docker exec -i kind-control-plane bash
+	docker exec -i kind-control-plane apt-get install -y tailscale || true
+	docker exec -i kind-control-plane systemctl start tailscaled
 
-setup: c/site.cue c/host.cue .env # Setup install, network requirements
+setup: c/site.cue .env # Setup install, network requirements
 	asdf install
 	brew install linkerd
 
 c/site.cue .env:
 	cp $@.env $@
-
-c/host.cue:
-	echo "_apiServerAddress: \"$$(ifconfig eth0 | grep 'inet ' | awk '{print $$2}')\"" > $@
 
 network:
 	sudo mount bpffs /sys/fs/bpf -t bpf
@@ -61,9 +59,10 @@ network:
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
 
-katt: # Bring up a kind cluster
-	$(MAKE) network
-	cue export --out yaml c/host.cue c/site.cue c/kind.cue | kind create cluster --name katt --config -
+ryokan tatami:
+	cue export --out yaml <(echo "_apiServerAddress: \"$$(ifconfig eth0 | grep 'inet ' | awk '{print $$2}')\"") c/$@.cue c/kind.cue | kind create cluster --config -
+
+katt: # Install all the goodies
 	$(MAKE) vpn
 	$(MAKE) cilium wait
 	$(MAKE) linkerd  wait
@@ -71,14 +70,10 @@ katt: # Bring up a kind cluster
 	$(MAKE) site wait
 
 clean: # Teardown
-	$(MAKE) clean-katt
-	$(MAKE) clean-catt
+	-kind delete cluster
 	$(MAKE) down
 	docker network rm kind || true
 	sudo systemctl restart docker
-
-clean-%:
-	-kind delete cluster --name $(second)
 
 wait:
 	sleep 5
@@ -108,14 +103,14 @@ linkerd:
 	linkerd check
 
 metal:
-	cue export --out yaml c/host.cue c/site.cue c/metal.cue > k/metal/config/config
+	cue export --out yaml c/site.cue c/metal.cue > k/metal/config/config
 	kustomize build k/metal | $(km) apply -f -
 
 kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
 traefik:
-	cue export --out yaml c/host.cue c/site.cue c/traefik.cue > k/traefik/config/traefik.yaml
+	cue export --out yaml c/site.cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
 	kustomize build k/traefik | $(kt) apply -f -
 
