@@ -111,8 +111,7 @@ kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
 %-metal:
-	cue export --out yaml c/.$(first).cue c/$(first).cue c/metal.cue > k/metal/config/config
-	kustomize build k/metal | $(km) apply -f -
+	bin/metal $(first)
 
 %-traefik:
 	cue export --out yaml c/.$(first).cue c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
