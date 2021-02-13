@@ -99,12 +99,31 @@ cilium:
 	while $(ks) get nodes | grep NotReady; do \
 		sleep 5; done
 
+linkerd-trust-anchor:
+	step certificate create root.linkerd.cluster.local root.crt root.key \
+   	--profile root-ca --no-password --insecure
+	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
+		--profile intermediate-ca --not-after 8760h --no-password --insecure \
+		--ca root.crt --ca-key root.key
+
 linkerd:
 	linkerd check --pre
-	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+	linkerd install \
+		--identity-trust-anchors-file bundle.crt \
+		--identity-issuer-certificate-file issuer.crt \
+		--identity-issuer-key-file issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
 	linkerd multicluster install | $(k) apply -f -
 	linkerd check --multicluster
+
+link:
+	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
+
+link-check:
+	-ryokan linkerd check --multicluster
+	-tatami linkerd check --multicluster
+	ryokan linkerd multicluster gateways
+	tatami linkerd multicluster gateways
 
 flagger:
 	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -

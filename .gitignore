@@ -8,3 +8,5 @@ acme.json
 venv
 k/*/b
 etc/zerotier
+issuer.*
+root.*
