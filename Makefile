@@ -101,8 +101,8 @@ cilium:
 
 linkerd:
 	linkerd check --pre
-	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
-	linkerd check
+	linkerd multicluster install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+	linkerd check --multicluster
 
 flagger:
 	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -
