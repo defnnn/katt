@@ -138,7 +138,6 @@ cert-manager:
 	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
 
 hubble:
-	kustomize build k/hubble | $(ks) apply -f -
 	helm upgrade cilium cilium/cilium --version 1.9.4 \
 		--namespace kube-system \
 		--reuse-values \
