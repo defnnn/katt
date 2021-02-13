@@ -101,7 +101,9 @@ cilium:
 
 linkerd:
 	linkerd check --pre
-	linkerd multicluster install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+	linkerd check
+	linkerd multicluster install | $(k) apply -f -
 	linkerd check --multicluster
 
 flagger:
