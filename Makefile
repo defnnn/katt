@@ -77,12 +77,12 @@ katt: # Install all the goodies
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
-linkerd-tatami:
+tatami-linkerd:
 	$(MAKE) linkerd wait
 	$(MAKE) linkerd-trust-anchor
 	$(MAKE) linkerd-use-trust
 
-linkerd-ryokan:
+ryokan-linkerd:
 	$(MAKE) linkerd-with-trust wait
 
 wait:
