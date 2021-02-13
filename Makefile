@@ -85,7 +85,7 @@ wait:
 cilium:
 	helm repo add cilium https://helm.cilium.io/ --force-update
 	helm repo update
-	helm install cilium cilium/cilium --version 1.9.3 \
+	helm install cilium cilium/cilium --version 1.9.4 \
 		--namespace kube-system \
 		--set nodeinit.enabled=true \
 		--set kubeProxyReplacement=partial \
@@ -137,6 +137,12 @@ cert-manager:
 
 hubble:
 	kustomize build k/hubble | $(ks) apply -f -
+	helm upgrade cilium cilium/cilium --version 1.9.4 \
+		--namespace kube-system \
+		--reuse-values \
+		--set hubble.listenAddress=":4244" \
+		--set hubble.relay.enabled=true \
+		--set hubble.ui.enabled=true
 
 home:
 	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
