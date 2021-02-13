@@ -72,8 +72,9 @@ ryokan tatami:
 
 katt: # Install all the goodies
 	$(MAKE) cilium wait
+	$(MAKE) $(PET)-metal wait
 	$(MAKE) $(PET)-linkerd wait
-	$(MAKE) $(PET)-metal $(PET)-traefik
+	$(MAKE) $(PET)-traefik wait
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
