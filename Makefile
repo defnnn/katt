@@ -83,6 +83,7 @@ defn:
 	$(MAKE) ryokan
 	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
 	tatami $(MAKE) link-check
+	echo sleeping to let ryokan setup its endpoints; sleep 60
 	ryokan $(MAKE) link-check
 
 tatami-linkerd:
