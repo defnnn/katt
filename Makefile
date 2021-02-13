@@ -72,17 +72,17 @@ ryokan tatami:
 
 katt: # Install all the goodies
 	$(MAKE) cilium wait
-	$(MAKE) $(PET) wait
+	$(MAKE) $(PET)-linkerd wait
 	$(MAKE) $(PET)-metal $(PET)-traefik
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
-tatami:
+linkerd-tatami:
 	$(MAKE) linkerd wait
 	$(MAKE) linkerd-trust-anchor
 	$(MAKE) linkerd-use-trust
 
-ryokan:
+linkerd-ryokan:
 	$(MAKE) linkerd-with-trust wait
 
 wait:
