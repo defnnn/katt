@@ -78,6 +78,13 @@ katt: # Install all the goodies
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
+defn:
+	$(MAKE) tatami
+	$(MAKE) ryokan
+	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
+	tatami $(MAKE) link-check
+	ryokan $(MAKE) link-check
+
 tatami-linkerd:
 	$(MAKE) linkerd wait
 	$(MAKE) linkerd-trust-anchor
@@ -137,10 +144,8 @@ linkerd-with-trust:
 	linkerd multicluster install | $(k) apply -f -
 	linkerd check --multicluster
 
-link:
-	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
-
 link-check:
+	linkerd multicluster gateways
 	linkerd check --multicluster
 	linkerd multicluster gateways
 
