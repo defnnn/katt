@@ -72,10 +72,18 @@ ryokan tatami:
 
 katt: # Install all the goodies
 	$(MAKE) cilium wait
-	$(MAKE) linkerd wait
+	$(MAKE) $(PET) wait
 	$(MAKE) $(PET)-metal $(PET)-traefik
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
+
+tatami:
+	$(MAKE) linkerd wait
+	$(MAKE) linkerd-trust-anchor
+	$(MAKE) linkerd-use-trust
+
+ryokan:
+	$(MAKE) linkerd-with-trust wait
 
 wait:
 	sleep 5
@@ -101,17 +109,29 @@ cilium:
 
 linkerd-trust-anchor:
 	step certificate create root.linkerd.cluster.local root.crt root.key \
-   	--profile root-ca --no-password --insecure
+   	--profile root-ca --no-password --insecure --force
 	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
 		--profile intermediate-ca --not-after 8760h --no-password --insecure \
-		--ca root.crt --ca-key root.key
+		--ca root.crt --ca-key root.key --force
+	$(kld) get cm linkerd-config -ojsonpath="{.data.values}" | yq -r .global.identityTrustAnchorsPEM  > trustAnchor.crt
+	cat trustAnchor.crt root.crt > bundle.crt
+
+linkerd-use-trust:
+	linkerd upgrade --identity-trust-anchors-file=./bundle.crt | kubectl apply -f -
 
 linkerd:
 	linkerd check --pre
+	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+	linkerd check
+	linkerd multicluster install | $(k) apply -f -
+	linkerd check --multicluster
+
+linkerd-with-trust:
+	linkerd check --pre
 	linkerd install \
 		--identity-trust-anchors-file bundle.crt \
-		--identity-issuer-certificate-file issuer.crt \
-		--identity-issuer-key-file issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+  	--identity-issuer-certificate-file issuer.crt \
+  	--identity-issuer-key-file issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
 	linkerd multicluster install | $(k) apply -f -
 	linkerd check --multicluster
@@ -120,10 +140,8 @@ link:
 	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
 
 link-check:
-	-ryokan linkerd check --multicluster
-	-tatami linkerd check --multicluster
-	ryokan linkerd multicluster gateways
-	tatami linkerd multicluster gateways
+	linkerd check --multicluster
+	linkerd multicluster gateways
 
 flagger:
 	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -

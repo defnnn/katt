@@ -10,3 +10,5 @@ k/*/b
 etc/zerotier
 issuer.*
 root.*
+bundle.crt
+trustAnchor.crt
