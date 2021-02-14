@@ -89,6 +89,7 @@ defn:
 		$$a $(MAKE) wait; \
 		$$a $(MAKE) link-check; \
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
+		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		$$a $(k) apply -f k/linkerd/$$a.yaml; \
 		done
 
