@@ -49,6 +49,12 @@ nodes: [
 			image: "kindest/node:v1.20.2@sha256:8f7ea6e7642c0da54f04a7ee10431549c0257315b3a634f6ef2fecaaedb19bab"
 
 			extraPortMappings: [
+				{
+					containerPort: 443
+					hostPort:      8443
+					listenAddress: "0.0.0.0"
+					protocol:      TCP
+				},
 			]
 
 			extraMounts: [
