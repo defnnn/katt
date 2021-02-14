@@ -73,8 +73,8 @@ ryokan tatami:
 katt: # Install all the goodies
 	$(MAKE) cilium wait
 	$(MAKE) $(PET)-metal wait
-	$(MAKE) $(PET)-traefik wait
 	$(MAKE) linkerd wait
+	$(MAKE) $(PET)-traefik wait
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
@@ -151,7 +151,7 @@ kruise:
 %-traefik:
 	cue export --out yaml c/.$(first).cue c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
-	kustomize build k/traefik | $(kt) apply -f -
+	kustomize build k/traefik | linkerd inject - | $(kt) apply -f -
 
 gloo:
 	#glooctl install knative -g
