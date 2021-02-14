@@ -121,13 +121,15 @@ linkerd-trust-anchor:
 	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
 		--profile intermediate-ca --not-after 8760h --no-password --insecure \
 		--ca root.crt --ca-key root.key --force
+	mkdir -p etc
+	mv -f issuer.* root.* etc/
 
 linkerd:
 	linkerd check --pre
 	linkerd install \
-		--identity-trust-anchors-file root.crt \
-		--identity-issuer-certificate-file issuer.crt \
-  	--identity-issuer-key-file issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+		--identity-trust-anchors-file etc/root.crt \
+		--identity-issuer-certificate-file etc/issuer.crt \
+  	--identity-issuer-key-file etc/issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
 	linkerd multicluster install | $(k) apply -f -
 	linkerd check --multicluster
