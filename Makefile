@@ -73,26 +73,27 @@ ryokan tatami:
 katt: # Install all the goodies
 	$(MAKE) cilium wait
 	$(MAKE) $(PET)-metal wait
-	$(MAKE) $(PET)-linkerd wait
+	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-traefik wait
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
 defn:
+	$(MAKE) linkerd-trust-anchor
 	$(MAKE) tatami
 	$(MAKE) ryokan
 	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
-	tatami $(MAKE) link-check
-	echo sleeping to let ryokan setup its endpoints; sleep 60
-	ryokan $(MAKE) link-check
-
-tatami-linkerd:
-	$(MAKE) linkerd wait
-	$(MAKE) linkerd-trust-anchor
-	$(MAKE) linkerd-use-trust
-
-ryokan-linkerd:
-	$(MAKE) linkerd-with-trust wait
+	sleep 10
+	for a in tatami ryokan; do \
+		$$a $(MAKE) wait; \
+		$$A $(MAKE) link-check; \
+		done
+	tatami $(k) apply -k "github.com/linkerd/website/multicluster/west/"
+	ryokan $(k) apply -k "github.com/linkerd/website/multicluster/east/"
+	for a in tatami ryokan; do \
+		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
+		$$a $(MAKE) wait; \
+		don
 
 wait:
 	sleep 5
@@ -118,28 +119,16 @@ cilium:
 
 linkerd-trust-anchor:
 	step certificate create root.linkerd.cluster.local root.crt root.key \
-   	--profile root-ca --no-password --insecure --force
+  	--profile root-ca --no-password --insecure --force
 	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
 		--profile intermediate-ca --not-after 8760h --no-password --insecure \
 		--ca root.crt --ca-key root.key --force
-	$(kld) get cm linkerd-config -ojsonpath="{.data.values}" | yq -r .global.identityTrustAnchorsPEM  > trustAnchor.crt
-	cat trustAnchor.crt root.crt > bundle.crt
-
-linkerd-use-trust:
-	linkerd upgrade --identity-trust-anchors-file=./bundle.crt | kubectl apply -f -
 
 linkerd:
 	linkerd check --pre
-	linkerd install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
-	linkerd check
-	linkerd multicluster install | $(k) apply -f -
-	linkerd check --multicluster
-
-linkerd-with-trust:
-	linkerd check --pre
 	linkerd install \
-		--identity-trust-anchors-file bundle.crt \
-  	--identity-issuer-certificate-file issuer.crt \
+		--identity-trust-anchors-file root.crt \
+		--identity-issuer-certificate-file issuer.crt \
   	--identity-issuer-key-file issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
 	linkerd multicluster install | $(k) apply -f -
