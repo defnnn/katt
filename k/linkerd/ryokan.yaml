@@ -1,17 +1,4 @@
 ---
-apiVersion: split.smi-spec.io/v1alpha1
-kind: TrafficSplit
-metadata:
-  name: podinfo
-  namespace: test
-spec:
-  service: podinfo
-  backends:
-  - service: podinfo
-    weight: 20
-  - service: podinfo-tatami
-    weight: 80
----
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
