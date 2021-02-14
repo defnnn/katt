@@ -78,7 +78,7 @@ katt: # Install all the goodies
 	$(MAKE) gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
-defn:
+one:
 	$(MAKE) linkerd-trust-anchor
 	$(MAKE) -j 2 tatami ryokan
 	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
