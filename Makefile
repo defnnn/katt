@@ -80,8 +80,7 @@ katt: # Install all the goodies
 
 defn:
 	$(MAKE) linkerd-trust-anchor
-	$(MAKE) tatami
-	$(MAKE) ryokan
+	$(MAKE) -j 2 tatami ryokan
 	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
 	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
 	tatami $(k) apply -k "github.com/linkerd/website/multicluster/west/"
