@@ -6,7 +6,7 @@ metadata:
   name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.13.0
+    helm.sh/chart: traefik-9.14.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: katt
   annotations:
@@ -18,7 +18,7 @@ metadata:
   name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.13.0
+    helm.sh/chart: traefik-9.14.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: katt
 rules:
@@ -72,7 +72,7 @@ metadata:
   name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.13.0
+    helm.sh/chart: traefik-9.14.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: katt
 roleRef:
@@ -91,7 +91,7 @@ metadata:
   name: katt-traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.13.0
+    helm.sh/chart: traefik-9.14.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: katt
   annotations:
@@ -111,7 +111,7 @@ spec:
       annotations:
       labels:
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-9.13.0
+        helm.sh/chart: traefik-9.14.2
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: katt
     spec:
@@ -121,7 +121,7 @@ spec:
       nodeSelector:
           index: "0"
       containers:
-      - image: "traefik:2.4.0"
+      - image: "traefik:2.4.2"
         imagePullPolicy: IfNotPresent
         name: katt-traefik
         resources:
@@ -148,7 +148,6 @@ spec:
           containerPort: 9000
           protocol: "TCP"
         - name: "web"
-          hostPort: 80
           containerPort: 8000
           protocol: "TCP"
         - name: "websecure"
@@ -194,7 +193,7 @@ items:
       name: katt-traefik
       labels:
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-9.13.0
+        helm.sh/chart: traefik-9.14.2
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: katt
       annotations:
@@ -205,6 +204,10 @@ items:
         app.kubernetes.io/name: traefik
         app.kubernetes.io/instance: katt
       ports:
+      - port: 80
+        name: web
+        targetPort: "web"
+        protocol: "TCP"
       - port: 443
         name: websecure
         targetPort: "websecure"
@@ -219,7 +222,7 @@ metadata:
     helm.sh/hook: "post-install,post-upgrade"
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.13.0
+    helm.sh/chart: traefik-9.14.2
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/instance: katt
 spec:
