@@ -151,7 +151,7 @@ kruise:
 %-traefik:
 	cue export --out yaml c/.$(first).cue c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
-	kustomize build k/traefik | linkerd inject - | $(kt) apply -f -
+	kustomize build k/traefik | linkerd inject --ingress - | $(kt) apply -f -
 
 gloo:
 	#glooctl install knative -g
