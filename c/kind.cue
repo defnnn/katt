@@ -53,7 +53,7 @@ nodes: [
 					containerPort: 443
 					hostPort:      8443
 					listenAddress: "0.0.0.0"
-					protocol:      TCP
+					protocol:      "TCP"
 				},
 			]
 
