@@ -83,17 +83,14 @@ defn:
 	$(MAKE) tatami
 	$(MAKE) ryokan
 	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
-	sleep 10
-	for a in tatami ryokan; do \
-		$$a $(MAKE) wait; \
-		$$A $(MAKE) link-check; \
-		done
+	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
 	tatami $(k) apply -k "github.com/linkerd/website/multicluster/west/"
 	ryokan $(k) apply -k "github.com/linkerd/website/multicluster/east/"
 	for a in tatami ryokan; do \
-		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(MAKE) wait; \
-		don
+		$$a $(MAKE) link-check; \
+		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
+		done
 
 wait:
 	sleep 5
