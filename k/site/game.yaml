@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: game
+  name: vault-auth
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,7 +25,7 @@ spec:
           {{- end }}
         vault.hashicorp.com/role: 'game'
     spec:
-      serviceAccountName: game
+      serviceAccountName: vault-auth
       containers:
       - image: alexwhen/docker-2048
         imagePullPolicy: Always
