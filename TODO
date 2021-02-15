@@ -11,3 +11,23 @@ sudo systemctl disable systemd-resolved
 sudo systemctl stop systemd-resolved
 sudo rm /etc/resolv.conf
 echo nameserver 1.1.1.1 | sudo tee /etc/resolv.conf
+
+export VAULT_SA_NAME="$(ssh tamago ./env.sh tatami kubectl get secrets --output=json | jq -r '.items[].metadata | select(.name|startswith("vault-token-")).name')"
+export SA_JWT_TOKEN="$(ssh tamago ./env.sh tatami kubectl get -o json secret $VAULT_SA_NAME | jq -r '.data.token | @base64d')"
+export SA_CA_CRT="$(ssh tamago ./env.sh tatami kubectl get -o json secret $VAULT_SA_NAME | jq -r '.data["ca.crt"] | @base64d')"
+export K8S_HOST='https://x.x.x.x:6443'
+
+export VAULT_TOKEN="$(pass vault/global/root)"
+
+vault auth enable kubernetes
+
+vault write auth/kubernetes/config \
+        token_reviewer_jwt="$SA_JWT_TOKEN" \
+        kubernetes_host="$K8S_HOST" \
+        kubernetes_ca_cert="$SA_CA_CRT"
+
+vault write auth/kubernetes/role/example \
+        bound_service_account_names=vault-auth \
+        bound_service_account_namespaces=default \
+        policies="admin" \
+        ttl=24h
