@@ -64,7 +64,7 @@ tamago:
 	-tamago ks delete job.batch/helm-install-traefik
 	-tamago ks delete deployment.apps/traefik
 	for a in tamago ya ki; do \
-		cat ~/.ssh/id_rsa.pub | ssh $$a -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
+		cat ~/.ssh/id_rsa.pub | ssh $$a.defn.jp -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
 		done
 	for a in ya ki; do \
 		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp\
