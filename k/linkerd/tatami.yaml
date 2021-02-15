@@ -5,7 +5,7 @@ metadata:
   name: split
   namespace: test
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.entrypoints: pubsecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     ingress.kubernetes.io/custom-request-headers: l5d-dst-override:frontend.test.svc.cluster.local:8080
 spec:
