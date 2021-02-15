@@ -102,7 +102,7 @@ wait:
 vault-agent:
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
-	helm install vault hashicorp/vault --set="injector.enabled=true"
+	helm install vault hashicorp/vault --values k/vault-agent/values.yaml
 
 cilium:
 	helm repo add cilium https://helm.cilium.io/ --force-update
