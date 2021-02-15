@@ -13,6 +13,7 @@ kg := kubectl -n gloo-system
 kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
 kld := kubectl -n linkerd
+klm := kubectl -n linkerd-multicluster
 
 kv := kubectl -n knative-serving
 kd := kubectl -n external-dns
@@ -75,7 +76,7 @@ katt: # Install all the goodies
 	$(MAKE) $(PET)-metal wait
 	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-traefik wait
-	$(MAKE) gloo cert-manager flagger kruise hubble wait
+	$(MAKE) vault-agent gloo cert-manager flagger kruise hubble wait
 	$(MAKE) $(PET)-site wait
 
 one:
@@ -97,6 +98,11 @@ wait:
 	sleep 5
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false')" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
+
+vault-agent:
+	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
+	helm repo update
+	helm install vault hashicorp/vault --set="injector.enabled=true"
 
 cilium:
 	helm repo add cilium https://helm.cilium.io/ --force-update
@@ -163,9 +169,6 @@ gloo:
 external-secrets:
 	$(kx) apply -f k/external-secrets/crds
 	kustomize build --enable_alpha_plugins k/external-secrets | $(kx) apply -f -
-
-kubernetes-dashboard:
-	kustomize build --enable_alpha_plugins k/kubernetes-dashboard | $(k) apply -f -
 
 cert-manager:
 	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
