@@ -77,7 +77,7 @@ katt: # Install all the goodies
 	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-traefik wait
 	$(MAKE) vault-agent gloo cert-manager flagger kruise hubble wait
-	$(MAKE) $(PET)-site wait
+	$(MAKE) $(PET)-site
 
 one:
 	$(MAKE) linkerd-trust-anchor
