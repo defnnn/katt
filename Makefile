@@ -67,7 +67,8 @@ tamago:
 		cat ~/.ssh/id_rsa.pub | ssh $$a -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
 		done
 	for a in tatami ryokan; do \
-		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp; \
+		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp\
+			--k3s-extra-args "--disable-network-policy --no-flannel" ; \
 		done
 
 ryokan tatami:
