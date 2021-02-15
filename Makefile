@@ -56,7 +56,7 @@ tamago:
 	mkdir -p ~/.kube
 	k3sup install --cluster --local --no-extras --local-path ~/.kube/tamago.conf \
 		--context tamago --tls-san tamago.defn.jp --host tamago.defn.jp \
-		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute --flannel-backend=none --no-flannel"
+		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute --no-flannel"
 	perl -pe 's{127.0.0.1}{tamago.defn.jp}' -i ~/.kube/tamago.conf
 	tamago $(MAKE) wait
 	-tamago ks delete addon.k3s.cattle.io/traefik
@@ -73,7 +73,7 @@ tamago:
 yaki:
 	for a in ya ki; do \
 		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp\
-			--k3s-extra-args "--disable-network-policy --no-flannel" ; \
+			--k3s-extra-args "--no-flannel" ; \
 		done
 
 ryokan tatami:
