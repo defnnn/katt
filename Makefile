@@ -51,6 +51,8 @@ network:
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
 tamago:
+	ssh-keygen -N ''
+	for a in tatami ryokan; do cat ~/.ssh/id_rsa.pub | ssh $$a -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; done
 	k3sup install --cluster --local --no-extras --local-path ~/.kube/tamago.conf \
 		--context tamago --tls-san tamago.defn.jp --host tamago.defn.jp \
 		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute"
