@@ -18,12 +18,12 @@ spec:
         app: game
       annotations:
         vault.hashicorp.com/agent-inject: 'true'
-        vault.hashicorp.com/agent-inject-secret-db-creds: 'database/creds/game'
+        vault.hashicorp.com/agent-inject-secret-db-creds: 'kv/defn/hello'
         vault.hashicorp.com/agent-inject-template-db-creds: |
-          {{- with secret "database/creds/game" -}}
-          {{ .Data.username }}={{ .Data.password }}
+          {{- with secret "kv/defn/hello" -}}
+          HELLO={{ .Data.HELLO}}
           {{- end }}
-        vault.hashicorp.com/role: 'game'
+        vault.hashicorp.com/role: 'example'
     spec:
       serviceAccountName: vault-auth
       containers:
