@@ -56,7 +56,7 @@ tamago:
 	mkdir -p ~/.kube
 	k3sup install --cluster --local --no-extras --local-path ~/.kube/tamago.conf \
 		--context tamago --tls-san tamago.defn.jp --host tamago.defn.jp \
-		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute"
+		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute --flannel-backend=none --no-flannel"
 	perl -pe 's{127.0.0.1}{tamago.defn.jp}' -i ~/.kube/tamago.conf
 	tamago $(MAKE) wait
 	-tamago ks delete addon.k3s.cattle.io/traefik
