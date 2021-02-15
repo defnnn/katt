@@ -57,7 +57,7 @@ tamago:
 		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute"
 	perl -pe 's{127.0.0.1}{tamago.defn.jp}' -i ~/.kube/tamago.conf
 	tamago $(MAKE) wait
-	tamago ks delete deployment.apps/traefik
+	tamago ks delete job.batch/helm-install-traefik
 	for a in tatami ryokan; do \
 		cat ~/.ssh/id_rsa.pub | ssh $$a -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
 		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp; \
