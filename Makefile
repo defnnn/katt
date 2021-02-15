@@ -130,6 +130,7 @@ cilium:
 	helm repo update
 	helm install cilium cilium/cilium --version 1.9.4 \
 		--namespace kube-system \
+		--set nodeinit.restartPods=true \
 		--set nodeinit.enabled=true \
 		--set kubeProxyReplacement=partial \
 		--set hostServices.enabled=false \
