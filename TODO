@@ -31,5 +31,3 @@ vault write auth/kubernetes/role/example \
         bound_service_account_namespaces=default \
         policies="admin" \
         ttl=24h
-
-k3sup install --cluster --local --no-extras --local-path ~/.kube/config --context tamago --tls-san tamago.defn.jp --host tamago.defn.jp --k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute"
