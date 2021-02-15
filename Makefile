@@ -50,8 +50,10 @@ network:
 			-o com.docker.network.bridge.enable_icc=true \
 			-o com.docker.network.bridge.name=kind0 \
 			kind; fi
+
 tamago:
 	ssh-keygen -f ~/.ssh/id_rsa -N ''
+	mkdir -p ~/.kube
 	k3sup install --cluster --local --no-extras --local-path ~/.kube/tamago.conf \
 		--context tamago --tls-san tamago.defn.jp --host tamago.defn.jp \
 		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute"
