@@ -1,6 +1,4 @@
 ---
-global:
-  enabled: false
 injector:
   enabled: true
   externalVaultAddr: https://global.default.defn.sh
