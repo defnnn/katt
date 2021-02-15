@@ -50,8 +50,8 @@ nodes: [
 
 			extraPortMappings: [
 				{
-					containerPort: 443
-					hostPort:      8443
+					containerPort: 9443
+					hostPort:      9443
 					listenAddress: "0.0.0.0"
 					protocol:      "TCP"
 				},

@@ -20,4 +20,5 @@ providers: kubernetesIngress: {
 entryPoints: {
 	traefik: address:   ":9000/tcp"
 	websecure: address: ":8443/tcp"
+	pubsecure: address: ":9443/tcp"
 }
