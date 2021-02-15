@@ -67,6 +67,10 @@ tamago:
 		cat ~/.ssh/id_rsa.pub | ssh $$a.defn.jp -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
 		ssh $$a sudo mount bpffs /sys/fs/bpf -t bpf
 		done
+	tamago $(MAKE) cilium wait
+	$(MAKE) yaki
+
+yaki:
 	for a in ya ki; do \
 		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp\
 			--k3s-extra-args "--disable-network-policy --no-flannel" ; \
