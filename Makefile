@@ -56,24 +56,19 @@ tamago:
 	mkdir -p ~/.kube
 	k3sup install --cluster --local --no-extras --local-path ~/.kube/tamago.conf \
 		--context tamago --tls-san tamago.defn.jp --host tamago.defn.jp \
-		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute --no-flannel"
+		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute --disable=servicelb --disable=traefik --disable-network-policy --flannel-backend=none"
 	perl -pe 's{127.0.0.1}{tamago.defn.jp}' -i ~/.kube/tamago.conf
 	tamago $(MAKE) wait
-	-tamago ks delete addon.k3s.cattle.io/traefik
-	-tamago ks delete helmchart.helm.cattle.io/traefik
-	-tamago ks delete job.batch/helm-install-traefik
-	-tamago ks delete deployment.apps/traefik
 	for a in tamago ya ki; do \
 		cat ~/.ssh/id_rsa.pub | ssh $$a.defn.jp -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
-		ssh $$a sudo mount bpffs /sys/fs/bpf -t bpf
+		ssh $$a sudo mount bpffs /sys/fs/bpf -t bpf; \
 		done
 	tamago $(MAKE) cilium wait
 	$(MAKE) yaki
 
 yaki:
 	for a in ya ki; do \
-		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp\
-			--k3s-extra-args "--no-flannel" ; \
+		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp; \
 		done
 
 ryokan tatami:
