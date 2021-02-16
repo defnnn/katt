@@ -105,8 +105,8 @@ katt: # Install all the goodies
 	$(MAKE) $(PET)-site
 
 one:
-	$(MAKE) tamago
 	$(MAKE) linkerd-trust-anchor
+	$(MAKE) tamago
 	$(MAKE) -j 2 tatami ryokan
 	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
 	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
