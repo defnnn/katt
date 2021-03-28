@@ -35,25 +35,6 @@ yaki:
 		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp; \
 		done
 
-ryokan tatami:
-	$(MAKE) $@-kind
-	$(MAKE) $@-config
-	$(MAKE) $@-katt
-
-%-kind:
-	$(MAKE) PET=$(first) zero
-	echo "_apiServerAddress: \"$$(host $(first).defn.jp | awk '{print $$NF}')\"" > c/.$(first).cue
-	cue export --out yaml c/.$(first).cue c/$(first).cue c/kind.cue | ssh $(first) ./env.sh kind create cluster --config -
-	$(MAKE) $(first)-config
-
-%-config:
-	mkdir -p ~/.kube
-	rsync -ia $(first):.kube/config ~/.kube/$(first).conf
-	env KUBECONFIG=$$HOME/.kube/$(first).conf k cluster-info
-
-%-katt:
-	env KUBECONFIG=$$HOME/.kube/$(first).conf $(MAKE) PET=$(first) katt
-
 katt: # Install all the goodies
 	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-traefik wait
@@ -166,10 +147,21 @@ registry: # Run a local registry
 	k apply -f k/registry.yaml
 
 mp:
+	$(MAKE) linkerd-trust-anchor
 	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
 	m delete --all --purge
 	$(MAKE) defn0
 	$(MAKE) defn1
+	defn0 linkerd multicluster link --cluster-name defn0 | defn1 $(k) apply -f -
+	defn1 linkerd multicluster link --cluster-name defn1 | defn0 $(k) apply -f -
+	defn0 $(k) apply -k "github.com/linkerd/website/multicluster/west/"
+	defn1 $(k) apply -k "github.com/linkerd/website/multicluster/east/"
+	for a in defn0 defn1; do \
+		$$a $(MAKE) wait; \
+		$$a $(MAKE) link-check; \
+		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
+		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
+		done
 
 mp-*:
 	$(MAKE) $(first)
@@ -178,9 +170,9 @@ mp-*:
 mp-cilium:
 	kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-install.yaml
 	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-hubble-install.yaml
-	-while kubectl get nodes -o wide | grep NotReady; do sleep 10; done
+	-$(MAKE) wait
 	sleep 30
-	while kubectl get nodes -o wide | grep NotReady; do sleep 10; done
+	$(MAKE) wait
 
 mp-cilium-test:
 	kubectl create ns cilium-test
@@ -212,10 +204,7 @@ defn0 defn1:
 	m exec $@ -- sudo apt-get update
 	m exec $@ -- sudo apt-get install tailscale
 	m exec $@ -- sudo tailscale up
-	rm -f ~/.kube/$@
-	touch ~/.kube/$@
 	bin/m-install-k3s $@ $@
-	cp ~/.kube/$@ ~/.kube/config
-	kubectl config use-context $@
-	$(MAKE) mp-cilium
-	k apply -f nginx.yaml
+	$@ $(MAKE) mp-cilium
+	$@ $(MAKE) linkerd wait
+	#k apply -f nginx.yaml

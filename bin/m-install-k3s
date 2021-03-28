@@ -13,9 +13,12 @@ function main {
 
   local mpts="$(m info --format json "$mphost" | jq -r --arg mp $mphost '.info[$mp].ipv4[1]')"
 
+  rm -f ~/.kube/$mphost.conf
+  touch ~/.kube/$mphost.conf
+
   k3sup install --cluster \
     --ip $mpip --user ubuntu \
-    --local-path ~/.kube/$mphost --merge --context "$context" \
+    --local-path ~/.kube/$mphost.conf --merge --context "$context" \
     --k3s-extra-args "--flannel-backend=none --no-flannel --disable-network-policy --disable traefik --bind-address=$mpip --advertise-address=$mpip --node-ip=$mpip --node-external-ip=$mpts" "$@"
 }
 
