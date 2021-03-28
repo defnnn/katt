@@ -201,7 +201,7 @@ mp-hubble-observe:
 defn0 defn1:
 	-m delete --purge $@
 	m launch -c 2 -d 50G -m 2048M --network en0 -n $@
-	cat .ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
+	cat ~/.ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
 	m exec $@ git clone https://github.com/amanibhavam/homedir
 	m exec $@ homedir/bin/copy-homedir
 	m exec $@ -- sudo mount bpffs -t bpf /sys/fs/bpf
@@ -219,19 +219,3 @@ defn0 defn1:
 	kubectl config use-context $@
 	$(MAKE) mp-cilium
 	k apply -f nginx.yaml
-
-defn3:
-	-m delete --purge $@
-	m launch -c 4 -d 100G -m 4096M --network en0 -n $@
-	cat .ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
-	mkdir -p ~/.config/$@/tailscale
-	sudo multipass mount $$HOME/.config/$@/tailscale $@:/var/lib/tailscale
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $@ -- sudo apt-key add -
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $@ -- sudo tee /etc/apt/sources.list.d/tailscale.list
-	m exec $@ -- sudo apt-get update
-	m exec $@ -- sudo apt-get install tailscale
-	m exec $@ -- sudo tailscale up
-	rm -f ~/.kube/config
-	touch ~/.kube/config
-	bin/m-install-k3s defn3 defn3
-	kubectl config use-context defn3
