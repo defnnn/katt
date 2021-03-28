@@ -75,16 +75,6 @@ linkerd-trust-anchor:
 	mkdir -p etc
 	mv -f issuer.* root.* etc/
 
-linkerd:
-	linkerd check --pre
-	linkerd install \
-		--identity-trust-anchors-file etc/root.crt \
-		--identity-issuer-certificate-file etc/issuer.crt \
-  	--identity-issuer-key-file etc/issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
-	linkerd check
-	linkerd multicluster install | $(k) apply -f -
-	linkerd multicluster check
-
 flagger:
 	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -
 
@@ -163,6 +153,17 @@ once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
 	helm  repo update
 
+mp-linkerd:
+	linkerd check --pre
+	linkerd install \
+		--identity-trust-anchors-file etc/root.crt \
+		--identity-issuer-certificate-file etc/issuer.crt \
+  	--identity-issuer-key-file etc/issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+	linkerd check
+	linkerd multicluster install | $(k) apply -f -
+	linkerd multicluster check
+	$(MAKE) wait
+
 mp-cilium:
 	#kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-install.yaml
 	helm install cilium cilium/cilium --version 1.9.5 \
@@ -221,5 +222,5 @@ defn0 defn1:
 	m exec $@ -- sudo tailscale up
 	bin/m-install-k3s $@ $@
 	$@ $(MAKE) mp-cilium
-	$@ $(MAKE) linkerd wait
+	$@ $(MAKE) mp-linkerd
 	$@ k apply -f nginx.yaml
