@@ -1,55 +1,20 @@
 SHELL := /bin/bash
 
-.PHONY: cutout
-
 first = $(word 1, $(subst -, ,$@))
 second = $(word 2, $(subst -, ,$@))
 
 k := kubectl
 ks := kubectl -n kube-system
-km := kubectl -n metallb-system
 kt := kubectl -n traefik
 kg := kubectl -n gloo-system
 kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
 kld := kubectl -n linkerd
 klm := kubectl -n linkerd-multicluster
-
-kv := kubectl -n knative-serving
 kd := kubectl -n external-dns
 
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
-
-test: # Test manifests with kubeval
-	for a in k/*/; do kustomize build $$a | kubeval --skip-kinds IngressRoute; done
-
-zero:
-	$(MAKE) PET=$(PET) clean
-	$(MAKE) PET=$(PET) network
-
-clean: # Teardown
-	-ssh $(PET) ./env.sh kind delete cluster
-	ssh $(PET) docker network rm kind || true
-	ssh $(PET) sudo systemctl restart docker
-
-vpn:
-	ssh $(PET) docker exec kind-control-plane apt-get update
-	ssh $(PET) docker exec kind-control-plane apt-get install -y gnupg2 net-tools iputils-ping dnsutils
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.gpg | ssh $(PET) docker exec -i kind-control-plane apt-key add -
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/groovy.list | ssh $(PET) docker exec -i kind-control-plane tee /etc/apt/sources.list.d/tailscale.list
-	curl -fsSL https://install.zerotier.com | ssh $(PET) docker exec -i kind-control-plane bash
-	ssh $(PET) docker exec -i kind-control-plane apt-get install -y tailscale || true
-	ssh $(PET) docker exec -i kind-control-plane systemctl start tailscaled
-
-network:
-	ssh $(PET) sudo mount bpffs /sys/fs/bpf -t bpf
-	. .env.$(PET) && if test -z "$$(ssh $(PET) docker network inspect kind 2>/dev/null | jq -r '.[].IPAM.Config[].Subnet')"; then \
-		ssh $(PET) docker network create --subnet $${KATT_KIND_CIDR} --ip-range $${KATT_KIND_CIDR} \
-			-o com.docker.network.bridge.enable_ip_masquerade=true \
-			-o com.docker.network.bridge.enable_icc=true \
-			-o com.docker.network.bridge.name=kind0 \
-			kind; fi
 
 tamago:
 	ssh-keygen -f ~/.ssh/id_rsa -N ''
@@ -63,7 +28,6 @@ tamago:
 		cat ~/.ssh/id_rsa.pub | ssh $$a.defn.jp -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
 		ssh $$a sudo mount bpffs /sys/fs/bpf -t bpf; \
 		done
-	tamago $(MAKE) cilium wait
 	$(MAKE) yaki
 
 yaki:
@@ -81,7 +45,6 @@ ryokan tatami:
 	echo "_apiServerAddress: \"$$(host $(first).defn.jp | awk '{print $$NF}')\"" > c/.$(first).cue
 	cue export --out yaml c/.$(first).cue c/$(first).cue c/kind.cue | ssh $(first) ./env.sh kind create cluster --config -
 	$(MAKE) $(first)-config
-	$(MAKE) PET=$(first) vpn
 
 %-config:
 	mkdir -p ~/.kube
@@ -92,11 +55,9 @@ ryokan tatami:
 	env KUBECONFIG=$$HOME/.kube/$(first).conf $(MAKE) PET=$(first) katt
 
 katt: # Install all the goodies
-	$(MAKE) cilium wait
-	$(MAKE) $(PET)-metal wait
 	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-traefik wait
-	$(MAKE) vault-agent gloo cert-manager flagger kruise hubble wait
+	$(MAKE) vault-agent gloo cert-manager flagger kruise wait
 	$(MAKE) $(PET)-site
 
 one:
@@ -124,24 +85,6 @@ vault-agent:
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
 	helm install vault hashicorp/vault --values k/vault-agent/values.yaml
-
-cilium:
-	helm repo add cilium https://helm.cilium.io/ --force-update
-	helm repo update
-	helm install cilium cilium/cilium --version 1.9.4 \
-		--namespace kube-system \
-		--set nodeinit.restartPods=true \
-		--set nodeinit.enabled=true \
-		--set kubeProxyReplacement=partial \
-		--set hostServices.enabled=false \
-		--set externalIPs.enabled=true \
-		--set nodePort.enabled=true \
-		--set hostPort.enabled=true \
-		--set bpf.masquerade=false \
-		--set image.pullPolicy=IfNotPresent \
-		--set ipam.mode=kubernetes
-	while $(ks) get nodes | grep NotReady; do \
-		sleep 5; done
 
 linkerd-trust-anchor:
 	step certificate create root.linkerd.cluster.local root.crt root.key \
@@ -173,9 +116,6 @@ flagger:
 kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
-%-metal:
-	bin/metal $(first)
-
 %-traefik:
 	cue export --out yaml c/.$(first).cue c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
 	$(kt) apply -f k/traefik/crds
@@ -194,14 +134,6 @@ external-secrets:
 
 cert-manager:
 	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
-
-hubble:
-	helm upgrade cilium cilium/cilium --version 1.9.4 \
-		--namespace kube-system \
-		--reuse-values \
-		--set hubble.listenAddress=":4244" \
-		--set hubble.relay.enabled=true \
-		--set hubble.ui.enabled=true
 
 home:
 	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
@@ -232,3 +164,74 @@ logs:
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
+
+mp:
+	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
+	m delete --all --purge
+	$(MAKE) defn0
+	$(MAKE) defn1
+
+mp-*:
+	$(MAKE) $(first)
+	bin/m-join-k3s $(first) defn0
+
+mp-cilium:
+	kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-install.yaml
+	kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-hubble-install.yaml
+	-while kubectl get nodes -o wide | grep NotReady; do sleep 10; done
+	sleep 30
+	while kubectl get nodes -o wide | grep NotReady; do sleep 10; done
+
+mp-cilium-test:
+	kubectl create ns cilium-test
+	kubectl apply -n cilium-test -f https://raw.githubusercontent.com/cilium/cilium/v1.9/examples/kubernetes/connectivity-check/connectivity-check.yaml
+
+mp-hubble-ui:
+	kubectl port-forward -n kube-system svc/hubble-ui --address 0.0.0.0 --address :: 12000:80
+
+mp-hubble-relay:
+	kubectl port-forward -n kube-system svc/hubble-relay --address 0.0.0.0 --address :: 4245:80
+
+mp-hubble-status:
+	hubble --server localhost:4245 status
+
+mp-hubble-observe:
+	hubble --server localhost:4245 observe -f
+
+defn0 defn1:
+	-m delete --purge $@
+	m launch -c 2 -d 50G -m 2048M --network en0 -n $@
+	cat .ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
+	m exec $@ git clone https://github.com/amanibhavam/homedir
+	m exec $@ homedir/bin/copy-homedir
+	m exec $@ -- sudo mount bpffs -t bpf /sys/fs/bpf
+	mkdir -p ~/.config/$@/tailscale
+	sudo multipass mount $$HOME/.config/$@/tailscale $@:/var/lib/tailscale
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $@ -- sudo apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $@ -- sudo tee /etc/apt/sources.list.d/tailscale.list
+	m exec $@ -- sudo apt-get update
+	m exec $@ -- sudo apt-get install tailscale
+	m exec $@ -- sudo tailscale up
+	rm -f ~/.kube/$@
+	touch ~/.kube/$@
+	bin/m-install-k3s $@ $@
+	cp ~/.kube/$@ ~/.kube/config
+	kubectl config use-context $@
+	$(MAKE) mp-cilium
+	k apply -f nginx.yaml
+
+defn3:
+	-m delete --purge $@
+	m launch -c 4 -d 100G -m 4096M --network en0 -n $@
+	cat .ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
+	mkdir -p ~/.config/$@/tailscale
+	sudo multipass mount $$HOME/.config/$@/tailscale $@:/var/lib/tailscale
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $@ -- sudo apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $@ -- sudo tee /etc/apt/sources.list.d/tailscale.list
+	m exec $@ -- sudo apt-get update
+	m exec $@ -- sudo apt-get install tailscale
+	m exec $@ -- sudo tailscale up
+	rm -f ~/.kube/config
+	touch ~/.kube/config
+	bin/m-install-k3s defn3 defn3
+	kubectl config use-context defn3

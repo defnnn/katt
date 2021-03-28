@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+function main {
+  set -exfu
+
+  local mphost="$1"; shift
+  local context="$1"; shift
+
+  local mpip=
+  while [[ -z "${mpip}" ]]; do
+    mpip="$(m info --format json $mphost | jq -r --arg mp $mphost '.info[$mp].ipv4[0]')"
+  done
+
+  local mpts="$(m info --format json "$mphost" | jq -r --arg mp $mphost '.info[$mp].ipv4[1]')"
+
+  k3sup install --cluster \
+    --ip $mpip --user ubuntu \
+    --local-path ~/.kube/config --merge --context "$context" \
+    --k3s-extra-args "--flannel-backend=none --no-flannel --disable-network-policy --disable traefik --bind-address=$mpip --advertise-address=$mpip --node-ip=$mpip --node-external-ip=$mpts" "$@"
+}
+
+main "$@"
