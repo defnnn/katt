@@ -184,10 +184,8 @@ mp-cilium:
    --set bpf.masquerade=false \
    --set image.pullPolicy=IfNotPresent \
    --set ipam.mode=kubernetes \
-	 --set nodeinit.restartPods=true
-	-$(MAKE) wait
-	sleep 30
-	$(MAKE) wait
+	 --set nodeinit.restartPods=true \
+	 --set operator.replicas=1
 	#kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-hubble-install.yaml
 	helm upgrade cilium cilium/cilium --version 1.9.5 \
    --namespace kube-system \
@@ -195,6 +193,8 @@ mp-cilium:
    --set hubble.listenAddress=":4244" \
    --set hubble.relay.enabled=true \
    --set hubble.ui.enabled=true
+	-$(MAKE) wait
+	sleep 30
 	$(MAKE) wait
 
 mp-cilium-test:
@@ -229,5 +229,5 @@ defn0 defn1:
 	m exec $@ -- sudo tailscale up
 	bin/m-install-k3s $@ $@
 	$@ $(MAKE) mp-cilium
-	#$@ $(MAKE) linkerd wait
-	k apply -f nginx.yaml
+	$@ $(MAKE) linkerd wait
+	$@ k apply -f nginx.yaml

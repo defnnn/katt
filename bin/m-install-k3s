@@ -15,6 +15,7 @@ function main {
 
   rm -f ~/.kube/$mphost.conf
   touch ~/.kube/$mphost.conf
+  chmod 600 ~/.kube/$mphost.conf
 
   k3sup install --cluster \
     --ip $mpip --user ubuntu \
