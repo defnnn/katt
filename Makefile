@@ -144,8 +144,7 @@ mp:
 	$(MAKE) linkerd-trust-anchor
 	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
 	m delete --all --purge
-	$(MAKE) -j 2 defn0 defn1
-	reset
+	$(MAKE) defn0 defn1
 	defn0 linkerd multicluster link --cluster-name defn0 | defn1 $(k) apply -f -
 	defn1 linkerd multicluster link --cluster-name defn1 | defn0 $(k) apply -f -
 	defn0 $(k) apply -k "github.com/linkerd/website/multicluster/west/"
