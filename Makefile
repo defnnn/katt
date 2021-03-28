@@ -141,6 +141,7 @@ mp:
 	defn1 $(k) apply -k "github.com/linkerd/website/multicluster/east/"
 	for a in defn0 defn1; do \
 		$$a $(MAKE) wait; \
+		$$a linkerd mc check; \
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		done
