@@ -51,7 +51,6 @@ one:
 	ryokan $(k) apply -k "github.com/linkerd/website/multicluster/east/"
 	for a in tatami ryokan; do \
 		$$a $(MAKE) wait; \
-		$$a $(MAKE) link-check; \
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		$$a $(k) apply -f k/linkerd/$$a.yaml; \
@@ -84,12 +83,7 @@ linkerd:
   	--identity-issuer-key-file etc/issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	linkerd check
 	linkerd multicluster install | $(k) apply -f -
-	linkerd check --multicluster
-
-link-check:
-	linkerd multicluster gateways
-	linkerd check --multicluster
-	linkerd multicluster gateways
+	linkerd multicluster check
 
 flagger:
 	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -
@@ -150,15 +144,14 @@ mp:
 	$(MAKE) linkerd-trust-anchor
 	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
 	m delete --all --purge
-	$(MAKE) defn0
-	$(MAKE) defn1
+	$(MAKE) -j 2 defn0 defn1
+	reset
 	defn0 linkerd multicluster link --cluster-name defn0 | defn1 $(k) apply -f -
 	defn1 linkerd multicluster link --cluster-name defn1 | defn0 $(k) apply -f -
 	defn0 $(k) apply -k "github.com/linkerd/website/multicluster/west/"
 	defn1 $(k) apply -k "github.com/linkerd/website/multicluster/east/"
 	for a in defn0 defn1; do \
 		$$a $(MAKE) wait; \
-		$$a $(MAKE) link-check; \
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		done
