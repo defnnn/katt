@@ -16,64 +16,16 @@ kd := kubectl -n external-dns
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-tamago:
-	ssh-keygen -f ~/.ssh/id_rsa -N ''
-	mkdir -p ~/.kube
-	k3sup install --cluster --local --no-extras --local-path ~/.kube/tamago.conf \
-		--context tamago --tls-san tamago.defn.jp --host tamago.defn.jp \
-		--k3s-extra-args "--node-taint CriticalAddonsOnly=true:NoExecute --disable=servicelb --disable=traefik --disable-network-policy --flannel-backend=none"
-	perl -pe 's{127.0.0.1}{tamago.defn.jp}' -i ~/.kube/tamago.conf
-	tamago $(MAKE) wait
-	for a in tamago ya ki; do \
-		cat ~/.ssh/id_rsa.pub | ssh $$a.defn.jp -o StrictHostKeyChecking=false tee -a .ssh/authorized_keys; \
-		ssh $$a sudo mount bpffs /sys/fs/bpf -t bpf; \
-		done
-	$(MAKE) yaki
-
-yaki:
-	for a in ya ki; do \
-		k3sup join --user app --host $$a.defn.jp --server-user app --server-host tamago.defn.jp; \
-		done
-
 katt: # Install all the goodies
 	$(MAKE) linkerd wait
 	$(MAKE) $(PET)-traefik wait
 	$(MAKE) vault-agent gloo cert-manager flagger kruise wait
 	$(MAKE) $(PET)-site
 
-one:
-	$(MAKE) linkerd-trust-anchor
-	$(MAKE) tamago
-	$(MAKE) -j 2 tatami ryokan
-	ryokan linkerd multicluster link --cluster-name ryokan | tatami $(k) apply -f -
-	tatami linkerd multicluster link --cluster-name tatami | ryokan $(k) apply -f -
-	tatami $(k) apply -k "github.com/linkerd/website/multicluster/west/"
-	ryokan $(k) apply -k "github.com/linkerd/website/multicluster/east/"
-	for a in tatami ryokan; do \
-		$$a $(MAKE) wait; \
-		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
-		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
-		$$a $(k) apply -f k/linkerd/$$a.yaml; \
-		done
-
-wait:
-	sleep 5
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false')" != "Running true" ]]; do \
-		$(k) get --all-namespaces pods; sleep 5; echo; done
-
 vault-agent:
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
 	helm install vault hashicorp/vault --values k/vault-agent/values.yaml
-
-linkerd-trust-anchor:
-	step certificate create root.linkerd.cluster.local root.crt root.key \
-  	--profile root-ca --no-password --insecure --force
-	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
-		--profile intermediate-ca --not-after 8760h --no-password --insecure \
-		--ca root.crt --ca-key root.key --force
-	mkdir -p etc
-	mv -f issuer.* root.* etc/
 
 flagger:
 	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -
@@ -107,6 +59,14 @@ home:
 	kustomize build k/site | linkerd inject - | $(k) apply -f -
 	$(k) apply -f k/site/$(first).yaml
 
+registry: # Run a local registry
+	k apply -f k/registry.yaml
+
+wait:
+	sleep 5
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false')" != "Running true" ]]; do \
+		$(k) get --all-namespaces pods; sleep 5; echo; done
+
 up: # Bring up homd
 	docker-compose up -d --remove-orphans
 
@@ -127,34 +87,40 @@ pull:
 logs:
 	docker-compose logs -f
 
-registry: # Run a local registry
-	k apply -f k/registry.yaml
+linkerd-trust-anchor:
+	step certificate create root.linkerd.cluster.local root.crt root.key \
+  	--profile root-ca --no-password --insecure --force
+	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
+		--profile intermediate-ca --not-after 8760h --no-password --insecure \
+		--ca root.crt --ca-key root.key --force
+	mkdir -p etc
+	mv -f issuer.* root.* etc/
 
 mp:
 	$(MAKE) linkerd-trust-anchor
 	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
 	m delete --all --purge
-	$(MAKE) defn0 defn1
-	defn0 linkerd multicluster link --cluster-name defn0 | defn1 $(k) apply -f -
-	defn1 linkerd multicluster link --cluster-name defn1 | defn0 $(k) apply -f -
-	defn0 $(k) apply -k "github.com/linkerd/website/multicluster/west/"
-	defn1 $(k) apply -k "github.com/linkerd/website/multicluster/east/"
-	for a in defn0 defn1; do \
+	$(MAKE) west east
+	west linkerd multicluster link --cluster-name west | east $(k) apply -f -
+	east linkerd multicluster link --cluster-name east | west $(k) apply -f -
+	west $(k) apply -k "github.com/linkerd/website/multicluster/west/"
+	east $(k) apply -k "github.com/linkerd/website/multicluster/east/"
+	for a in west east; do \
 		$$a $(MAKE) wait; \
 		$$a linkerd mc check; \
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		done
-	defn0 kn test exec -c nginx -it $$(defn0 kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-defn1:9898"
-	defn1 kn test exec -c nginx -it $$(defn1 kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-defn0:9898"
+	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
+	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
 
 mp-*:
 	$(MAKE) $(first)
-	bin/m-join-k3s $(first) defn0
+	bin/m-join-k3s $(first) west
 
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
-	helm  repo update
+	helm repo update
 
 mp-linkerd:
 	linkerd check --pre
@@ -209,7 +175,7 @@ mp-hubble-status:
 mp-hubble-observe:
 	hubble --server localhost:4245 observe -f
 
-defn0 defn1:
+west east:
 	-m delete --purge $@
 	m launch -c 2 -d 50G -m 2048M --network en0 -n $@
 	cat ~/.ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
