@@ -182,8 +182,8 @@ west east:
 	m exec $@ git clone https://github.com/amanibhavam/homedir
 	m exec $@ homedir/bin/copy-homedir
 	m exec $@ -- sudo mount bpffs -t bpf /sys/fs/bpf
-	mkdir -p ~/.config/$@/tailscale
-	sudo multipass mount $$HOME/.config/$@/tailscale $@:/var/lib/tailscale
+	mkdir -p ~/.pasword-store/config/$@/tailscale
+	sudo multipass mount $$HOME/.password-store/config/$@/tailscale $@:/var/lib/tailscale
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $@ -- sudo apt-key add -
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $@ -- sudo tee /etc/apt/sources.list.d/tailscale.list
 	m exec $@ -- sudo apt-get update
