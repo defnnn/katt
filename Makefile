@@ -145,6 +145,8 @@ mp:
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		done
+	defn0 kn test exec -c nginx -it $$(defn0 kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-defn1:9898"
+	defn1 kn test exec -c nginx -it $$(defn1 kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-defn0:9898"
 
 mp-*:
 	$(MAKE) $(first)
