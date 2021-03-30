@@ -13,7 +13,7 @@ kld := kubectl -n linkerd
 klm := kubectl -n linkerd-multicluster
 kd := kubectl -n external-dns
 
-bridge := mpbr0
+bridge := en0
 
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
