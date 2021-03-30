@@ -13,6 +13,8 @@ kld := kubectl -n linkerd
 klm := kubectl -n linkerd-multicluster
 kd := kubectl -n external-dns
 
+bridge := mpbr0
+
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
@@ -98,6 +100,7 @@ linkerd-trust-anchor:
 
 mp:
 	$(MAKE) linkerd-trust-anchor
+	touch ~/.ssh/id_rsa
 	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
 	m delete --all --purge
 	$(MAKE) west east
@@ -182,7 +185,7 @@ mp-hubble-observe:
 
 west east:
 	-m delete --purge $@
-	m launch -c 2 -d 50G -m 2048M --network en0 -n $@
+	m launch -c 2 -d 20G -m 2048M --network $(bridge) -n $@
 	cat ~/.ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
 	m exec $@ git clone https://github.com/amanibhavam/homedir
 	m exec $@ homedir/bin/copy-homedir
