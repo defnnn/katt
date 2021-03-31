@@ -8,10 +8,10 @@ function main {
 
   local mpip=
   while [[ -z "${mpip}" ]]; do
-    mpip="$(m info --format json $mphost | jq -r --arg mp $mphost '.info[$mp].ipv4[0]')"
+    mpip="$(m info --format json $mphost | jq -r --arg mp $mphost '.info[$mp].ipv4[-1]')"
   done
 
-  local mpts="$(m info --format json "$mphost" | jq -r --arg mp $mphost '.info[$mp].ipv4[1]')"
+  local mpts="$(m info --format json "$mphost" | jq -r --arg mp $mphost '.info[$mp].ipv4[-1]')"
 
   rm -f ~/.kube/$mphost.conf
   touch ~/.kube/$mphost.conf
