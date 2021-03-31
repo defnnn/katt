@@ -15,6 +15,8 @@ kd := kubectl -n external-dns
 
 bridge := en0
 
+cilium := 1.10.0-rc0
+
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
@@ -142,8 +144,7 @@ mp-linkerd:
 	$(MAKE) wait
 
 mp-cilium:
-	#kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-install.yaml
-	helm install cilium cilium/cilium --version 1.9.5 \
+	helm install cilium cilium/cilium --version $(cilium) \
    --namespace kube-system \
    --set nodeinit.enabled=true \
    --set kubeProxyReplacement=partial \
@@ -156,8 +157,7 @@ mp-cilium:
    --set ipam.mode=kubernetes \
 	 --set nodeinit.restartPods=true \
 	 --set operator.replicas=1
-	#kubectl apply -f https://raw.githubusercontent.com/cilium/cilium/v1.9/install/kubernetes/quick-hubble-install.yaml
-	helm upgrade cilium cilium/cilium --version 1.9.5 \
+	helm upgrade cilium cilium/cilium --version $(cilium) \
    --namespace kube-system \
    --reuse-values \
    --set hubble.listenAddress=":4244" \
