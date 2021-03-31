@@ -115,12 +115,13 @@ mp-join:
 	east $(k) apply -k "github.com/linkerd/website/multicluster/east/"
 	for a in west east; do \
 		$$a $(MAKE) wait; \
-		$$a linkerd mc check; \
 		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
 		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
 		done
 
 mp-join-test:
+	west linkerd mc check
+	east linkerd mc check
 	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
 	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
 
