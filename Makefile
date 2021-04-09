@@ -105,7 +105,11 @@ mp:
 	touch ~/.ssh/id_rsa
 	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
 	m delete --all --purge
-	$(MAKE) west east
+	$(MAKE) west
+
+mpp:
+	$(MAKE) mp
+	$(MAKE) east
 	west linkerd multicluster link --cluster-name west | east $(k) apply -f -
 	east linkerd multicluster link --cluster-name east | west $(k) apply -f -
 	$(MAKE) mp-join
@@ -192,7 +196,7 @@ west east:
 	m exec $@ homedir/bin/copy-homedir
 	m exec $@ -- sudo mount bpffs -t bpf /sys/fs/bpf
 	mkdir -p ~/.pasword-store/config/$@/tailscale
-	sudo multipass mount $$HOME/.password-store/config/$@/tailscale $@:/var/lib/tailscale
+	sudo multipass mount $$HOME/.config/$@/tailscale $@:/var/lib/tailscale
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $@ -- sudo apt-key add -
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $@ -- sudo tee /etc/apt/sources.list.d/tailscale.list
 	m exec $@ -- sudo apt-get update
