@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+function main {
+  set -exfu
+
+  local server="$1"; shift
+  local server_name="$1"; shift
+  local agent="$1"; shift
+  local agent_name="$1"; shift
+  
+  k3sup join \
+    --ip "${agent}" --user "${agent_name}" --server-ip "${server}" --server-user "${server_name}" \
+    --k3s-extra-args "--no-flannel --node-ip=${agent} --node-external-ip ${agent}" "$@"
+}
+
+main "$@"
