@@ -15,9 +15,7 @@ function main {
 
   local mpserverip="$(m info --format json $mpserver | jq -r --arg mp $mpserver '.info[$mp].ipv4[0]')"
 
-  k3sup join \
-    --ip "${mpip}" --user ubuntu --server-ip "${mpserverip}" --server-user ubuntu \
-    --k3s-extra-args "--no-flannel --node-ip=$mpip --node-external-ip $mpts" "$@"
+  bin/join "${mpserverip}" ubuntu "${mpip}" ubuntu
 }
 
 main "$@"
