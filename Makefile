@@ -145,9 +145,9 @@ mp-linkerd:
 		--identity-trust-anchors-file etc/root.crt \
 		--identity-issuer-certificate-file etc/issuer.crt \
   	--identity-issuer-key-file etc/issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
-	linkerd check
+	while true; do if linkerd check; then break; fi; sleep 10; done
 	linkerd multicluster install | $(k) apply -f -
-	linkerd multicluster check
+	-linkerd multicluster check
 	$(MAKE) wait
 
 cilium:
