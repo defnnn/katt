@@ -137,6 +137,9 @@ once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
 	helm repo update
 
+linkerd:
+	$(MAKE) mp-linkerd
+
 mp-linkerd:
 	linkerd check --pre
 	linkerd install \
@@ -147,6 +150,9 @@ mp-linkerd:
 	linkerd multicluster install | $(k) apply -f -
 	linkerd multicluster check
 	$(MAKE) wait
+
+cilium:
+	$(MAKE) mp-cilium
 
 mp-cilium:
 	helm install cilium cilium/cilium --version $(cilium) \
