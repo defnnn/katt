@@ -108,7 +108,6 @@ mp:
 	$(MAKE) west
 
 mpp:
-	$(MAKE) mp
 	$(MAKE) east
 	west linkerd multicluster link --cluster-name west | east $(k) apply -f -
 	east linkerd multicluster link --cluster-name east | west $(k) apply -f -
