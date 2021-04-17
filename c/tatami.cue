@@ -1,9 +1,0 @@
-_petHostname: "tatami.defn.jp"
-
-_networking: {
-	serviceSubnet: "10.32.0.0/17"
-	podSubnet:     "10.32.128.0/17"
-}
-
-_address_pools: "traefik-proxy": "172.25.2.25/32"
-_address_pools: "general":       "172.25.2.100-172.25.2.149"

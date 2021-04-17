@@ -10,7 +10,6 @@ kg := kubectl -n gloo-system
 kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
 kld := kubectl -n linkerd
-klm := kubectl -n linkerd-multicluster
 kd := kubectl -n external-dns
 
 bridge := en0
@@ -38,7 +37,7 @@ kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
 %-traefik:
-	cue export --out yaml c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
+	cue export --out yaml c/traefik.cue > k/traefik/config/traefik.yaml
 	$(first) $(kt) apply -f k/traefik/crds
 	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
 
