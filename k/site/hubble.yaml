@@ -1,0 +1,27 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  namespace: kube-system
+  name: hubble-ui
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  namespace: kube-system
+  name: hubble-ui
+  labels:
+    app.kubernetes.io/name: hubble-ui
+spec:
+  tls: {}
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostRegexp(`hubble.{domain:.+}`)
+    kind: Rule
+    services:
+    - name: hubble-ui
+      kind: Service
+      port: 80

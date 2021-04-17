@@ -39,13 +39,36 @@ spec:
    name: game
    labels:
      app: game
-   annotations:
-     metallb.universe.tf/address-pool: general
  spec:
-   type: LoadBalancer
+   type: ClusterIP
    selector:
      app: game
    ports:
    - port: 80
      name: game
      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: game
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: game
+  labels:
+    app.kubernetes.io/name: game
+spec:
+  tls: {}
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostRegexp(`game.{domain:.+}`)
+    kind: Rule
+    services:
+    - name: game
+      kind: Service
+      port: 80

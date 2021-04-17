@@ -153,9 +153,10 @@ mp-linkerd:
 	linkerd install \
 		--identity-trust-anchors-file etc/root.crt \
 		--identity-issuer-certificate-file etc/issuer.crt \
-  	--identity-issuer-key-file etc/issuer.key | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
+  	--identity-issuer-key-file etc/issuer.key | $(k) apply -f -
 	while true; do if linkerd check; then break; fi; sleep 10; done
 	linkerd multicluster install | $(k) apply -f -
+	linkerd viz install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	-linkerd multicluster check
 	$(MAKE) wait
 
