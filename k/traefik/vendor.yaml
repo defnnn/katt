@@ -197,8 +197,6 @@ items:
         helm.sh/chart: traefik-9.14.2
         app.kubernetes.io/managed-by: Helm
         app.kubernetes.io/instance: katt
-      annotations:
-        metallb.universe.tf/address-pool: traefik-proxy
     spec:
       type: LoadBalancer
       selector:

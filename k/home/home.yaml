@@ -58,7 +58,6 @@ metadata:
   labels:
     app: home
   annotations:
-    metallb.universe.tf/address-pool: general
     external-dns.alpha.kubernetes.io/hostname: home.ryokan.defn.jp
 spec:
   type: LoadBalancer
