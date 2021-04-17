@@ -31,3 +31,14 @@ vault write auth/kubernetes/role/example \
         bound_service_account_namespaces=default \
         policies="admin" \
         ttl=24h
+
+Permissions:
+Zone - DNS - Edit
+Zone - Zone - Read
+
+Zone Resources:
+Include - All Zones
+
+no newline!
+
+sops -e -i CF_API_TOKEN.sops

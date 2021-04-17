@@ -38,9 +38,9 @@ kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
 %-traefik:
-	cue export --out yaml c/.$(first).cue c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
-	$(kt) apply -f k/traefik/crds
-	kustomize build k/traefik | linkerd inject --ingress - | $(kt) apply -f -
+	cue export --out yaml c/$(first).cue c/traefik.cue > k/traefik/config/traefik.yaml
+	$(first) $(kt) apply -f k/traefik/crds
+	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
 
 gloo:
 	#glooctl install knative -g
@@ -51,17 +51,17 @@ gloo:
 
 external-secrets:
 	$(kx) apply -f k/external-secrets/crds
-	kustomize build --enable_alpha_plugins k/external-secrets | $(kx) apply -f -
+	kustomize build --enable-alpha-plugins k/external-secrets | $(kx) apply -f -
 
 cert-manager:
-	kustomize build --enable_alpha_plugins k/cert-manager | $(k) apply -f -
+	kustomize build --enable-alpha-plugins k/cert-manager | $(k) apply -f -
 
 home:
-	kustomize build --enable_alpha_plugins k/home | $(k) apply -f -
+	kustomize build --enable-alpha-plugins k/home | $(k) apply -f -
 
 %-site:
-	kustomize build k/site | linkerd inject - | $(k) apply -f -
-	$(k) apply -f k/site/$(first).yaml
+	$(first) kustomize build k/site | $(first) linkerd inject - | $(first) $(k) apply -f -
+	$(first) $(k) apply -f k/site/$(first).yaml
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
@@ -99,6 +99,15 @@ linkerd-trust-anchor:
 		--ca root.crt --ca-key root.key --force
 	mkdir -p etc
 	mv -f issuer.* root.* etc/
+
+toge:
+	bin/cluster 100.121.251.124 defn $(first)
+	$(first) $(MAKE) $(first)-inner
+
+toge-inner:
+	$(MAKE) cilium linkerd cert-manager wait
+	$(MAKE) $(first)-traefik wait
+	$(MAKE) $(first)-site
 
 mp:
 	$(MAKE) linkerd-trust-anchor
