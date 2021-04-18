@@ -89,16 +89,13 @@ katt west:
 east:
 	$(MAKE) $(first)-mp
 
-east-meets-west:
-	west linkerd multicluster link --cluster-name west | east $(k) apply -f -
-	east linkerd multicluster link --cluster-name east | west $(k) apply -f -
-	west $(k) apply -k "github.com/linkerd/website/multicluster/west/"
-	east $(k) apply -k "github.com/linkerd/website/multicluster/east/"
-	for a in west east; do \
-		$$a $(MAKE) wait; \
-		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
-		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
-		done
+west-east todo-toge:
+	$(first) linkerd multicluster link --cluster-name $(first) | $(second) $(k) apply -f -
+	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
+	$(first) $(MAKE) wait
+	$(second) $(MAKE) wait
+	$(first) linkerd mc check
+	$(second) linkerd mc check
 
 mp-join-test:
 	west linkerd mc check
