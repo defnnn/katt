@@ -6,7 +6,7 @@ metadata:
   namespace: cert-manager
 spec:
   acme:
-    email: youremail
+    email: TODO_CF_EMAIL
     server: https://acme-staging-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-staging-account-key
@@ -14,13 +14,13 @@ spec:
     - dns01:
         cnameStrategy: None
         cloudflare:
-          email: yourcfemail
+          email: TODO_LE_EMAIL
           apiTokenSecretRef:
             name: cert-manager-secret
             key: CF_API_TOKEN
       selector:
         dnsZones:
-        - yourzone
+        - TODO_ZONE
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -29,7 +29,7 @@ metadata:
   namespace: cert-manager
 spec:
   acme:
-    email: youremail
+    email: TODO_CF_EMAIL
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-prod-account-key
@@ -37,26 +37,26 @@ spec:
     - dns01:
         cnameStrategy: None
         cloudflare:
-          email: yourcfemail
+          email: TODO_LE_EMAIL
           apiTokenSecretRef:
             name: cert-manager-secret
             key: CF_API_TOKEN
       selector:
         dnsZones:
-        - yourzone
+        - TODO_ZONE
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: wild.yoursub.yourzone
+  name: katt-wildcard-secret
   namespace: traefik
 spec:
-  secretName: wild.yoursub.yourzone
+  secretName: katt-wildcard-secret
   issuerRef:
     name: letsencrypt-staging
     kind: ClusterIssuer
   dnsNames:
-  - '*.yoursub.yourzone'
+  - TODO_WILDCARD_ZONE
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: TLSStore
@@ -65,4 +65,4 @@ metadata:
   namespace: traefik
 spec:
   defaultCertificate:
-    secretName: wild.yoursub.yourzone
+    secretName: katt-wildcard-secret

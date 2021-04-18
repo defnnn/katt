@@ -30,11 +30,6 @@ flagger:
 kruise:
 	kustomize build k/kruise | $(k) apply -f -
 
-%-traefik:
-	cue export --out yaml c/traefik.cue > k/traefik/config/traefik.yaml
-	$(first) $(kt) apply -f k/traefik/crds
-	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
-
 gloo:
 	#glooctl install knative -g
 	glooctl install gateway --values k/gloo/values.yaml --with-admin-console
@@ -51,10 +46,6 @@ cert-manager:
 
 home:
 	kustomize build --enable-alpha-plugins k/home | $(k) apply -f -
-
-%-site:
-	$(first) kustomize build k/site | $(first) linkerd inject - | $(first) $(k) apply -f -
-	$(first) $(k) apply -f k/site/$(first).yaml
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
@@ -83,6 +74,9 @@ pull:
 
 logs:
 	docker-compose logs -f
+
+toge-reset:
+		ssh $(first).defn.in sudo /usr/local/bin/k3s-uninstall.sh
 
 toge:
 	bin/cluster 100.121.251.124 defn $(first)
@@ -130,11 +124,17 @@ mp-join-test:
 %-inner:
 	$(MAKE) cilium linkerd wait
 	$(MAKE) cert-manager wait
+	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
+%-traefik:
+	cue export --out yaml c/traefik.cue > k/traefik/config/traefik.yaml
+	$(first) $(kt) apply -f k/traefik/crds
+	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
+
 %-site:
-	$(MAKE) $(first)-traefik wait
-	$(MAKE) $(first)-site
+	$(first) kustomize build k/site/$(first) | $(first) linkerd inject - | $(first) $(k) apply -f -
+
 
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update

@@ -1,0 +1,6 @@
+- op: replace
+  path: /spec/dnsNames/0
+  value: '*.SOMETHING'
+- op: replace
+  path: /spec/issuerRef/name
+  value: letsencrypt-staging
