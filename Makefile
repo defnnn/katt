@@ -114,10 +114,8 @@ mp-join-test:
 
 %-mp:
 	-m delete --purge $(first)
-	m launch -c 2 -d 20G -m 2048M --network $(bridge) -n $(first)
+	m launch -c 4 -d 40G -m 2048M --network $(bridge) -n $(first)
 	cat ~/.ssh/id_rsa.pub | m exec $(first) -- tee -a .ssh/authorized_keys
-	m exec $(first) git clone https://github.com/amanibhavam/homedir
-	m exec $(first) homedir/bin/copy-homedir
 	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
 	mkdir -p ~/.pasword-store/config/$(first)/tailscale
 	sudo multipass mount $$HOME/.config/$(first)/tailscale $(first):/var/lib/tailscale
@@ -130,7 +128,9 @@ mp-join-test:
 	$(MAKE) $@-inner
 
 %-inner:
-	$(MAKE) cilium linkerd cert-manager wait
+	$(MAKE) cilium linkerd wait
+	sleep 60
+	$(MAKE) cert-manager wait
 	$(MAKE) $(first)-site
 
 %-site:
