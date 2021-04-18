@@ -134,8 +134,8 @@ mp-join-test:
 	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
 
 %-site:
+	cd k/site && make $(first)-gen
 	$(first) kustomize build k/site/$(first) | $(first) linkerd inject - | $(first) $(k) apply -f -
-
 
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
