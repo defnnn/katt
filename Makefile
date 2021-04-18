@@ -75,11 +75,11 @@ pull:
 logs:
 	docker-compose logs -f
 
-toge-reset:
+%-reset:
 		ssh $(first).defn.in sudo /usr/local/bin/k3s-uninstall.sh
 
-toge:
-	bin/cluster 100.121.251.124 defn $(first)
+gojo todo toge nue:
+	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
 	$(first) $(MAKE) $(first)-inner
 
 katt west:
