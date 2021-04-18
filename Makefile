@@ -129,7 +129,6 @@ mp-join-test:
 
 %-inner:
 	$(MAKE) cilium linkerd wait
-	sleep 60
 	$(MAKE) cert-manager wait
 	$(MAKE) $(first)-site
 
