@@ -19,12 +19,6 @@ cilium := 1.10.0-rc0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-katt: # Install all the goodies
-	$(MAKE) linkerd wait
-	$(MAKE) $(PET)-traefik wait
-	$(MAKE) vault-agent gloo cert-manager flagger kruise wait
-	$(MAKE) $(PET)-site
-
 vault-agent:
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
@@ -90,6 +84,72 @@ pull:
 logs:
 	docker-compose logs -f
 
+toge:
+	bin/cluster 100.121.251.124 defn $(first)
+	$(first) $(MAKE) $(first)-inner
+
+west:
+	m delete --all --purge
+	$(MAKE) $(first)-mp
+
+east:
+	$(MAKE) $(first)-mp
+
+west-east:
+	west $(k) apply -k "github.com/linkerd/website/multicluster/west/"
+	east $(k) apply -k "github.com/linkerd/website/multicluster/east/"
+	for a in west east; do \
+		$$a $(MAKE) wait; \
+		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
+		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
+		done
+
+%-mp:
+	-m delete --purge $(first)
+	m launch -c 2 -d 20G -m 2048M --network $(bridge) -n $(first)
+	cat ~/.ssh/id_rsa.pub | m exec $(first) -- tee -a .ssh/authorized_keys
+	m exec $(first) git clone https://github.com/amanibhavam/homedir
+	m exec $(first) homedir/bin/copy-homedir
+	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
+	mkdir -p ~/.pasword-store/config/$(first)/tailscale
+	sudo multipass mount $$HOME/.config/$(first)/tailscale $(first):/var/lib/tailscale
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $(first) -- sudo apt-key add -
+	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $(first) -- sudo tee /etc/apt/sources.list.d/tailscale.list
+	m exec $(first) -- sudo apt-get update
+	m exec $(first) -- sudo apt-get install tailscale
+	m exec $(first) -- sudo tailscale up
+	bin/m-install-k3s $(first) $(first)
+	$(MAKE) $@-inner
+
+%-inner:
+	$(MAKE) cilium linkerd cert-manager wait
+	$(MAKE) $(first)-site
+
+%-site:
+	$(MAKE) $(first)-traefik wait
+	$(MAKE) $(first)-site
+
+mpp:
+	$(MAKE) east
+	west linkerd multicluster link --cluster-name west | east $(k) apply -f -
+	east linkerd multicluster link --cluster-name east | west $(k) apply -f -
+	$(MAKE) mp-join
+
+mp-join-test:
+	west linkerd mc check
+	east linkerd mc check
+	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
+	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
+
+once:
+	helm repo add cilium https://helm.cilium.io/ --force-update
+	helm repo update
+
+init:
+	$(MAKE) linkerd-trust-anchor
+	touch ~/.ssh/id_rsa
+	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
+
 linkerd-trust-anchor:
 	step certificate create root.linkerd.cluster.local root.crt root.key \
   	--profile root-ca --no-password --insecure --force
@@ -99,50 +159,6 @@ linkerd-trust-anchor:
 	mkdir -p etc
 	mv -f issuer.* root.* etc/
 
-toge:
-	bin/cluster 100.121.251.124 defn $(first)
-	$(first) $(MAKE) $(first)-inner
-
-toge-inner:
-	$(MAKE) cilium linkerd cert-manager wait
-	$(MAKE) $(first)-traefik wait
-	$(MAKE) $(first)-site
-
-mp:
-	$(MAKE) linkerd-trust-anchor
-	touch ~/.ssh/id_rsa
-	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
-	m delete --all --purge
-	$(MAKE) west
-
-mpp:
-	$(MAKE) east
-	west linkerd multicluster link --cluster-name west | east $(k) apply -f -
-	east linkerd multicluster link --cluster-name east | west $(k) apply -f -
-	$(MAKE) mp-join
-
-mp-join:
-	west $(k) apply -k "github.com/linkerd/website/multicluster/west/"
-	east $(k) apply -k "github.com/linkerd/website/multicluster/east/"
-	for a in west east; do \
-		$$a $(MAKE) wait; \
-		$$a $(k) label svc -n test podinfo mirror.linkerd.io/exported=true; \
-		$$a $(k) label svc -n test frontend mirror.linkerd.io/exported=true; \
-		done
-
-mp-join-test:
-	west linkerd mc check
-	east linkerd mc check
-	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
-	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
-
-mp-*:
-	$(MAKE) $(first)
-	bin/m-join-k3s $(first) west
-
-once:
-	helm repo add cilium https://helm.cilium.io/ --force-update
-	helm repo update
 
 linkerd:
 	$(MAKE) mp-linkerd
@@ -185,38 +201,3 @@ mp-cilium:
 	-$(MAKE) wait
 	sleep 30
 	$(MAKE) wait
-
-mp-cilium-test:
-	kubectl create ns cilium-test
-	kubectl apply -n cilium-test -f https://raw.githubusercontent.com/cilium/cilium/v1.9/examples/kubernetes/connectivity-check/connectivity-check.yaml
-
-mp-hubble-ui:
-	kubectl port-forward -n kube-system svc/hubble-ui --address 0.0.0.0 --address :: 12000:80
-
-mp-hubble-relay:
-	kubectl port-forward -n kube-system svc/hubble-relay --address 0.0.0.0 --address :: 4245:80
-
-mp-hubble-status:
-	hubble --server localhost:4245 status
-
-mp-hubble-observe:
-	hubble --server localhost:4245 observe -f
-
-west east:
-	-m delete --purge $@
-	m launch -c 2 -d 20G -m 2048M --network $(bridge) -n $@
-	cat ~/.ssh/id_rsa.pub | m exec $@ -- tee -a .ssh/authorized_keys
-	m exec $@ git clone https://github.com/amanibhavam/homedir
-	m exec $@ homedir/bin/copy-homedir
-	m exec $@ -- sudo mount bpffs -t bpf /sys/fs/bpf
-	mkdir -p ~/.pasword-store/config/$@/tailscale
-	sudo multipass mount $$HOME/.config/$@/tailscale $@:/var/lib/tailscale
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $@ -- sudo apt-key add -
-	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $@ -- sudo tee /etc/apt/sources.list.d/tailscale.list
-	m exec $@ -- sudo apt-get update
-	m exec $@ -- sudo apt-get install tailscale
-	m exec $@ -- sudo tailscale up
-	bin/m-install-k3s $@ $@
-	$@ $(MAKE) mp-cilium
-	$@ $(MAKE) mp-linkerd
-	$@ k apply -f nginx.yaml
