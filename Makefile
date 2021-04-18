@@ -88,7 +88,7 @@ toge:
 	bin/cluster 100.121.251.124 defn $(first)
 	$(first) $(MAKE) $(first)-inner
 
-west:
+katt west:
 	m delete --all --purge
 	$(MAKE) $(first)-mp
 
