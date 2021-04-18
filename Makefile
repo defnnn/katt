@@ -128,7 +128,7 @@ mp-join-test:
 	$(MAKE) $(first)-site
 
 %-traefik:
-	cue export --out yaml c/traefik.cue > k/traefik/config/traefik.yaml
+	# cue export --out yaml c/traefik.cue > k/traefik/config/traefik.yaml
 	$(first) $(kt) apply -f k/traefik/crds
 	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
 
