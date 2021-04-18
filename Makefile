@@ -90,7 +90,7 @@ toge:
 
 katt west:
 	m delete --all --purge
-	$(MAKE) $(first)-mp
+	$(first) $(MAKE) $(first)-mp
 
 east:
 	$(MAKE) $(first)-mp
@@ -125,7 +125,7 @@ mp-join-test:
 	m exec $(first) -- sudo apt-get install tailscale
 	m exec $(first) -- sudo tailscale up
 	bin/m-install-k3s $(first) $(first)
-	$(MAKE) $@-inner
+	$(first) $(MAKE) $@-inner
 
 %-inner:
 	$(MAKE) cilium linkerd wait
