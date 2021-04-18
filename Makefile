@@ -108,7 +108,7 @@ mp-join-test:
 
 %-mp:
 	-m delete --purge $(first)
-	m launch -c 4 -d 40G -m 2048M --network $(bridge) -n $(first)
+	m launch -c 2 -d 20G -m 2048M -n $(first)
 	cat ~/.ssh/id_rsa.pub | m exec $(first) -- tee -a .ssh/authorized_keys
 	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
 	mkdir -p ~/.pasword-store/config/$(first)/tailscale
@@ -154,7 +154,6 @@ linkerd-trust-anchor:
 		--ca root.crt --ca-key root.key --force
 	mkdir -p etc
 	mv -f issuer.* root.* etc/
-
 
 linkerd:
 	$(MAKE) mp-linkerd
