@@ -122,8 +122,9 @@ mp-join-test:
 	$(first) $(MAKE) $@-inner
 
 %-inner:
-	$(MAKE) cilium linkerd wait
+	$(MAKE) cilium wait
 	$(MAKE) cert-manager wait
+	$(MAKE) linkerd wait
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
