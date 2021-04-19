@@ -78,8 +78,12 @@ logs:
 %-reset:
 		ssh $(first).defn.in sudo /usr/local/bin/k3s-uninstall.sh
 
-gojo todo toge nue:
+gojo todo toge:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
+	$(first) $(MAKE) $(first)-inner
+
+nue gyoku:
+	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) $(first)-inner
 
 katt west:
@@ -89,7 +93,7 @@ katt west:
 east:
 	$(MAKE) $(first)-mp
 
-west-east todo-toge:
+todo-toge todo-nue todo-gyoku:
 	$(first) linkerd multicluster link --cluster-name $(first) | $(second) $(k) apply -f -
 	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
 	$(first) $(MAKE) wait
@@ -98,8 +102,6 @@ west-east todo-toge:
 	$(second) linkerd mc check
 
 mp-join-test:
-	west linkerd mc check
-	east linkerd mc check
 	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
 	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
 
