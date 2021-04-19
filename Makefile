@@ -52,7 +52,7 @@ registry: # Run a local registry
 
 wait:
 	sleep 5
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false')" != "Running true" ]]; do \
+	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false' | grep -v 'cilium-node-init' )" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
 up: # Bring up homd
@@ -87,7 +87,9 @@ nue gyoku:
 	$(first) $(MAKE) $(first)-inner
 
 katt:
+	-k3d cluster delete $(first)
 	k3d cluster create $(first) -p '443:443@server[0]' --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
+	docker cp bash k3d-katt-server-0:/bin/bash
 	docker exec -it k3d-katt-server-0 mount bpffs /sys/fs/bpf -t bpf
 	docker exec -it k3d-katt-server-0 mount --make-shared /sys/fs/bpf
 	$(MAKE) $(first)-inner
@@ -201,3 +203,7 @@ mp-cilium:
 	-$(MAKE) wait
 	sleep 30
 	$(MAKE) wait
+
+bash:
+	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
+	chmod 755 bash
