@@ -90,9 +90,7 @@ katt:
 	k3d cluster create $(first) --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
 	docker exec -it k3d-katt-server-0 mount bpffs /sys/fs/bpf -t bpf
 	docker exec -it k3d-katt-server-0 mount --make-shared /sys/fs/bpf
-	helm install cilium cilium/cilium --version 1.9.1 \
-		--namespace kube-system --set kubeProxyReplacement=partial --set hostServices.enabled=false --set externalIPs.enabled=true --set nodePort.enabled=true --set hostPort.enabled=true --set bpf.masquerade=false --set image.pullPolicy=IfNotPresent --set ipam.mode=kubernetes
-	helm upgrade cilium cilium/cilium --version 1.9.1 --namespace kube-system --reuse-values --set hubble.listenAddress=":4244" --set hubble.relay.enabled=true --set hubble.ui.enabled=true
+	$(MAKE) $(first)-inner
 
 west:
 	m delete --all --purge
