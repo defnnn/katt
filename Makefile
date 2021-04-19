@@ -87,7 +87,7 @@ nue gyoku:
 	$(first) $(MAKE) $(first)-inner
 
 katt:
-	k3d cluster create $(first) --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
+	k3d cluster create $(first) -p '443:443@server[0]' --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
 	docker exec -it k3d-katt-server-0 mount bpffs /sys/fs/bpf -t bpf
 	docker exec -it k3d-katt-server-0 mount --make-shared /sys/fs/bpf
 	$(MAKE) $(first)-inner
