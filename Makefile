@@ -86,7 +86,10 @@ nue gyoku:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) $(first)-inner
 
-katt west:
+katt:
+	k3d cluster create $(first) --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
+
+west:
 	m delete --all --purge
 	$(first) $(MAKE) $(first)-mp
 
