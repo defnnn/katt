@@ -86,6 +86,10 @@ nue gyoku maki miwa:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) $(first)-inner
 
+ken:
+	bin/cluster $(ip) root $(first)
+	$(first) $(MAKE) $(first)-inner
+
 katt:
 	-k3d cluster delete $(first)
 	k3d cluster create $(first) -p '443:443@server[0]' --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
