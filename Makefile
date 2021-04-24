@@ -101,7 +101,7 @@ west:
 east:
 	$(MAKE) $(first)-mp
 
-todo-toge todo-nue todo-gyoku:
+todo-%:
 	$(first) linkerd multicluster link --cluster-name $(first) | $(second) $(k) apply -f -
 	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
 	$(first) $(MAKE) wait
