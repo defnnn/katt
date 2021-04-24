@@ -82,7 +82,7 @@ gojo todo toge:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
 	$(first) $(MAKE) $(first)-inner
 
-nue gyoku:
+nue gyoku maki miwa:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) $(first)-inner
 
