@@ -27,9 +27,9 @@ spec:
     spec:
       containers:
       - name: hello
-        image: paulbouwer/hello-kubernetes:1.8
+        image: cilium/echoserver
         ports:
         - containerPort: 8080
         env:
-        - name: MESSAGE
-          value: Hello from the first deployment!
+          - name: PORT
+            value: "8080"
