@@ -3,9 +3,10 @@ package config
 apiVersion: "kustomize.config.k8s.io/v1beta1"
 kind:       "Kustomization"
 
-bases: [
+bases: *[
 	"../base",
-]
+	"../base-linkerd",
+] | [...]
 
 patches: [{
 	path: "patch-cluster-issuer.yaml"
