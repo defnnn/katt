@@ -91,12 +91,9 @@ ken:
 	$(first) $(MAKE) $(first)-inner
 
 katt:
-	-k3d cluster delete $(first)
-	k3d cluster create $(first) -p '443:443@server[0]' --k3s-server-arg "--disable=traefik" --no-lb --k3s-server-arg "--disable-network-policy" --k3s-server-arg "--flannel-backend=none"
-	docker cp bash k3d-katt-server-0:/bin/bash
-	docker exec -it k3d-katt-server-0 mount bpffs /sys/fs/bpf -t bpf
-	docker exec -it k3d-katt-server-0 mount --make-shared /sys/fs/bpf
-	$(MAKE) $(first)-inner
+	$(MAKE) cert-manager wait
+	$(MAKE) mp-linkerd wait
+	$(MAKE) $(first)-traefik
 
 west:
 	m delete --all --purge
@@ -168,6 +165,10 @@ linkerd-trust-anchor:
 
 linkerd:
 	$(MAKE) mp-linkerd
+	$(MAKE) linkerd-viz
+
+linkerd-viz:
+	linkerd viz install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 
 mp-linkerd:
 	linkerd check --pre
@@ -177,7 +178,6 @@ mp-linkerd:
   	--identity-issuer-key-file etc/issuer.key | $(k) apply -f -
 	while true; do if linkerd check; then break; fi; sleep 10; done
 	linkerd multicluster install | $(k) apply -f -
-	linkerd viz install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
 	-linkerd multicluster check
 	$(MAKE) wait
 
