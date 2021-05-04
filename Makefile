@@ -94,6 +94,7 @@ katt:
 	$(MAKE) cert-manager wait
 	$(MAKE) mp-linkerd wait
 	$(MAKE) $(first)-traefik
+	$(MAKE) $(first)-site
 
 west:
 	m delete --all --purge
