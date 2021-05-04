@@ -58,3 +58,45 @@ spec:
     targetPort: 8080
   selector:
     app: hello
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: hello
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: hi.katt.defn.in
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: hello
+              servicePort: 8080
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirect
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: false
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: https-redirect
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: HostRegexp(`{host:.+}`)
+    kind: Rule
+    services:
+    - kind: TraefikService
+      name: noop@internal
+    middlewares:
+    - name: https-redirect

@@ -203,6 +203,10 @@ items:
         app.kubernetes.io/name: traefik
         app.kubernetes.io/instance: katt
       ports:
+      - port: 80
+        name: web
+        targetPort: "web"
+        protocol: "TCP"
       - port: 443
         name: websecure
         targetPort: "websecure"
