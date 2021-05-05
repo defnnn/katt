@@ -119,7 +119,13 @@ katt-nue:
 	$(first) linkerd mc check
 
 katt-curl:
+	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name)" -- /bin/sh -c "while true; do curl -s http://hello:8080i; done" | grep --line-buffered Hostname
+
+katt-curl-nue:
 	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name)" -- /bin/sh -c "curl -s http://hello-nue:8080" | grep Hostname
+
+nue-stat:
+	nue linkerd viz stat --from deploy/linkerd-gateway --from-namespace linkerd-multicluster deploy/hello
 
 mp-join-test:
 	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
