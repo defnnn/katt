@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 first = $(word 1, $(subst -, ,$@))
 second = $(word 2, $(subst -, ,$@))
+third = $(word 3, $(subst -, ,$@))
 
 k := kubectl
 ks := kubectl -n kube-system
@@ -93,6 +94,7 @@ ken:
 katt:
 	$(MAKE) cert-manager wait
 	$(MAKE) mp-linkerd wait
+	$(MAKE) cluster-linkerd-lb wait
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
@@ -110,6 +112,11 @@ todo-%:
 	$(second) $(MAKE) wait
 	$(first) linkerd mc check
 	$(second) linkerd mc check
+
+katt-nue:
+	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
+	$(first) $(MAKE) wait
+	$(first) linkerd mc check
 
 mp-join-test:
 	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
@@ -166,6 +173,7 @@ linkerd-trust-anchor:
 
 linkerd:
 	$(MAKE) mp-linkerd
+	$(MAKE) cluster-linkerd-lb
 	$(MAKE) linkerd-viz
 
 linkerd-viz:
@@ -178,7 +186,15 @@ mp-linkerd:
 		--identity-issuer-certificate-file etc/issuer.crt \
   	--identity-issuer-key-file etc/issuer.key | $(k) apply -f -
 	while true; do if linkerd check; then break; fi; sleep 10; done
+
+cluster-linkerd-lb:
 	linkerd multicluster install | $(k) apply -f -
+	sleep 5
+	-linkerd multicluster check
+	$(MAKE) wait
+
+cluster-linkerd-np:
+	linkerd multicluster install --gateway-service-type NodePort | $(k) apply -f -
 	-linkerd multicluster check
 	$(MAKE) wait
 
