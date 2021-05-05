@@ -1,3 +1,3 @@
 allow_k8s_contexts('default')
 
-k8s_yaml('nginx.yaml')
+k8s_yaml('hello.yaml')

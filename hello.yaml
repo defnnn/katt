@@ -45,8 +45,6 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: hello
-  labels:
-    app: hello
 spec:
   tls: {}
   entryPoints:
@@ -54,6 +52,23 @@ spec:
   routes:
   - match: HostRegexp(`hello.{domain:.+}`)
     kind: Rule
+    services:
+    - name: hello
+      kind: Service
+      port: 8080
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: default
+spec:
+  tls: {}
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostRegexp(`{any:.+}`)
+    kind: Rule
+    priority: 1
     services:
     - name: hello
       kind: Service
