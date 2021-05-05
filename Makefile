@@ -118,6 +118,9 @@ katt-nue:
 	$(first) $(MAKE) wait
 	$(first) linkerd mc check
 
+katt-curl:
+	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name)" -- /bin/sh -c "curl -s http://hello-nue:8080" | grep Hostname
+
 mp-join-test:
 	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
 	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
