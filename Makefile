@@ -15,7 +15,7 @@ kd := kubectl -n external-dns
 
 bridge := en0
 
-cilium := 1.10.0-rc0
+cilium := 1.10.0-rc1
 
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
@@ -81,14 +81,17 @@ logs:
 
 gojo todo toge:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
+	$(first) $(MAKE) cilium wait
 	$(first) $(MAKE) $(first)-inner
 
 nue gyoku maki miwa:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
+	$(first) $(MAKE) cilium wait
 	$(first) $(MAKE) $(first)-inner
 
 ken:
 	bin/cluster $(ip) root $(first)
+	$(first) $(MAKE) cilium wait
 	$(first) $(MAKE) $(first)-inner
 
 katt:
@@ -105,7 +108,7 @@ west:
 east:
 	$(MAKE) $(first)-mp
 
-todo-%:
+todo-% nue-%:
 	$(first) linkerd multicluster link --cluster-name $(first) | $(second) $(k) apply -f -
 	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
 	$(first) $(MAKE) wait
@@ -144,20 +147,15 @@ mp-join-test:
 	m exec $(first) -- sudo apt-get install tailscale
 	m exec $(first) -- sudo tailscale up
 	bin/m-install-k3s $(first) $(first)
-	$(first) $(MAKE) cert-manager wait
-	$(first) $(MAKE) linkerd wait
-	$(first) $(MAKE) $(first)-traefik
-	$(first) $(MAKE) $(first)-site
+	$(first) $(MAKE) $(first)-inner
 
 %-inner:
-	$(MAKE) cilium wait
 	$(MAKE) cert-manager wait
 	$(MAKE) linkerd wait
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
 %-traefik:
-	# cue export --out yaml c/traefik.cue > k/traefik/config/traefik.yaml
 	$(first) $(kt) apply -f k/traefik/crds
 	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
 
