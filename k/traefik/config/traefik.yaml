@@ -1,6 +1,6 @@
 accessLog: {}
 log:
-  level: INFO
+  level: DEBUG
   format: json
 api:
   dashboard: "true"

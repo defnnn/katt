@@ -122,7 +122,7 @@ katt-nue:
 	$(first) linkerd mc check
 
 katt-curl:
-	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name | head -1)" -- /bin/sh -c "while true; do curl -s http://hello:8080i; done" | grep --line-buffered Hostname
+	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name | head -1)" -- /bin/sh -c "while true; do curl -s http://hello:8080; done" | grep --line-buffered Hostname
 
 katt-curl-nue:
 	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name | head -1)" -- /bin/sh -c "curl -s http://hello-nue:8080" | grep Hostname
