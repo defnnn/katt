@@ -94,8 +94,8 @@ ken: ~/.ssh/id_rsa
 	mkdir -p ~/.kube
 	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
 	sudo cp ~/.ssh/authorized_keys ~root/.ssh/authorized_keys
-	#$(first) $(MAKE) cilium wait
-	#$(first) $(MAKE) $(first)-inner
+	$(first) $(MAKE) cilium wait
+	$(first) $(MAKE) $(first)-inner
 
 katt:
 	$(MAKE) cert-manager wait
