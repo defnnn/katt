@@ -89,10 +89,12 @@ nue gyoku maki miwa:
 	$(first) $(MAKE) cilium wait
 	$(first) $(MAKE) $(first)-inner
 
-ken:
-	bin/cluster $(ip) root $(first)
-	$(first) $(MAKE) cilium wait
-	$(first) $(MAKE) $(first)-inner
+ken: ~/.ssh/id_rsa
+	cat ~/.ssh/id_rsa.pub | sudo tee ~root/.ssh/authorized_keys
+	mkdir -p ~/.kube
+	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
+	#$(first) $(MAKE) cilium wait
+	#$(first) $(MAKE) $(first)-inner
 
 katt:
 	$(MAKE) cert-manager wait
@@ -169,8 +171,14 @@ once:
 
 init:
 	$(MAKE) linkerd-trust-anchor
+	rm -f ~/.ssh/id_rsa
+	$(MAKE) ~/.ssh/id_rsa
+
+~/.ssh/id_rsa:
+	rm -f ~/.ssh/id_rsa
 	touch ~/.ssh/id_rsa
-	ssh-keygen -y -f ~/.ssh/id_rsa -N ''
+	chmod 600 ~/.ssh/id_rsa
+	yes | ssh-keygen -f ~/.ssh/id_rsa -N ''
 
 linkerd-trust-anchor:
 	step certificate create root.linkerd.cluster.local root.crt root.key \
