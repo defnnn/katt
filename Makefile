@@ -90,7 +90,7 @@ nue gyoku maki miwa:
 	$(first) $(MAKE) $(first)-inner
 
 ken: ~/.ssh/id_rsa
-	k3s-uninstall.sh
+	-k3s-uninstall.sh
 	cat ~/.ssh/id_rsa.pub | sudo tee ~root/.ssh/authorized_keys
 	mkdir -p ~/.kube
 	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
