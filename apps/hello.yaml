@@ -53,20 +53,3 @@ spec:
     - name: hello
       kind: Service
       port: 8080
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: default
-spec:
-  tls: {}
-  entryPoints:
-    - websecure
-  routes:
-  - match: HostRegexp(`{any:.+}`)
-    kind: Rule
-    priority: 1
-    services:
-    - name: hello
-      kind: Service
-      port: 8080
