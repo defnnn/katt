@@ -41,13 +41,13 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: hello-lamda
+  name: hello
 spec:
   tls: {}
   entryPoints:
     - websecure
   routes:
-  - match: HostRegexp(`hello-lamda.{domain:.+}`)
+  - match: HostRegexp(`hello.{domain:.+}`)
     kind: Rule
     services:
     - name: hello
