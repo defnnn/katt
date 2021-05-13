@@ -12,6 +12,7 @@ kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
 kld := kubectl -n linkerd
 kd := kubectl -n external-dns
+ka := kubectl -n argocd
 
 bridge := en0
 
@@ -157,6 +158,7 @@ mp-join-test:
 	$(MAKE) cert-manager wait
 	$(MAKE) linkerd wait
 	$(MAKE) $(first)-traefik
+	$(MAKE) argocd
 	$(MAKE) $(first)-site
 
 %-traefik:
@@ -237,9 +239,9 @@ mp-cilium:
 	sleep 30
 	$(MAKE) wait
 
-argo:
-	$(k) create ns argocd
-	$(kn) argocd apply -f k/argocd/main.yaml
+argocd:
+	-$(k) create ns argocd
+	$(ka) apply -f k/argocd/main.yaml
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
