@@ -89,9 +89,9 @@ nue gyoku maki miwa:
 	$(first) $(MAKE) cilium wait
 	$(first) $(MAKE) $(first)-inner
 
-ken: ~/.ssh/id_rsa
+ken:
 	-k3s-uninstall.sh
-	cat ~/.ssh/id_rsa.pub | sudo tee ~root/.ssh/authorized_keys
+	ssh-add -L | sudo tee ~root/.ssh/authorized_keys
 	mkdir -p ~/.kube
 	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
 	sudo cp ~/.ssh/authorized_keys ~root/.ssh/authorized_keys
@@ -141,7 +141,7 @@ mp-join-test:
 %-mp:
 	-m delete --purge $(first)
 	m launch -c 2 -d 20G -m 2048M -n $(first)
-	cat ~/.ssh/id_rsa.pub | m exec $(first) -- tee -a .ssh/authorized_keys
+	ssh-add -L | m exec $(first) -- tee -a .ssh/authorized_keys
 	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
 	mkdir -p ~/.pasword-store/config/$(first)/tailscale
 	sudo multipass mount $$HOME/.config/$(first)/tailscale $(first):/var/lib/tailscale
@@ -173,14 +173,6 @@ once:
 
 init:
 	$(MAKE) linkerd-trust-anchor
-	rm -f ~/.ssh/id_rsa
-	$(MAKE) ~/.ssh/id_rsa
-
-~/.ssh/id_rsa:
-	rm -f ~/.ssh/id_rsa
-	touch ~/.ssh/id_rsa
-	chmod 600 ~/.ssh/id_rsa
-	yes | ssh-keygen -f ~/.ssh/id_rsa -N ''
 
 linkerd-trust-anchor:
 	step certificate create root.linkerd.cluster.local root.crt root.key \
@@ -244,6 +236,10 @@ mp-cilium:
 	-$(MAKE) wait
 	sleep 30
 	$(MAKE) wait
+
+argo:
+	$(k) create ns argocd
+	$(kn) argocd apply -f k/argocd/main.yaml
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
