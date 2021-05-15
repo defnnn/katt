@@ -241,7 +241,9 @@ mp-cilium:
 
 argocd:
 	-$(k) create ns argocd
-	$(ka) apply -f k/argocd/main.yaml
+	kustomize build k/argocd/base | $(ka) apply -f -
+	for deploy in "application-controller" "dex-server" "redis" "repo-server" "server"; \
+		do $(ka) rollout status deploy/argocd-$${deploy}; done
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
