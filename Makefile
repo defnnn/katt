@@ -251,6 +251,9 @@ argocd:
 argocd-login:
 	@argocd login "$(server)" --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
 
+argocd-port:
+	$(ka) port-forward svc/argocd-server 8080:443
+
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
 	chmod 755 bash
