@@ -239,6 +239,8 @@ mp-cilium:
    --set hubble.ui.enabled=true
 	for deploy in hubble-relay hubble-ui; \
 		do $(ks) rollout status deploy/$${deploy}; done
+	for deploy in coredns local-path-provisioner metrics-server; \
+		do $(ks) rollout status deploy/$${deploy}; done
 
 argocd:
 	-$(k) create ns argocd
