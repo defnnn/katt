@@ -245,7 +245,7 @@ mp-cilium:
 argocd:
 	-$(k) create ns argocd
 	kustomize build k/argocd/base | $(ka) apply -f -
-	for deploy in application-controller dex-server redis repo-server server; \
+	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 
 bash:
