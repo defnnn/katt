@@ -155,11 +155,11 @@ mp-join-test:
 	$(first) $(MAKE) $(first)-inner
 
 %-inner:
-	$(MAKE) cert-manager wait
-	$(MAKE) linkerd wait
-	$(MAKE) $(first)-traefik
 	$(MAKE) argocd
-	$(MAKE) $(first)-site
+	#$(MAKE) cert-manager wait
+	#$(MAKE) linkerd wait
+	#$(MAKE) $(first)-traefik
+	#$(MAKE) $(first)-site
 
 %-traefik:
 	$(first) $(kt) apply -f k/traefik/crds
