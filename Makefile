@@ -246,6 +246,7 @@ argocd:
 	kustomize build k/argocd/base | $(ka) apply -f -
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
+	$(ka) rollout status statefulset/argocd-application-controller
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
