@@ -53,7 +53,6 @@ registry: # Run a local registry
 	k apply -f k/registry.yaml
 
 wait:
-	sleep 5
 	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false' | grep -v 'cilium-node-init' )" != "Running true" ]]; do \
 		$(k) get --all-namespaces pods; sleep 5; echo; done
 
