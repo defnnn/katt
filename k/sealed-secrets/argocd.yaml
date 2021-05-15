@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sealed-secrets
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/defn/katt'
+    path: k/sealed-secrets/base
+    targetRevision: mp
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: sealed-secrets
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sealed-secrets
