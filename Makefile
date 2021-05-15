@@ -229,20 +229,21 @@ mp-cilium:
    --set ipam.mode=kubernetes \
 	 --set nodeinit.restartPods=true \
 	 --set operator.replicas=1
+	for deploy in cilium-operator; \
+		do $(ks) rollout status deploy/$${deploy}; done
 	helm upgrade cilium cilium/cilium --version $(cilium) \
    --namespace kube-system \
    --reuse-values \
    --set hubble.listenAddress=":4244" \
    --set hubble.relay.enabled=true \
    --set hubble.ui.enabled=true
-	-$(MAKE) wait
-	sleep 30
-	$(MAKE) wait
+	for deploy in hubble-relay hubble-ui; \
+		do $(ks) rollout status deploy/$${deploy}; done
 
 argocd:
 	-$(k) create ns argocd
 	kustomize build k/argocd/base | $(ka) apply -f -
-	for deploy in "application-controller" "dex-server" "redis" "repo-server" "server"; \
+	for deploy in application-controller dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 
 bash:
