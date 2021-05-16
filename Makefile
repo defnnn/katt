@@ -254,6 +254,9 @@ argocd-login:
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
 
+sealed-secret-key:
+	 @$(ks) get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml
+
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
 	chmod 755 bash
