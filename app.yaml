@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: katt
+  namespace: argocd
+spec:
+  project: katt
+  source:
+    repoURL: 'https://github.com/defn/katt'
+    path: a
+    targetRevision: mp
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
