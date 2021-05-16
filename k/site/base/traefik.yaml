@@ -7,31 +7,6 @@ spec:
   controller: traefik.io/ingress-controller
 ---
 apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: https-redirect
-spec:
-  redirectScheme:
-    scheme: https
-    permanent: false
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: https-redirect
-spec:
-  entryPoints:
-  - web
-  routes:
-  - match: HostRegexp(`{host:.+}`)
-    kind: Rule
-    services:
-    - kind: TraefikService
-      name: noop@internal
-    middlewares:
-    - name: https-redirect
----
-apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: traefik-dashboard-secure
