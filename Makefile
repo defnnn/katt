@@ -94,6 +94,7 @@ ken:
 	ssh-add -L | sudo tee ~root/.ssh/authorized_keys
 	mkdir -p ~/.kube
 	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
+	ln -nfs $@.conf ~/.kube/config
 	sudo cp ~/.ssh/authorized_keys ~root/.ssh/authorized_keys
 	$(first) $(MAKE) cilium wait
 	$(first) $(MAKE) $(first)-inner
@@ -155,6 +156,8 @@ mp-join-test:
 
 %-inner:
 	$(MAKE) argocd
+	$(k) apply -f a/sealed-secrets.yaml
+	$(k) apply -f a/cert-manager.yaml
 	#$(MAKE) cert-manager wait
 	#$(MAKE) linkerd wait
 	#$(MAKE) $(first)-traefik
@@ -243,19 +246,22 @@ mp-cilium:
 
 argocd:
 	-$(k) create ns argocd
-	kustomize build k/argocd/base | $(ka) apply -f -
+	kustomize build https://github.com/letfn/katt-argocd/base | $(ka) apply -f -
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
 argocd-login:
-	@argocd login "$(server)" --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
+	@echo y | argocd login "$(server)" --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
 
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
 
 sealed-secret-key:
 	 @$(ks) get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml
+
+sealed-secret-make:
+	@$(k) create secret generic "$(secret)" --dry-run=client --from-file=foo=/dev/stdin -o json | kubeseal
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
