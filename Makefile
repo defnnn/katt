@@ -154,10 +154,10 @@ mp-join-test:
 
 %-inner:
 	$(MAKE) argocd
+	$(MAKE) argocd-init
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f katt.yaml
 	$(MAKE) linkerd
-	$(MAKE) argocd-init
 	$(MAKE) $(first)-site
 
 %-site:
