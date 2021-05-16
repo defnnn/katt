@@ -14,7 +14,7 @@ spec:
     namespace: cert-manager
   syncPolicy:
     automated:
-      prune: false
+      prune: true
       selfHeal: false
 ---
 apiVersion: v1
