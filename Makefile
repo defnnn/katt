@@ -246,6 +246,11 @@ argocd:
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
+argocd-init:
+	$(MAKE) argocd-port &
+	$(MAKE) argocd-login
+	$(MAKE) argocd-passwd
+
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
 
