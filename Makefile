@@ -157,6 +157,7 @@ mp-join-test:
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f app.yaml
 	$(MAKE) linkerd
+	$(MAKE) argocd-init
 	$(MAKE) $(first)-site
 
 %-site:
