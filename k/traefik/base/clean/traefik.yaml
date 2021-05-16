@@ -3,24 +3,24 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: katt-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.14.2
+    helm.sh/chart: traefik-9.19.1
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: katt
+    app.kubernetes.io/instance: traefik
   annotations:
 ---
 # Source: traefik/templates/rbac/clusterrole.yaml
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: katt-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.14.2
+    helm.sh/chart: traefik-9.19.1
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: katt
+    app.kubernetes.io/instance: traefik
 rules:
   - apiGroups:
       - ""
@@ -69,38 +69,38 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: katt-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.14.2
+    helm.sh/chart: traefik-9.19.1
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: katt
+    app.kubernetes.io/instance: traefik
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: katt-traefik
+  name: traefik
 subjects:
   - kind: ServiceAccount
-    name: katt-traefik
-    namespace: default
+    name: traefik
+    namespace: traefik
 ---
 # Source: traefik/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: katt-traefik
+  name: traefik
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.14.2
+    helm.sh/chart: traefik-9.19.1
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: katt
+    app.kubernetes.io/instance: traefik
   annotations:
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: traefik
-      app.kubernetes.io/instance: katt
+      app.kubernetes.io/instance: traefik
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -111,17 +111,17 @@ spec:
       annotations:
       labels:
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-9.14.2
+        helm.sh/chart: traefik-9.19.1
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: katt
+        app.kubernetes.io/instance: traefik
     spec:
-      serviceAccountName: katt-traefik
+      serviceAccountName: traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: false
       containers:
       - image: "traefik:2.4.8"
         imagePullPolicy: IfNotPresent
-        name: katt-traefik
+        name: traefik
         resources:
         readinessProbe:
           httpGet:
@@ -151,9 +151,6 @@ spec:
         - name: "websecure"
           containerPort: 8443
           protocol: "TCP"
-        - name: "pubsecure"
-          containerPort: 9443
-          protocol: "TCP"
         securityContext:
           capabilities:
             drop:
@@ -168,14 +165,25 @@ spec:
           - name: tmp
             mountPath: /tmp
         args:
+          - "--global.checknewversion"
+          - "--global.sendanonymoususage"
           - "--entryPoints.traefik.address=:9000/tcp"
           - "--entryPoints.web.address=:8000/tcp"
           - "--entryPoints.websecure.address=:8443/tcp"
-          - "--entryPoints.pubsecure.address=:9443/tcp"
           - "--api.dashboard=true"
           - "--ping=true"
           - "--providers.kubernetescrd"
           - "--providers.kubernetesingress"
+          - "--entrypoints.web.http.redirections.entryPoint.to=:443"
+          - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+          - "--providers.file.filename=/data/traefik-config.yaml"
+          - "--entrypoints.websecure.http.tls.certresolver=cloudflare"
+          - "--entrypoints.websecure.http.tls.domains[0].main=example.com"
+          - "--entrypoints.websecure.http.tls.domains[0].sans=*.example.com"
+          - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+          - "--certificatesresolvers.cloudflare.acme.email=mail@example.com"
+          - "--certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1"
+          - "--certificatesresolvers.cloudflare.acme.storage=/certs/acme.json"
       volumes:
         - name: data
           emptyDir: {}
@@ -191,17 +199,18 @@ items:
   - apiVersion: v1
     kind: Service
     metadata:
-      name: katt-traefik
+      name: traefik
       labels:
         app.kubernetes.io/name: traefik
-        helm.sh/chart: traefik-9.14.2
+        helm.sh/chart: traefik-9.19.1
         app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/instance: katt
+        app.kubernetes.io/instance: traefik
+      annotations:
     spec:
       type: LoadBalancer
       selector:
         app.kubernetes.io/name: traefik
-        app.kubernetes.io/instance: katt
+        app.kubernetes.io/instance: traefik
       ports:
       - port: 80
         name: web
@@ -216,14 +225,14 @@ items:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: katt-traefik-dashboard
+  name: traefik-dashboard
   annotations:
     helm.sh/hook: "post-install,post-upgrade"
   labels:
     app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.14.2
+    helm.sh/chart: traefik-9.19.1
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/instance: katt
+    app.kubernetes.io/instance: traefik
 spec:
   entryPoints:
     - traefik

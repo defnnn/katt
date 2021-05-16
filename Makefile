@@ -44,9 +44,6 @@ external-secrets:
 	$(kx) apply -f k/external-secrets/crds
 	kustomize build --enable-alpha-plugins k/external-secrets | $(kx) apply -f -
 
-cert-manager:
-	kustomize build --enable-alpha-plugins k/cert-manager | $(k) apply -f -
-
 home:
 	kustomize build --enable-alpha-plugins k/home | $(k) apply -f -
 
@@ -160,15 +157,11 @@ mp-join-test:
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
 	$(MAKE) linkerd wait
-	$(MAKE) $(first)-traefik
+	$(k) apply -f a/traefik.yaml
 	$(MAKE) $(first)-site
 
-%-traefik:
-	$(first) $(kt) apply -f k/traefik/crds
-	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
-
 %-site:
-	$(k) apply -f ~/.password-store/CF_API_TOKEN.yaml
+	pass CF_API_TOKEN | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 	cd k/site && make $(first)-gen
 	$(first) kustomize build k/site/$(first) | $(first) linkerd inject - | $(first) $(k) apply -f -
 
