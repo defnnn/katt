@@ -251,7 +251,7 @@ argocd:
 	$(ka) rollout status statefulset/argocd-application-controller
 
 argocd-login:
-	@echo y | argocd login "$(server)" --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
+	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
 
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
