@@ -157,9 +157,9 @@ mp-join-test:
 	$(k) apply -f a/katt.yaml
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
+	$(MAKE) linkerd
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f a/traefik.yaml
-	$(MAKE) linkerd wait
 	$(MAKE) $(first)-site
 
 %-site:
