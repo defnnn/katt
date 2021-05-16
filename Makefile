@@ -258,6 +258,9 @@ argocd-login:
 argocd-passwd:
 	@argocd  account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password admin
 
+argocd-ignore:
+	argocd proj add-orphaned-ignore default cilium.io CiliumIdentity
+
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
 
