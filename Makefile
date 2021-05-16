@@ -154,6 +154,7 @@ mp-join-test:
 
 %-inner:
 	$(MAKE) argocd
+	$(k) apply -f a/katt.yaml
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
 	$(k) apply -f a/traefik.yaml

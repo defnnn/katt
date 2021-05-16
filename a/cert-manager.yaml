@@ -4,7 +4,7 @@ metadata:
   name: cert-manager
   namespace: argocd
 spec:
-  project: default
+  project: katt
   source:
     repoURL: 'https://github.com/defn/katt'
     path: k/cert-manager/base
