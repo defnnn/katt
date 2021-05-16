@@ -1,3 +1,23 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: katt
+  namespace: argocd
+spec:
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: '*'
+    server: '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  orphanedResources:
+    ignore:
+    - group: cilium.io
+      kind: CiliumIdentity
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
