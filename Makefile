@@ -160,7 +160,6 @@ mp-join-test:
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
 	$(MAKE) linkerd wait
-	$(k) apply -f ~/.password-store/CF_API_TOKEN.yaml
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
@@ -169,6 +168,7 @@ mp-join-test:
 	$(first) kustomize build k/traefik | $(first) linkerd inject --ingress - | $(first) $(kt) apply -f -
 
 %-site:
+	$(k) apply -f ~/.password-store/CF_API_TOKEN.yaml
 	cd k/site && make $(first)-gen
 	$(first) kustomize build k/site/$(first) | $(first) linkerd inject - | $(first) $(k) apply -f -
 
