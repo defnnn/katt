@@ -158,10 +158,9 @@ mp-join-test:
 	$(MAKE) argocd
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
-	#$(MAKE) cert-manager wait
-	#$(MAKE) linkerd wait
-	#$(MAKE) $(first)-traefik
-	#$(MAKE) $(first)-site
+	$(MAKE) linkerd wait
+	$(MAKE) $(first)-traefik
+	$(MAKE) $(first)-site
 
 %-traefik:
 	$(first) $(kt) apply -f k/traefik/crds
