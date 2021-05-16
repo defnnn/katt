@@ -149,13 +149,6 @@ spec:
         - --entrypoints.web.http.redirections.entryPoint.to=:443
         - --entrypoints.web.http.redirections.entryPoint.scheme=https
         - --providers.file.filename=/data/traefik-config.yaml
-        - --entrypoints.websecure.http.tls.certresolver=cloudflare
-        - --entrypoints.websecure.http.tls.domains[0].main=example.com
-        - --entrypoints.websecure.http.tls.domains[0].sans=*.example.com
-        - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
-        - --certificatesresolvers.cloudflare.acme.email=mail@example.com
-        - --certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1
-        - --certificatesresolvers.cloudflare.acme.storage=/certs/acme.json
         image: traefik:2.4.8
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -211,24 +204,3 @@ spec:
         name: data
       - emptyDir: {}
         name: tmp
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  annotations:
-    helm.sh/hook: post-install,post-upgrade
-  labels:
-    app.kubernetes.io/instance: traefik
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: traefik
-    helm.sh/chart: traefik-9.19.1
-  name: traefik-dashboard
-spec:
-  entryPoints:
-  - traefik
-  routes:
-  - kind: Rule
-    match: PathPrefix(`/dashboard`) || PathPrefix(`/api`)
-    services:
-    - kind: TraefikService
-      name: api@internal

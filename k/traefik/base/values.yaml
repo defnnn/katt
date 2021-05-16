@@ -3,3 +3,6 @@ additionalArguments:
 ports:
   web:
     redirectTo: websecure
+ingressRoute:
+  dashboard:
+    enabled: false

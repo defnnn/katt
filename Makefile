@@ -162,7 +162,7 @@ mp-join-test:
 	$(MAKE) $(first)-site
 
 %-site:
-	pass CF_API_TOKEN | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
+	-pass CF_API_TOKEN | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 	cd k/site && make $(first)-gen
 	$(first) kustomize build k/site/$(first) | $(first) linkerd inject - | $(first) $(k) apply -f -
 
