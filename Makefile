@@ -253,6 +253,9 @@ argocd:
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
 
+argocd-passwd:
+	@argocd  account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password admin
+
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
 
