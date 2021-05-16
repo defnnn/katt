@@ -154,12 +154,9 @@ mp-join-test:
 
 %-inner:
 	$(MAKE) argocd
-	$(k) apply -f a/katt.yaml
-	$(k) apply -f a/sealed-secrets.yaml
-	$(k) apply -f a/cert-manager.yaml
-	$(MAKE) linkerd
 	$(k) apply -f k/traefik/crds
-	$(k) apply -f a/traefik.yaml
+	$(k) apply -f app.yaml
+	$(MAKE) linkerd
 	$(MAKE) $(first)-site
 
 %-site:
