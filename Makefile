@@ -156,8 +156,8 @@ mp-join-test:
 	$(MAKE) argocd
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
-	$(MAKE) linkerd wait
 	$(k) apply -f a/traefik.yaml
+	$(MAKE) linkerd wait
 	$(MAKE) $(first)-site
 
 %-site:
