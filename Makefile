@@ -249,6 +249,7 @@ argocd:
 
 argocd-init:
 	$(MAKE) argocd-port &
+	sleep 10
 	$(MAKE) argocd-login
 	$(MAKE) argocd-passwd
 
