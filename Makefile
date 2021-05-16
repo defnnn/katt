@@ -94,7 +94,7 @@ ken:
 	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
 	ln -nfs $@.conf ~/.kube/config
 	sudo cp ~/.ssh/authorized_keys ~root/.ssh/authorized_keys
-	$(first) $(MAKE) cilium wait
+	$(first) $(MAKE) cilium
 	$(first) $(MAKE) $(first)-inner
 
 katt:
