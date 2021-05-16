@@ -13,6 +13,7 @@ kc := kubectl -n cert-manager
 kld := kubectl -n linkerd
 kd := kubectl -n external-dns
 ka := kubectl -n argocd
+kn := kubectl -n
 
 bridge := en0
 
@@ -159,6 +160,7 @@ mp-join-test:
 	$(k) apply -f a/sealed-secrets.yaml
 	$(k) apply -f a/cert-manager.yaml
 	$(MAKE) linkerd wait
+	$(k) apply -f ~/.password-store/CF_API_TOKEN.yaml
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
@@ -263,7 +265,7 @@ sealed-secret-key:
 	 @$(ks) get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml
 
 sealed-secret-make:
-	@$(k) create secret generic "$(secret)" --dry-run=client --from-file=foo=/dev/stdin -o json | kubeseal
+	@$(kn) "$(ns)" create secret generic "$(secret)" --dry-run=client --from-file=$(name)=/dev/stdin -o json | kubeseal
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
