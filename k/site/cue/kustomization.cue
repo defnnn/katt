@@ -5,7 +5,7 @@ kind:       "Kustomization"
 
 bases: _bases
 
-_bases: *["../base", "../linkerd"] | [...]
+_bases: *["../base"] | [...]
 
 patches: [{
 	path: "patch-cluster-issuer.yaml"

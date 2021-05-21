@@ -6,3 +6,4 @@ resources:
   - traefik.yaml
   - hubble.yaml
   - argocd.yaml
+  - consul.yaml
