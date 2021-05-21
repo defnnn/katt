@@ -214,10 +214,9 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --cluster-name defn --cluster-id 100
+	cilium install --cluster-name defn --cluster-id 100 --ipam kubernetes --node-encryption --encryption wireguard
 	cilium status --wait
-	cilium connectivity test
-	cilium clustermesh enable
+	cilium clustermesh enable --service-type LoadBalancer
 	cilium clustermesh status --wait
 
 helm-cilium:
