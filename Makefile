@@ -164,6 +164,7 @@ mp-join-test:
 
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
+	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
 
 init:
