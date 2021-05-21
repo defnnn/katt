@@ -17,7 +17,7 @@ kn := kubectl -n
 
 bridge := en0
 
-cilium := 1.10.0-rc1
+cilium := 1.10.0
 
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
