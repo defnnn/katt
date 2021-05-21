@@ -39,7 +39,7 @@ gloo:
 	#glooctl install knative -g
 	glooctl install gateway --values k/gloo/values.yaml --with-admin-console
 	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
-	curl -sSL https://raw.githubusercontent.com/solo-io/gloo/v1.2.9/example/petstore/petstore.yaml | linkerd inject - | $(k) apply -f -
+	curl -sSL https://raw.githubusercontent.com/solo-io/gloo/v1.2.9/example/petstore/petstore.yaml | $(k) apply -f -
 	glooctl add route --path-exact /all-pets --dest-name default-petstore-8080 --prefix-rewrite /api/pets
 
 external-secrets:
@@ -160,7 +160,7 @@ mp-join-test:
 %-site:
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 	cd k/site && make $(first)-gen
-	$(first) kustomize build k/site/$(first) | $(first) linkerd inject - | $(first) $(k) apply -f -
+	$(first) kustomize build k/site/$(first) | $(first) $(k) apply -f -
 
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
