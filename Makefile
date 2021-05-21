@@ -22,6 +22,10 @@ cilium := 1.10.0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
+install: ## Install asdf tools
+	-asdf plugin-add linkerd https://github.com/letfn/asdf-linkerd.git
+	asdf install
+
 vault-agent:
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
