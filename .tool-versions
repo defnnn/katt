@@ -2,3 +2,4 @@ kustomize 4.1.3
 helm 3.5.4
 k3sup 0.11.0
 linkerd 2.10.2
+argocd 2.0.2
