@@ -155,12 +155,16 @@ mp-join-test:
 	$(MAKE) argocd-init
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f katt.yaml
-	$(MAKE) consul
+	$(MAKE) consul vault
 	$(MAKE) $(first)-site
 
 consul:
 	helm install consul hashicorp/consul --set global.name=consul --set server.replicas=1
 	$(k) rollout status statefulset.apps/consul-server
+
+vault:
+	helm install vault hashicorp/vault --set global.name=consul --set server.replicas=1
+	$(k) rollout status statefulset.apps/vault
 
 %-site:
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin

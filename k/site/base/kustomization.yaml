@@ -7,3 +7,4 @@ resources:
   - hubble.yaml
   - argocd.yaml
   - consul.yaml
+  - vault.yaml
