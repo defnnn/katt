@@ -164,7 +164,6 @@ consul:
 
 vault:
 	helm install vault hashicorp/vault --set global.name=consul --set server.replicas=1
-	$(k) rollout status statefulset.apps/vault
 
 %-site:
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
