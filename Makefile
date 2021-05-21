@@ -17,8 +17,6 @@ kn := kubectl -n
 
 bridge := en0
 
-cilium := 1.10.0
-
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
@@ -213,9 +211,16 @@ cluster-linkerd-np:
 	$(MAKE) wait
 
 cilium:
-	$(MAKE) mp-cilium
+	$(MAKE) cli-cilium
 
-mp-cilium:
+cli-cilium:
+	cilium install --cluster-name defn --cluster-id 100
+	cilium status --wait
+	cilium connectivity test
+	cilium clustermesh enable
+	cilium clustermesh status --wait
+
+helm-cilium:
 	helm install cilium cilium/cilium --version $(cilium) \
    --namespace kube-system \
    --set nodeinit.enabled=true \
