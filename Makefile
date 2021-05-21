@@ -52,10 +52,6 @@ home:
 registry: # Run a local registry
 	k apply -f k/registry.yaml
 
-wait:
-	while [[ "$$($(k) get -o json --all-namespaces pods | jq -r '(.items//[])[].status | "\(.phase) \((.containerStatuses//[])[].ready)"' | sort -u | grep -v 'Succeeded false' | grep -v 'cilium-node-init' )" != "Running true" ]]; do \
-		$(k) get --all-namespaces pods; sleep 5; echo; done
-
 up: # Bring up homd
 	docker-compose up -d --remove-orphans
 
@@ -81,12 +77,12 @@ logs:
 
 gojo todo toge:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
-	$(first) $(MAKE) cilium wait
+	$(first) $(MAKE) cilium
 	$(first) $(MAKE) $(first)-inner
 
 nue gyoku maki miwa:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
-	$(first) $(MAKE) cilium wait
+	$(first) $(MAKE) cilium
 	$(first) $(MAKE) $(first)-inner
 
 ken:
@@ -100,9 +96,9 @@ ken:
 	$(first) $(MAKE) $(first)-inner
 
 katt:
-	$(MAKE) cert-manager wait
-	$(MAKE) mp-linkerd wait
-	$(MAKE) cluster-linkerd-lb wait
+	$(MAKE) cert-manager
+	$(MAKE) mp-linkerd
+	$(MAKE) cluster-linkerd-lb
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
@@ -116,14 +112,14 @@ east:
 todo-% nue-%:
 	$(first) linkerd multicluster link --cluster-name $(first) | $(second) $(k) apply -f -
 	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
-	$(first) $(MAKE) wait
-	$(second) $(MAKE) wait
+	$(first) $(MAKE)
+	$(second) $(MAKE)
 	$(first) linkerd mc check
 	$(second) linkerd mc check
 
 katt-nue:
 	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
-	$(first) $(MAKE) wait
+	$(first) $(MAKE)
 	$(first) linkerd mc check
 
 katt-curl:
@@ -203,12 +199,10 @@ cluster-linkerd-lb:
 	linkerd multicluster install | $(k) apply -f -
 	sleep 5
 	-linkerd multicluster check
-	$(MAKE) wait
 
 cluster-linkerd-np:
 	linkerd multicluster install --gateway-service-type NodePort | $(k) apply -f -
 	-linkerd multicluster check
-	$(MAKE) wait
 
 cilium:
 	$(MAKE) cli-cilium
@@ -216,6 +210,8 @@ cilium:
 cli-cilium:
 	cilium install --cluster-name defn --cluster-id 100 --ipam kubernetes --node-encryption --encryption wireguard
 	cilium status --wait
+
+cli-clustermesh:
 	cilium clustermesh enable --service-type LoadBalancer
 	cilium clustermesh status --wait
 
