@@ -155,7 +155,6 @@ mp-join-test:
 	$(MAKE) argocd-init
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f katt.yaml
-	$(MAKE) linkerd
 	$(MAKE) $(first)-site
 
 %-site:
@@ -208,7 +207,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --cluster-name defn --cluster-id 100 --ipam kubernetes --node-encryption --encryption wireguard
+	cilium install --cluster-name defn --cluster-id 100 --node-encryption --encryption wireguard
 	cilium status --wait
 
 cli-clustermesh:
