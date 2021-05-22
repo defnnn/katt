@@ -156,6 +156,7 @@ mp-join-test:
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f katt.yaml
 	$(MAKE) consul vault
+	argocd app wait sealed-secrets --health
 	argocd app wait cert-manager --health
 	argocd app wait traefik --health
 	$(MAKE) $(first)-site
