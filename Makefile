@@ -89,25 +89,24 @@ ken:
 	-k3s-uninstall.sh
 	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
 	$(first) $(MAKE) cilium cname=defn cid=100
-	$(first) make cli-clustermesh
 	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
 a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca ken"
-	$(first) make cli-clustermesh
-	cilium clustermesh connect --context ken --destination-context $@
-	cilium clustermesh status --context $@ --wait
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=11
+	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $@ --wait
 
 b:
 	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$b" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca ken"
-	$(first) make cli-clustermesh
-	cilium clustermesh connect --context ken --destination-context $@
-	cilium clustermesh status --context $@ --wait
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca a"
+	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $@ --wait
+	$(first) cilium clustermesh connect --context a --destination-context $@
+	$(first) cilium clustermesh status --context $@ --wait
 
 katt:
 	$(MAKE) cert-manager
