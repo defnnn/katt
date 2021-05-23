@@ -221,6 +221,10 @@ cilium:
 cli-cilium:
 	cilium install --cluster-name defn --cluster-id 100 --node-encryption --encryption wireguard
 	cilium status --wait
+	$(ks) rollout status deployment/cilium-operator
+	cilium hubble enable --ui
+	$(ks) rollout status deployment/hubble-relay
+	$(ks) rollout status deployment/hubble-ui
 
 cli-clustermesh:
 	cilium clustermesh enable --service-type LoadBalancer
@@ -289,6 +293,12 @@ bash:
 	chmod 755 bash
 
 cilium-cli:
-	curl -LO https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz
+	curl -sLLO https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz
 	sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
 	rm cilium-linux-amd64.tar.gz
+
+hubble-cli:
+	export HUBBLE_VERSION=$(shell curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
+	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-linux-amd64.tar.gz"
+	sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
+	rm -f hubble-linux-amd64.tar.gz	

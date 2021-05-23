@@ -7,7 +7,7 @@ function main {
   local server_username="$1"; shift
   local server_name="$1"; shift
 
-  k3sup install --cluster --ip ${server_ip}  --user ${server_username} --local-path ~/.kube/${server_name}.conf --k3s-extra-args "--flannel-backend=none --no-flannel --disable traefik --disable-network-policy --bind-address=${server_ip} --advertise-address=${server_ip} --node-ip=${server_ip} --node-external-ip=${server_ip}"
+  k3sup install --cluster --ip ${server_ip} --user ${server_username} --local-path ~/.kube/${server_name}.conf --k3s-extra-args "--flannel-backend=none --disable traefik --bind-address=${server_ip} --advertise-address=${server_ip} --node-ip=${server_ip} --node-external-ip=${server_ip}"
 }
 
 main "$@"
