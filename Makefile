@@ -87,26 +87,29 @@ nue gyoku maki miwa:
 
 ken:
 	-k3s-uninstall.sh
-	ssh-add -L | sudo tee ~root/.ssh/authorized_keys
-	mkdir -p ~/.kube
-	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
-	ln -nfs $@.conf ~/.kube/config
-	sudo cp ~/.ssh/authorized_keys ~root/.ssh/authorized_keys
+	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
 	$(first) $(MAKE) cilium cname=defn cid=100
+	$(first) make cli-clustermesh
+
+ken-inner:
 	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
 a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
-	mkdir -p ~/.kube
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca ken"
+	$(first) make cli-clustermesh
+	cilium clustermesh connect --context ken --destination-context $@
+	cilium clustermesh status --context $@ --wait
 
 b:
-	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
-	mkdir -p ~/.kube
-	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112
+	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
+	bin/cluster "$$b" ubuntu $(first)
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca ken"
+	$(first) make cli-clustermesh
+	cilium clustermesh connect --context ken --destination-context $@
+	cilium clustermesh status --context $@ --wait
 
 katt:
 	$(MAKE) cert-manager
@@ -232,7 +235,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption
+	cilium install --version v1.10.0 --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
