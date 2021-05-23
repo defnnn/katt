@@ -219,7 +219,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --cluster-name defn --cluster-id 100 --node-encryption --encryption wireguard
+	cilium install --cluster-name defn --cluster-id 100 --node-encryption
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
