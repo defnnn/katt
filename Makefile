@@ -100,13 +100,13 @@ a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	mkdir -p ~/.kube
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="$(first)" cid=111
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111
 
 b:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	mkdir -p ~/.kube
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="$(first)" cid=112
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112
 
 katt:
 	$(MAKE) cert-manager
