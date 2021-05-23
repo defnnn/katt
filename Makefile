@@ -90,8 +90,6 @@ ken:
 	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
 	$(first) $(MAKE) cilium cname=defn cid=100
 	$(first) make cli-clustermesh
-
-ken-inner:
 	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
