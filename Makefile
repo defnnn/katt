@@ -92,8 +92,21 @@ ken:
 	bin/cluster $(shell tailscale ip | grep ^100) root $(first)
 	ln -nfs $@.conf ~/.kube/config
 	sudo cp ~/.ssh/authorized_keys ~root/.ssh/authorized_keys
-	$(first) $(MAKE) cilium
+	$(first) $(MAKE) cilium cname=defn cid=100
 	$(first) $(MAKE) $(first)-inner
+
+.PHONY: a
+a:
+	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
+	mkdir -p ~/.kube
+	bin/cluster "$$a" ubuntu $(first)
+	$(first) $(MAKE) cilium cname="$(first)" cid=111
+
+b:
+	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
+	mkdir -p ~/.kube
+	bin/cluster "$$a" ubuntu $(first)
+	$(first) $(MAKE) cilium cname="$(first)" cid=112
 
 katt:
 	$(MAKE) cert-manager
@@ -219,7 +232,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --cluster-name defn --cluster-id 100 --node-encryption
+	cilium install --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
