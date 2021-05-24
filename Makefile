@@ -10,7 +10,6 @@ kt := kubectl -n traefik
 kg := kubectl -n gloo-system
 kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
-kld := kubectl -n linkerd
 kd := kubectl -n external-dns
 ka := kubectl -n argocd
 kn := kubectl -n
@@ -21,19 +20,12 @@ menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
 install: ## Install asdf tools
-	-asdf plugin-add linkerd https://github.com/letfn/asdf-linkerd.git
 	asdf install
 
 vault-agent:
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
 	helm install vault hashicorp/vault --values k/vault-agent/values.yaml
-
-flagger:
-	kustomize build https://github.com/fluxcd/flagger/kustomize/linkerd?ref=v1.6.2 | kubectl apply -f -
-
-kruise:
-	kustomize build k/kruise | $(k) apply -f -
 
 gloo:
 	#glooctl install knative -g
@@ -51,29 +43,6 @@ home:
 
 registry: # Run a local registry
 	k apply -f k/registry.yaml
-
-up: # Bring up homd
-	docker-compose up -d --remove-orphans
-
-down: # Bring down home
-	docker-compose down --remove-orphans
-
-recreate: # Recreate home container
-	$(MAKE) down
-	$(MAKE) up
-
-recycle: # Recycle home container
-	$(MAKE) pull
-	$(MAKE) recreate
-
-pull:
-	docker-compose pull
-
-logs:
-	docker-compose logs -f
-
-%-reset:
-		ssh $(first).defn.in sudo /usr/local/bin/k3s-uninstall.sh
 
 gojo todo toge:
 	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
@@ -121,8 +90,6 @@ c:
 
 katt:
 	$(MAKE) cert-manager
-	$(MAKE) mp-linkerd
-	$(MAKE) cluster-linkerd-lb
 	$(MAKE) $(first)-traefik
 	$(MAKE) $(first)-site
 
@@ -134,30 +101,11 @@ east:
 	$(MAKE) $(first)-mp
 
 todo-% nue-%:
-	$(first) linkerd multicluster link --cluster-name $(first) | $(second) $(k) apply -f -
-	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
 	$(first) $(MAKE)
 	$(second) $(MAKE)
-	$(first) linkerd mc check
-	$(second) linkerd mc check
 
 katt-nue:
-	$(second) linkerd multicluster link --cluster-name $(second) | $(first) $(k) apply -f -
 	$(first) $(MAKE)
-	$(first) linkerd mc check
-
-katt-curl:
-	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name | head -1)" -- /bin/sh -c "while true; do curl -s http://hello:8080; done" | grep --line-buffered Hostname
-
-katt-curl-nue:
-	katt exec -ti -c hello "$$(katt k get pod -l app=hello --no-headers -o custom-columns=:.metadata.name | head -1)" -- /bin/sh -c "curl -s http://hello-nue:8080" | grep Hostname
-
-nue-stat:
-	nue linkerd viz stat --from deploy/linkerd-gateway --from-namespace linkerd-multicluster deploy/hello
-
-mp-join-test:
-	west kn test exec -c nginx -it $$(west kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-east:9898"
-	east kn test exec -c nginx -it $$(east kn test get po -l app=frontend --no-headers -o custom-columns=:.metadata.name) -- /bin/sh -c "curl http://podinfo-west:9898"
 
 %-mp:
 	-m delete --purge $(first)
@@ -201,43 +149,6 @@ once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
-
-init:
-	$(MAKE) linkerd-trust-anchor
-
-linkerd-trust-anchor:
-	step certificate create root.linkerd.cluster.local root.crt root.key \
-  	--profile root-ca --no-password --insecure --force
-	step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
-		--profile intermediate-ca --not-after 8760h --no-password --insecure \
-		--ca root.crt --ca-key root.key --force
-	mkdir -p etc
-	mv -f issuer.* root.* etc/
-
-linkerd:
-	$(MAKE) mp-linkerd
-	$(MAKE) cluster-linkerd-lb
-	$(MAKE) linkerd-viz
-
-linkerd-viz:
-	linkerd viz install | perl -pe 's{enforced-host=.*}{enforced-host=}' | $(k) apply -f -
-
-mp-linkerd:
-	linkerd check --pre
-	linkerd install \
-		--identity-trust-anchors-file etc/root.crt \
-		--identity-issuer-certificate-file etc/issuer.crt \
-  	--identity-issuer-key-file etc/issuer.key | $(k) apply -f -
-	while true; do if linkerd check; then break; fi; sleep 10; done
-
-cluster-linkerd-lb:
-	linkerd multicluster install | $(k) apply -f -
-	sleep 5
-	-linkerd multicluster check
-
-cluster-linkerd-np:
-	linkerd multicluster install --gateway-service-type NodePort | $(k) apply -f -
-	-linkerd multicluster check
 
 cilium:
 	$(MAKE) cli-cilium
