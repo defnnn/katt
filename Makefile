@@ -54,12 +54,6 @@ nue gyoku maki miwa:
 	$(first) $(MAKE) cilium
 	$(first) $(MAKE) $(first)-inner
 
-ken:
-	-k3s-uninstall.sh
-	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
-	$(first) $(MAKE) cilium cname=defn cid=100
-	$(first) $(MAKE) $(first)-inner
-
 west-launch:
 	m delete --all --purge
 	$(MAKE) $(first)-mp
@@ -70,11 +64,18 @@ west:
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 
+east:
+	-k3s-uninstall.sh
+	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
+	$(first) $(MAKE) cilium cname=defn-$@ cid=100
+	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $(first) --wait
+
 .PHONY: a
 a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west; do \
@@ -84,7 +85,7 @@ a:
 b:
 	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$b" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west a; do \
@@ -94,7 +95,7 @@ b:
 c:
 	-ssh "$$c" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$c" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west a b; do \
@@ -118,6 +119,7 @@ c:
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f katt.yaml
 	$(MAKE) consul vault
+	argocd app wait katt --health
 	argocd app wait sealed-secrets --health
 	argocd app wait cert-manager --health
 	argocd app wait traefik --health
