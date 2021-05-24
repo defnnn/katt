@@ -60,67 +60,58 @@ ken:
 	$(first) $(MAKE) cilium cname=defn cid=100
 	$(first) $(MAKE) $(first)-inner
 
+west-launch:
+	m delete --all --purge
+	$(MAKE) $(first)-mp
+
+west:
+	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=101
+	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $@ --wait
+
 .PHONY: a
 a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=11
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+	for s in west; do \
+		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
+		$(first) cilium clustermesh status --context $@ --wait; done
 
 b:
 	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$b" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca a"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in a; do \
+	for s in west a; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
 c:
 	-ssh "$$c" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$c" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca a"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in a b; do \
+	for s in west a b; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
-
-katt:
-	$(MAKE) cert-manager
-	$(MAKE) $(first)-traefik
-	$(MAKE) $(first)-site
-
-west:
-	m delete --all --purge
-	$(first) $(MAKE) $(first)-mp
-
-east:
-	$(MAKE) $(first)-mp
-
-todo-% nue-%:
-	$(first) $(MAKE)
-	$(second) $(MAKE)
-
-katt-nue:
-	$(first) $(MAKE)
 
 %-mp:
 	-m delete --purge $(first)
 	m launch -c 2 -d 20G -m 2048M -n $(first)
 	ssh-add -L | m exec $(first) -- tee -a .ssh/authorized_keys
 	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
-	mkdir -p ~/.pasword-store/config/$(first)/tailscale
 	sudo multipass mount $$HOME/.config/$(first)/tailscale $(first):/var/lib/tailscale
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $(first) -- sudo apt-key add -
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $(first) -- sudo tee /etc/apt/sources.list.d/tailscale.list
 	m exec $(first) -- sudo apt-get update
 	m exec $(first) -- sudo apt-get install tailscale
 	m exec $(first) -- sudo tailscale up
-	bin/m-install-k3s $(first) $(first)
-	$(first) $(MAKE) $(first)-inner
 
 %-inner:
 	$(MAKE) argocd
@@ -237,3 +228,14 @@ hubble-cli:
 	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-linux-amd64.tar.gz"
 	sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
 	rm -f hubble-linux-amd64.tar.gz	
+
+cilium-cli-darwin:
+	curl -sLLO https://github.com/cilium/cilium-cli/releases/latest/download/cilium-darwin-amd64.tar.gz
+	sudo tar xzvfC cilium-darwin-amd64.tar.gz /usr/local/bin
+	rm cilium-darwin-amd64.tar.gz
+
+hubble-cli-darwin:
+	export HUBBLE_VERSION=$(shell curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
+	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-darwin-amd64.tar.gz"
+	sudo tar xzvfC hubble-darwin-amd64.tar.gz /usr/local/bin
+	rm -f hubble-darwin-amd64.tar.gz	
