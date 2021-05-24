@@ -106,7 +106,6 @@ c:
 	m launch -c 2 -d 20G -m 2048M -n $(first)
 	ssh-add -L | m exec $(first) -- tee -a .ssh/authorized_keys
 	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
-	sudo multipass mount $$HOME/.config/$(first)/tailscale $(first):/var/lib/tailscale
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $(first) -- sudo apt-key add -
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.list | m exec $(first) -- sudo tee /etc/apt/sources.list.d/tailscale.list
 	m exec $(first) -- sudo apt-get update
