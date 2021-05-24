@@ -105,8 +105,19 @@ b:
 	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca a"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	$(first) cilium clustermesh connect --context a --destination-context $@
+	for s in a; do \
+		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
+		$(first) cilium clustermesh status --context $@ --wait; done
+
+c:
+	-ssh "$$c" /usr/local/bin/k3s-uninstall.sh
+	bin/cluster "$$c" ubuntu $(first)
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca a"
+	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+	for s in a b; do \
+		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
+		$(first) cilium clustermesh status --context $@ --wait; done
 
 katt:
 	$(MAKE) cert-manager
