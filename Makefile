@@ -67,38 +67,41 @@ west:
 east:
 	-k3s-uninstall.sh
 	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
-	$(first) $(MAKE) cilium cname=defn-$@ cid=100
+	$(first) $(MAKE) cilium cname=defn-$@ cid=102 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $(first) --wait
+	for s in west; do \
+		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
+		$(first) cilium clustermesh status --context $@ --wait; done
 
 .PHONY: a
 a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca east"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west; do \
+	for s in west east; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
 b:
 	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$b" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca east"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west a; do \
+	for s in west east a; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
 c:
 	-ssh "$$c" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$c" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca east"
+	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west a b; do \
+	for s in west east a b; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
