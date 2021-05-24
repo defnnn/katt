@@ -45,12 +45,12 @@ registry: # Run a local registry
 	k apply -f k/registry.yaml
 
 gojo todo toge:
-	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') defn $(first)
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') defn $(first)
 	$(first) $(MAKE) cilium
 	$(first) $(MAKE) $(first)-inner
 
 nue gyoku maki miwa:
-	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) cilium
 	$(first) $(MAKE) $(first)-inner
 
@@ -59,7 +59,7 @@ west-launch:
 	$(MAKE) $(first)-mp
 
 west:
-	bin/cluster $(shell host $(first).defn.in | awk '{print $$NF}') ubuntu $(first)
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) cilium cname="defn-$(first)" cid=101
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
