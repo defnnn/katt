@@ -64,14 +64,14 @@ west:
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 
-ken:
+east:
 	-k3s-uninstall.sh
 	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
 	$(first) $(MAKE) cilium cname=defn-$@ cid=100 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $(first) --wait
 	for s in west; do \
-		$(first) cilium clustermesh connect --context $ss --destination-context $(first); \
+		$(first) cilium clustermesh connect --context $$s --destination-context $(first); \
 		$(first) cilium clustermesh status --context $(first) --wait; done
 	#$(first) $(MAKE) $(first)-inner
 
