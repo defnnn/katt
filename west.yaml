@@ -31,7 +31,7 @@ spec:
     path: a/west
     targetRevision: mp
   destination:
-    name: west
+    name: in-cluster
     namespace: argocd
   syncPolicy:
     automated:
