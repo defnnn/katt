@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: b--cert-manager
+  namespace: argocd
+spec:
+  project: b
+  source:
+    repoURL: 'https://github.com/defn/katt'
+    path: k/cert-manager/base
+    targetRevision: mp
+  destination:
+    name: b
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
