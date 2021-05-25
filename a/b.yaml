@@ -1,0 +1,39 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: b
+  namespace: argocd
+spec:
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: '*'
+    server: '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  orphanedResources:
+    warn: false
+    ignore:
+    - group: cilium.io
+      kind: CiliumIdentity
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: b
+  namespace: argocd
+spec:
+  project: b
+  source:
+    repoURL: 'https://github.com/defn/katt'
+    path: a/b
+    targetRevision: mp
+  destination:
+    name: in-cluster
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
