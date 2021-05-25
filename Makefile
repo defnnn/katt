@@ -70,8 +70,8 @@ east:
 	$(MAKE) argocd
 	$(MAKE) argocd-init
 	$(k) apply -f k/traefik/crds
-	$(k) apply -f east.yaml
-	argocd app wait katt --health
+	$(k) apply -f a/$@.yaml
+	argocd app wait $@ --health
 	argocd app wait sealed-secrets --health
 	argocd app wait cert-manager --health
 	argocd app wait traefik --health
