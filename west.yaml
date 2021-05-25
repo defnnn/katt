@@ -31,7 +31,7 @@ spec:
     path: a/west
     targetRevision: mp
   destination:
-    server: west
+    name: west
     namespace: argocd
   syncPolicy:
     automated:
