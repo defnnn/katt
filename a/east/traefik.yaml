@@ -1,23 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: traefik
+  name: east--traefik
   namespace: argocd
 spec:
-  project: katt
+  project: east
   source:
     repoURL: 'https://github.com/defn/katt'
     path: k/traefik/base
     targetRevision: mp
   destination:
-    server: 'https://kubernetes.default.svc'
+    name: in-cluster
     namespace: traefik
   syncPolicy:
     automated:
       prune: true
       selfHeal: false
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: traefik

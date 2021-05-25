@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cert-manager
+  name: east--cert-manager
   namespace: argocd
 spec:
-  project: katt
+  project: east
   source:
     repoURL: 'https://github.com/defn/katt'
     path: k/cert-manager/base
     targetRevision: mp
   destination:
-    server: 'https://kubernetes.default.svc'
+    name: in-cluster
     namespace: cert-manager
   syncPolicy:
     automated:

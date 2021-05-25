@@ -72,9 +72,9 @@ east:
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f a/$@.yaml
 	argocd app wait $@ --health
-	argocd app wait sealed-secrets --health
-	argocd app wait cert-manager --health
-	argocd app wait traefik --health
+	argocd app wait $@--sealed-secrets --health
+	argocd app wait $@--cert-manager --health
+	argocd app wait $@--traefik --health
 	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
