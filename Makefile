@@ -66,13 +66,8 @@ west:
 
 east:
 	-k3s-uninstall.sh
-	bin/cluster $(shell tailscale ip | grep ^100) ubuntu $(first)
-	$(first) $(MAKE) cilium cname=defn-$@ cid=102 copt="--inherit-ca west"
-	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $(first) --wait
-	for s in west; do \
-		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
-		$(first) cilium clustermesh status --context $@ --wait; done
+	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first)
+	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
 a:
@@ -81,7 +76,7 @@ a:
 	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west east; do \
+	for s in west; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
@@ -91,7 +86,7 @@ b:
 	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west east a; do \
+	for s in west a; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
@@ -101,7 +96,7 @@ c:
 	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west east a b; do \
+	for s in west a b; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 

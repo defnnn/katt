@@ -11,7 +11,7 @@ function main {
   kubectl config unset clusters.${server_name} || true
   kubectl config unset contexts.${server_name} || true
 
-  k3sup install --cluster --ip ${server_ip} --user ${server_username} --merge --context ${server_name} --local-path ~/.kube/config --k3s-extra-args "--flannel-backend=none --disable traefik --bind-address=${server_ip} --advertise-address=${server_ip} --node-ip=${server_ip} --node-external-ip=${server_ip}"
+  k3sup install --cluster --ip ${server_ip} --user ${server_username} --merge --context ${server_name} --local-path ~/.kube/config --k3s-extra-args "--flannel-backend=none --disable traefik --disable-network-policy --bind-address=${server_ip} --advertise-address=${server_ip} --node-ip=${server_ip} --node-external-ip=${server_ip}"
 }
 
 main "$@"
