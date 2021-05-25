@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: katt
+  name: east
   namespace: argocd
 spec:
   sourceRepos:
@@ -22,16 +22,16 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: katt
+  name: east
   namespace: argocd
 spec:
-  project: katt
+  project: east
   source:
     repoURL: 'https://github.com/defn/katt'
-    path: a
+    path: a/east
     targetRevision: mp
   destination:
-    server: 'https://kubernetes.default.svc'
+    name: in-cluster
     namespace: argocd
   syncPolicy:
     automated:

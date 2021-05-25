@@ -67,6 +67,14 @@ west:
 east:
 	-k3s-uninstall.sh
 	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first)
+	$(MAKE) argocd
+	$(MAKE) argocd-init
+	$(k) apply -f k/traefik/crds
+	$(k) apply -f east.yaml
+	argocd app wait katt --health
+	argocd app wait sealed-secrets --health
+	argocd app wait cert-manager --health
+	argocd app wait traefik --health
 	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
@@ -112,15 +120,6 @@ c:
 	m exec $(first) -- sudo tailscale up
 
 %-inner:
-	$(MAKE) argocd
-	$(MAKE) argocd-init
-	$(k) apply -f k/traefik/crds
-	$(k) apply -f katt.yaml
-	$(MAKE) consul vault
-	argocd app wait katt --health
-	argocd app wait sealed-secrets --health
-	argocd app wait cert-manager --health
-	argocd app wait traefik --health
 	$(MAKE) $(first)-site
 
 consul:
