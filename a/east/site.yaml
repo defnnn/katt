@@ -11,6 +11,7 @@ spec:
     targetRevision: mp
   destination:
     name: in-cluster
+    namespace: default
   syncPolicy:
     automated:
       prune: true
