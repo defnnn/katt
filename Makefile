@@ -72,7 +72,6 @@ east:
 	$(k) apply -f k/traefik/crds
 	$(k) apply -f a/$@.yaml
 	argocd app wait $@ --health
-	argocd app wait $@--sealed-secrets --health
 	argocd app wait $@--cert-manager --health
 	argocd app wait $@--traefik --health
 	$(first) $(MAKE) $(first)-inner
@@ -205,12 +204,6 @@ argocd-ignore:
 
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
-
-sealed-secret-key:
-	 @$(ks) get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml
-
-sealed-secret-make:
-	@$(kn) "$(ns)" create secret generic "$(secret)" --dry-run=client --from-file=$(name)=/dev/stdin -o json | kubeseal
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
