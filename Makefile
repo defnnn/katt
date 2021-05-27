@@ -59,7 +59,7 @@ west-launch:
 	$(MAKE) $(first)-mp
 
 west:
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
