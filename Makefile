@@ -67,7 +67,7 @@ west:
 
 east:
 	-k3s-uninstall.sh
-	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first)
+	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first) $(first).defn.ooo
 	$(MAKE) argocd
 	$(MAKE) argocd-init
 	$(k) apply -f k/traefik/crds
