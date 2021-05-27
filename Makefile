@@ -60,7 +60,7 @@ west-launch:
 
 west:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=101
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 
@@ -80,7 +80,7 @@ east:
 a:
 	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$a" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=111 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west; do \
@@ -90,7 +90,7 @@ a:
 b:
 	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$b" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=112 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west a; do \
@@ -100,7 +100,7 @@ b:
 c:
 	-ssh "$$c" /usr/local/bin/k3s-uninstall.sh
 	bin/cluster "$$c" ubuntu $(first)
-	$(first) $(MAKE) cilium cname="defn-$(first)" cid=113 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west a b; do \
