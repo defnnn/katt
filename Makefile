@@ -63,6 +63,7 @@ west:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+	$(MAKE) $(first)-add
 
 east:
 	-k3s-uninstall.sh
@@ -108,7 +109,7 @@ c:
 		$(first) cilium clustermesh status --context $@ --wait; done
 
 %-add:
-	-argocd cluster rm "$(shell argocd cluster list -o json | jq -r --arg n "$(first)" '.[] | select(.name == $$n) | .server')"
+	-argocd cluster rm https://$(first).defn.ooo:6443
 	argocd cluster add $(first)
 	east apply -f a/$(first).yaml
 
