@@ -59,14 +59,15 @@ west-launch:
 	$(MAKE) $(first)-mp
 
 west:
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+	$(MAKE) $(first)-add
 
 east:
 	-k3s-uninstall.sh
-	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first)
+	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first) $(first).defn.ooo
 	$(MAKE) argocd
 	$(MAKE) argocd-init
 	$(k) apply -f k/traefik/crds
@@ -106,6 +107,11 @@ c:
 	for s in west a b; do \
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
+
+%-add:
+	-argocd cluster rm https://$(first).defn.ooo:6443
+	argocd cluster add $(first)
+	east apply -f a/$(first).yaml
 
 %-mp:
 	-m delete --purge $(first)
