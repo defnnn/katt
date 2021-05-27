@@ -5,13 +5,16 @@ function main {
 
   local server_ip="$1"; shift
   local server_username="$1"; shift
-  local server_name="$1"; shift
+  local server_context="$1"; shift
+  local server_fqdn="$1"; shift
 
-  kubectl config unset users.${server_name} || true
-  kubectl config unset clusters.${server_name} || true
-  kubectl config unset contexts.${server_name} || true
+  kubectl config unset users.${server_context} || true
+  kubectl config unset clusters.${server_context} || true
+  kubectl config unset contexts.${server_context} || true
 
-  k3sup install --cluster --ip ${server_ip} --user ${server_username} --merge --context ${server_name} --local-path ~/.kube/config --k3s-extra-args "--flannel-backend=vxlan --disable traefik --bind-address=${server_ip} --advertise-address=${server_ip} --node-ip=${server_ip} --node-external-ip=${server_ip}"
+  k3sup install --cluster --ip ${server_ip} --user ${server_username} --merge --context ${server_context} --local-path ~/.kube/config --k3s-extra-args "--disable traefik --node-ip=${server_ip} --node-external-ip=${server_ip} --tls-san ${server_fqdn} \
+    --flannel-backend=vxlan"
+  kubectl config set-cluster ${server_context} --server=https://${server_fqdn}:6443
 }
 
 main "$@"
