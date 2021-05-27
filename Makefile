@@ -107,6 +107,11 @@ c:
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
+%-add:
+	-argocd cluster rm "$(shell argocd cluster list -o json | jq -r --arg n "$(first)" '.[] | select(.name == $$n) | .server')"
+	argocd cluster add $(first)
+	east apply -f a/$(first).yaml
+
 %-mp:
 	-m delete --purge $(first)
 	m launch -c 2 -d 20G -m 2048M -n $(first)
