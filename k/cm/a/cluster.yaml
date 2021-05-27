@@ -54,7 +54,7 @@ kind: ConfigMap
 metadata:
   name: rebel-base-response
 data:
-  message: "{\"Galaxy\": \"Alderaan\", \"Cluster\": \"Cluster-2\"}\n"
+  message: "{\"Galaxy\": \"Alderaan\", \"Cluster\": \"Cluster-a\"}\n"
 ---
 apiVersion: apps/v1
 kind: Deployment
