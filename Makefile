@@ -97,6 +97,11 @@ east:
 	argocd app wait $@--cert-manager --health
 	argocd app wait $@--traefik --health
 
+east-mesh:
+	for s in a b c; do \
+		$(first) cilium clustermesh connect --context $$s --destination-context $(first); \
+		$(first) cilium clustermesh status --context $(first) --wait; done
+
 .PHONY: a
 a:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
