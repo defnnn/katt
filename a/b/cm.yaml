@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: a--cm
+  name: b--cm
   namespace: argocd
 spec:
-  project: a
+  project: b
   source:
     repoURL: 'https://github.com/defn/katt'
-    path: k/cm/a
+    path: k/cm/b
     targetRevision: mp
   destination:
-    name: a
+    name: b
     namespace: default
   syncPolicy:
     automated:
