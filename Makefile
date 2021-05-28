@@ -90,7 +90,8 @@ a:
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo
+		ubuntu $(first) $(first).defn.ooo \
+		10.50.0.0/16 10.51.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -104,7 +105,8 @@ b:
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo
+		ubuntu $(first) $(first).defn.ooo \
+		10.52.0.0/16 10.53.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -118,7 +120,8 @@ c:
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo
+		ubuntu $(first) $(first).defn.ooo \
+		10.54.0.0/16 10.55.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
