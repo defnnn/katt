@@ -61,6 +61,11 @@ west-reset:
 	-echo "echo drop database kubernetes | sudo -u postgres psql" | m shell $(first)
 	m restart $(first)
 
+%-reset:
+	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	ssh "$(first).defn.ooo" sudo reboot
+
 west:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
