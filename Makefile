@@ -179,7 +179,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --version v1.10.0 --kube-proxy-replacement=disabled --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
+	cilium install --version v1.10.0 --kube-proxy-replacement=strict --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
