@@ -123,6 +123,8 @@ c:
 %-add:
 	-argocd cluster rm https://$(first).defn.ooo:6443
 	argocd cluster add $(first)
+
+%s-app:
 	east apply -f a/$(first).yaml
 
 %-mp:
