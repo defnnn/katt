@@ -64,7 +64,7 @@ west-reset:
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	ssh "$(first).defn.ooo" sudo reboot
+	ssh "$(first).defn.ooo" sudo reboot &
 
 west:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
@@ -87,7 +87,10 @@ east:
 a:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
+	bin/cluster \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -98,7 +101,10 @@ a:
 b:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
+	bin/cluster \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -109,7 +115,10 @@ b:
 c:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
+	bin/cluster \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
