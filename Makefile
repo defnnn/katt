@@ -126,7 +126,7 @@ c:
 	m exec $(first) -- sudo apt-get update
 	m exec $(first) -- sudo apt-get install tailscale
 	m exec $(first) -- sudo tailscale up
-	m exec $(first) -- sudo apt install -y --install-recommends linux-generic-hwe-20.04 
+	m exec $(first) -- sudo apt install -y --install-recommends linux-generic-hwe-20.04 postgresql postgresql-contrib
 	m restart $(first)
 
 %-inner:
