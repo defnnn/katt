@@ -47,12 +47,10 @@ registry: # Run a local registry
 gojo todo toge:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') defn $(first)
 	$(first) $(MAKE) cilium
-	$(first) $(MAKE) $(first)-inner
 
 nue gyoku maki miwa:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) cilium
-	$(first) $(MAKE) $(first)-inner
 
 west-launch:
 	m delete --all --purge
@@ -79,7 +77,6 @@ east:
 	argocd app wait $@ --health
 	argocd app wait $@--cert-manager --health
 	argocd app wait $@--traefik --health
-	$(first) $(MAKE) $(first)-inner
 
 .PHONY: a
 a:
@@ -115,6 +112,9 @@ c:
 		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
 		$(first) cilium clustermesh status --context $@ --wait; done
 
+%-secrets:
+	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(first) $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
+
 %-add:
 	-argocd cluster rm https://$(first).defn.ooo:6443
 	argocd cluster add $(first)
@@ -133,20 +133,12 @@ c:
 	m exec $(first) -- sudo apt install -y --install-recommends linux-generic-hwe-20.04 postgresql postgresql-contrib
 	m restart $(first)
 
-%-inner:
-	$(MAKE) $(first)-site
-
 consul:
 	helm install consul hashicorp/consul --set global.name=consul --set server.replicas=1
 	$(k) rollout status statefulset.apps/consul-server
 
 vault:
 	helm install vault hashicorp/vault --set global.name=consul --set server.replicas=1
-
-%-site:
-	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
-	cd k/site && make $(first)-gen
-	$(first) kustomize build k/site/$(first) | $(first) $(k) apply -f -
 
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
