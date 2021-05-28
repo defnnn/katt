@@ -83,6 +83,9 @@ east:
 	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
 	$(first) cilium clustermesh status --context $(first) --wait
 
+%-connectivity:
+	cilium connectivity test --context $(first) --multi-cluster $(second)
+
 west:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
@@ -176,7 +179,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --version v1.10.0 --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
+	cilium install --version v1.10.0 --kube-proxy-replacement=disabled --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
