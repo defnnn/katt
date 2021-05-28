@@ -70,7 +70,6 @@ east:
 	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first) $(first).defn.ooo
 	$(MAKE) argocd
 	$(MAKE) argocd-init
-	$(k) apply -f k/traefik/crds
 	$(k) apply -f a/$@.yaml
 	argocd app wait $@ --health
 	argocd app wait $@--cert-manager --health

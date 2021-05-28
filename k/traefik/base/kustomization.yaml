@@ -3,3 +3,11 @@ kind: Kustomization
 
 resources:
   - traefik.yaml
+  - ingressroute.yaml
+  - ingressroutetcp.yaml
+  - ingressrouteudp.yaml
+  - middlewares.yaml
+  - serverstransports.yaml
+  - tlsoptions.yaml
+  - tlsstores.yaml
+  - traefikservices.yaml
