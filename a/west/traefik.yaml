@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: west--traefik
+  namespace: argocd
+spec:
+  project: west
+  source:
+    repoURL: 'https://github.com/defn/katt'
+    path: k/traefik/base
+    targetRevision: mp
+  destination:
+    name: west
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
+    syncOptions:
+    - CreateNamespace=true
