@@ -72,7 +72,7 @@ west:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.40.0.0/16 10.41.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	-argocd app delete -y -p background $(first)
@@ -84,7 +84,7 @@ east:
 		$(shell tailscale ip | grep ^100) \
 		ubuntu $(first) $(first).defn.ooo \
 		10.42.0.0/16 10.43.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west; do \
@@ -102,6 +102,10 @@ east-mesh:
 		$(first) cilium clustermesh connect --context $$s --destination-context $(first); \
 		$(first) cilium clustermesh status --context $(first) --wait; done
 
+%-mesh:
+	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
+	$(first) cilium clustermesh status --context $(first) --wait
+
 .PHONY: a
 a:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -111,7 +115,7 @@ a:
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.50.0.0/16 10.51.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west; do \
@@ -126,7 +130,7 @@ b:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.52.0.0/16 10.53.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west a; do \
@@ -141,7 +145,7 @@ c:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.54.0.0/16 10.55.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca west"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	for s in west a b; do \
