@@ -68,6 +68,7 @@ west:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+	-argocd app delete -y -p background $(first)
 
 east:
 	-k3s-uninstall.sh
@@ -126,7 +127,7 @@ c:
 	m exec $(first) -- sudo apt-get update
 	m exec $(first) -- sudo apt-get install tailscale
 	m exec $(first) -- sudo tailscale up
-	m exec $(first) -- sudo apt install -y --install-recommends linux-generic-hwe-20.04 
+	m exec $(first) -- sudo apt install -y --install-recommends linux-generic-hwe-20.04 postgresql postgresql-contrib
 	m restart $(first)
 
 %-inner:

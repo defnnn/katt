@@ -12,8 +12,8 @@ function main {
   kubectl config unset clusters.${server_context} || true
   kubectl config unset contexts.${server_context} || true
 
-  k3sup install --cluster --ip ${server_ip} --user ${server_username} --merge --context ${server_context} --local-path ~/.kube/config --k3s-extra-args "--disable traefik --node-external-ip=${server_ip} --tls-san ${server_fqdn} \
-    --flannel-backend=vxlan"
+  k3sup install --cluster --ip ${server_ip} --user ${server_username} --merge --context ${server_context} --local-path ~/.kube/config --k3s-extra-args \
+    "--disable traefik --node-external-ip=${server_ip} --tls-san ${server_fqdn} --datastore-endpoint postgres:// --flannel-backend=vxlan"
   kubectl config set-cluster ${server_context} --server=https://${server_fqdn}:6443
 }
 

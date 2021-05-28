@@ -5,6 +5,3 @@ resources:
   - katt.yaml
   - traefik.yaml
   - hubble.yaml
-  - argocd.yaml
-  - consul.yaml
-  - vault.yaml
