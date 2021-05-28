@@ -60,6 +60,7 @@ west-launch:
 
 west-reset:
 	echo k3s-uninstall.sh | m shell $(first)
+	-echo "echo drop database kubernetes | sudo -u postgres psql" | m shell $(first)
 	m restart $(first)
 
 west:
