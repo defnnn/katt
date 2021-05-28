@@ -83,8 +83,9 @@ east:
 
 .PHONY: a
 a:
-	-ssh "$$a" /usr/local/bin/k3s-uninstall.sh
-	bin/cluster "$$a" ubuntu $(first)
+	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -93,8 +94,9 @@ a:
 		$(first) cilium clustermesh status --context $@ --wait; done
 
 b:
-	-ssh "$$b" /usr/local/bin/k3s-uninstall.sh
-	bin/cluster "$$b" ubuntu $(first)
+	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -103,8 +105,9 @@ b:
 		$(first) cilium clustermesh status --context $@ --wait; done
 
 c:
-	-ssh "$$c" /usr/local/bin/k3s-uninstall.sh
-	bin/cluster "$$c" ubuntu $(first)
+	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
