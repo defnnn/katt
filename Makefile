@@ -56,15 +56,32 @@ west-launch:
 	m delete --all --purge
 	$(MAKE) $(first)-mp
 
-west-reset:
-	echo k3s-uninstall.sh | m shell $(first)
-	-echo "echo drop database kubernetes | sudo -u postgres psql" | m shell $(first)
-	m restart $(first)
-
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	ssh "$(first).defn.ooo" sudo reboot &
+
+east:
+	-k3s-uninstall.sh
+	bin/cluster \
+		$(shell tailscale ip | grep ^100) \
+		$(shell tailscale ip | grep ^100) \
+		ubuntu $(first) $(first).defn.ooo \
+		10.42.0.0/16 10.43.0.0/16
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
+	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $@ --wait
+	$(MAKE) $(first)-west-mesh
+	$(MAKE) argocd
+	$(MAKE) argocd-init
+	$(k) apply -f a/$@.yaml
+	argocd app wait $@ --health
+	argocd app wait $@--cert-manager --health
+	argocd app wait $@--traefik --health
+
+%-mesh:
+	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
+	$(first) cilium clustermesh status --context $(first) --wait
 
 west:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -77,36 +94,7 @@ west:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	-argocd app delete -y -p background $(first)
-
-east:
-	-k3s-uninstall.sh
-	bin/cluster \
-		$(shell tailscale ip | grep ^100) \
-		$(shell tailscale ip | grep ^100) \
-		ubuntu $(first) $(first).defn.ooo \
-		10.42.0.0/16 10.43.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
-	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $@ --wait
-	for s in west; do \
-		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
-		$(first) cilium clustermesh status --context $@ --wait; done
-	$(MAKE) argocd
-	$(MAKE) argocd-init
-	$(k) apply -f a/$@.yaml
-	argocd app wait $@ --health
-	argocd app wait $@--cert-manager --health
-	argocd app wait $@--traefik --health
-
-east-mesh:
-	for s in a b c; do \
-		$(first) cilium clustermesh connect --context $$s --destination-context $(first); \
-		$(first) cilium clustermesh status --context $(first) --wait; done
-
-%-mesh:
-	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
-	$(first) cilium clustermesh status --context $(first) --wait
+	$(MAKE) $(first)-east-mesh
 
 .PHONY: a
 a:
@@ -120,9 +108,8 @@ a:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west; do \
-		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
-		$(first) cilium clustermesh status --context $@ --wait; done
+	$(first) cilium clustermesh status --context $@ --wait
+	$(MAKE) $(first)-{east,west}-mesh
 
 b:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -135,9 +122,7 @@ b:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west a; do \
-		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
-		$(first) cilium clustermesh status --context $@ --wait; done
+	$(MAKE) $(first)-{east,west,a}-mesh
 
 c:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -150,9 +135,7 @@ c:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	for s in west a b; do \
-		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
-		$(first) cilium clustermesh status --context $@ --wait; done
+	$(MAKE) $(first)-{east,west,a,b}-mesh
 
 %-secrets:
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(first) $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
