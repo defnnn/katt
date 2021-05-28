@@ -79,7 +79,17 @@ west:
 
 east:
 	-k3s-uninstall.sh
-	bin/cluster-sans-cilium $(shell tailscale ip | grep ^100) ubuntu $(first) $(first).defn.ooo
+	bin/cluster \
+		$(shell tailscale ip | grep ^100) \
+		$(shell tailscale ip | grep ^100) \
+		ubuntu $(first) $(first).defn.ooo \
+		10.42.0.0/16 10.43.0.0/16
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102 copt="--inherit-ca west"
+	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $@ --wait
+	for s in west; do \
+		$(first) cilium clustermesh connect --context $$s --destination-context $@; \
+		$(first) cilium clustermesh status --context $@ --wait; done
 	$(MAKE) argocd
 	$(MAKE) argocd-init
 	$(k) apply -f a/$@.yaml
