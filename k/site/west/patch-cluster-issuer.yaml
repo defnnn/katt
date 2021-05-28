@@ -1,0 +1,9 @@
+- op: replace
+  path: /spec/acme/email
+  value: iam@defn.sh
+- op: replace
+  path: /spec/acme/solvers/0/dns01/cloudflare/email
+  value: cloudflare@defn.us
+- op: replace
+  path: /spec/acme/solvers/0/selector/dnsZones/0
+  value: defn.ooo
