@@ -89,7 +89,7 @@ a:
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca west"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer

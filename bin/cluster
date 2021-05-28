@@ -14,7 +14,7 @@ function main {
   kubectl config unset contexts.${server_context} || true
 
   k3sup install --cluster --host ${server_fqdn} --user ${server_username} --merge --context ${server_context} --local-path ~/.kube/config --k3s-extra-args \
-    "--disable traefik --node-ip=${server_ip_priv} --node-external-ip=${server_ip_pub} --tls-san ${server_fqdn} --datastore-endpoint postgres:// --flannel-backend=none --disable-network-policy"
+    "--disable traefik --advertise-address=${server_ip_priv} --node-ip=${server_ip_priv} --node-external-ip=${server_ip_pub} --tls-san ${server_fqdn} --datastore-endpoint postgres:// --flannel-backend=none --disable-network-policy"
   kubectl config set-cluster ${server_context} --server=https://${server_fqdn}:6443
 }
 
