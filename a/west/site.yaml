@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: west--site
+  namespace: argocd
+spec:
+  project: west
+  source:
+    repoURL: 'https://github.com/defn/katt'
+    path: k/site/west
+    targetRevision: mp
+  destination:
+    name: west
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: false
