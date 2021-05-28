@@ -58,6 +58,10 @@ west-launch:
 	m delete --all --purge
 	$(MAKE) $(first)-mp
 
+west-reset:
+	echo k3s-uninstall.sh | m shell $(first)
+	m restart $(first)
+
 west:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first) $(first).defn.ooo
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
