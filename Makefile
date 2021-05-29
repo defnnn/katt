@@ -61,6 +61,12 @@ west-reset:
 	-echo "echo drop database kubernetes | sudo -u postgres psql" | m shell $(first)
 	m restart $(first)
 
+east-reset:
+	-/usr/local/bin/k3s-uninstall.sh
+	-echo "database kubernetes" | sudo -u postgres psql
+	sudo reboot &
+	tmux detach
+
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
@@ -79,13 +85,15 @@ east:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-west-mesh
+	$(MAKE) $(first)-argocd
+
+east-argocd:
 	$(MAKE) argocd
 	$(MAKE) argocd-init
-	$(k) apply -f a/$@.yaml
-	argocd app wait $@ --health
-	argocd app wait $@--cert-manager --health
-	argocd app wait $@--traefik --health
+	$(k) apply -f a/$(first).yaml
+	argocd app wait $(first) --health
+	argocd app wait $(first)--cert-manager --health
+	argocd app wait $(first)--traefik --health
 
 %-mesh:
 	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
@@ -116,6 +124,8 @@ west:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+
+west-plus:
 	$(MAKE) $(first)-east-mesh
 	$(MAKE) $(first)-add
 
@@ -132,8 +142,9 @@ a:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-{east,west}-mesh
+
+a-plus:
+	true
 
 b:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -147,6 +158,8 @@ b:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca a"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+
+b-plus:
 	$(MAKE) $(first)-a-mesh
 
 c:
@@ -161,6 +174,8 @@ c:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca b"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
+
+c-plus:
 	$(MAKE) $(first)-{a,b}-mesh
 
 %-secrets:
