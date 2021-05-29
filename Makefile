@@ -104,8 +104,9 @@ west-plus:
 
 .PHONY: a
 a:
-	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
-	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	-ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" /usr/local/bin/k3s-uninstall.sh
+	-echo "alter role postgres with password 'postgres'" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
+	-echo "drop database kubernetes" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
@@ -119,8 +120,9 @@ a-plus:
 	$(first) cilium clustermesh status --context $@ --wait
 
 b:
-	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
-	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	-ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" /usr/local/bin/k3s-uninstall.sh
+	-echo "alter role postgres with password 'postgres'" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
+	-echo "drop database kubernetes" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
@@ -135,8 +137,9 @@ b-plus:
 	$(MAKE) $(first)-a-mesh
 
 c:
-	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
-	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	-ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" /usr/local/bin/k3s-uninstall.sh
+	-echo "alter role postgres with password 'postgres'" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
+	-echo "drop database kubernetes" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
