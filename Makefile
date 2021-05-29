@@ -112,6 +112,7 @@ west:
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	$(MAKE) $(first)-east-mesh
+	$(MAKE) $(first)-add
 
 .PHONY: a
 a:
