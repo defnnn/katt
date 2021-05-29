@@ -218,7 +218,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --version v1.10.0 --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
+	cilium install --version v1.10.0 --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
