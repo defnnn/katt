@@ -85,6 +85,8 @@ east:
 	$(first) cilium clustermesh status --context $(first) --wait
 
 %-connectivity:
+	$(first) cilium connectivity test
+	$(second) cilium connectivity test
 	cilium connectivity test --context $(first) --multi-cluster $(second)
 
 west:
