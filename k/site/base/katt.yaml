@@ -57,6 +57,7 @@ spec:
     kind: ClusterIssuer
   dnsNames:
   - TODO_WILDCARD_ZONE
+  - TODO_WILDCARD_COUNTER
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: TLSStore
