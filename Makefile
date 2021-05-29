@@ -85,8 +85,12 @@ east:
 	$(first) cilium clustermesh status --context $(first) --wait
 
 %-connectivity:
+	$(first) delete ns cilium-test
 	$(first) cilium connectivity test
+	$(second) delete ns cilium-test
 	$(second) cilium connectivity test
+	$(first) delete ns cilium-test
+	$(second) delete ns cilium-test
 	cilium connectivity test --context $(first) --multi-cluster $(second)
 
 west:
