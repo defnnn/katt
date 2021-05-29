@@ -3,4 +3,4 @@
   value: '*.west.defn.ooo'
 - op: replace
   path: /spec/issuerRef/name
-  value: letsencrypt-staging
+  value: letsencrypt-prod

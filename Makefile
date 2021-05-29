@@ -63,6 +63,7 @@ west-launch:
 
 east:
 	-k3s-uninstall.sh
+	-echo "drop database kubernetes" | sudo -u postgres psql
 	bin/cluster \
 		$(shell tailscale ip | grep ^100) \
 		$(shell tailscale ip | grep ^100) \
