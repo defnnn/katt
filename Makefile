@@ -91,8 +91,8 @@ east:
 	$(first) delete ns cilium-test
 
 %-connectivity:
-	$(MAKE) $(first)-test
-	$(MAKE) $(second)-test
+	$(first) delete ns cilium-test
+	$(second) delete ns cilium-test
 	cilium connectivity test --context $(first) --multi-cluster $(second)
 	$(first) delete ns cilium-test
 	$(second) delete ns cilium-test
