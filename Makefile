@@ -70,6 +70,7 @@ east:
 		$(shell tailscale ip | grep ^100) \
 		ubuntu $(first) $(first).defn.ooo \
 		10.42.0.0/16 10.43.0.0/16
+	$(MAKE) $(first)-secrets
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -91,11 +92,11 @@ east:
 	$(first) delete ns cilium-test
 
 %-connectivity:
-	$(first) delete ns cilium-test
-	$(second) delete ns cilium-test
+	-$(first) delete ns cilium-test
+	-$(second) delete ns cilium-test
 	cilium connectivity test --context $(first) --multi-cluster $(second)
-	$(first) delete ns cilium-test
-	$(second) delete ns cilium-test
+	-$(first) delete ns cilium-test
+	-$(second) delete ns cilium-test
 
 west:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -106,6 +107,7 @@ west:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.40.0.0/16 10.41.0.0/16
+	$(MAKE) $(first)-secrets
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101 copt="--inherit-ca east"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -156,6 +158,7 @@ c:
 	$(MAKE) $(first)-{a,b}-mesh
 
 %-secrets:
+	$(first) create ns cert-manager
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(first) $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 
 %-add:
