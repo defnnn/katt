@@ -105,6 +105,7 @@ a:
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.50.0.0/16 10.51.0.0/16
@@ -119,7 +120,8 @@ b:
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
+		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.52.0.0/16 10.53.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca east"
