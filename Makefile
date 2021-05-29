@@ -163,7 +163,7 @@ c-plus:
 
 %-mp:
 	-m delete --purge $(first)
-	m launch -c 2 -d 20G -m 2048M -n $(first)
+	m launch -c 2 -d 20G -m 4096M -n $(first)
 	ssh-add -L | m exec $(first) -- tee -a .ssh/authorized_keys
 	m exec $(first) -- sudo mount bpffs -t bpf /sys/fs/bpf
 	curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | m exec $(first) -- sudo apt-key add -
