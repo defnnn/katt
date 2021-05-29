@@ -88,9 +88,9 @@ east:
 	$(MAKE) $(first)-argocd
 
 east-argocd:
-	$(MAKE) argocd
-	$(MAKE) argocd-init
-	$(k) apply -f a/$(first).yaml
+	$(first) $(MAKE) argocd
+	$(first) $(MAKE) argocd-init
+	$(first) $(k) apply -f a/$(first).yaml
 	argocd app wait $(first) --health
 	argocd app wait $(first)--cert-manager --health
 	argocd app wait $(first)--traefik --health
