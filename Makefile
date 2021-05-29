@@ -19,35 +19,6 @@ bridge := en0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-install: ## Install asdf tools
-	asdf install
-
-vault-agent:
-	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
-	helm repo update
-	helm install vault hashicorp/vault --values k/vault-agent/values.yaml
-
-gloo:
-	#glooctl install knative -g
-	glooctl install gateway --values k/gloo/values.yaml --with-admin-console
-	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
-	curl -sSL https://raw.githubusercontent.com/solo-io/gloo/v1.2.9/example/petstore/petstore.yaml | $(k) apply -f -
-	glooctl add route --path-exact /all-pets --dest-name default-petstore-8080 --prefix-rewrite /api/pets
-
-external-secrets:
-	$(kx) apply -f k/external-secrets/crds
-	kustomize build --enable-alpha-plugins k/external-secrets | $(kx) apply -f -
-
-home:
-	kustomize build --enable-alpha-plugins k/home | $(k) apply -f -
-
-registry: # Run a local registry
-	k apply -f k/registry.yaml
-
-gojo todo toge:
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') defn $(first)
-	$(first) $(MAKE) cilium
-
 nue gyoku maki miwa:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
 	$(first) $(MAKE) cilium
@@ -214,46 +185,19 @@ once:
 	helm repo update
 
 cilium:
-	$(MAKE) cli-cilium
+	$(MAKE) cilium-install
 
-cli-cilium:
-	cilium install --version v1.10.0 --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
+cilium-install:
+	cilium install --version v1.10.0 --kube-proxy-replacement=strict --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
 	$(ks) rollout status deployment/hubble-relay
 	$(ks) rollout status deployment/hubble-ui
 
-cli-clustermesh:
+cilium-clustermesh:
 	cilium clustermesh enable --service-type LoadBalancer
 	cilium clustermesh status --wait
-
-helm-cilium:
-	helm install cilium cilium/cilium --version $(cilium) \
-   --namespace kube-system \
-   --set nodeinit.enabled=true \
-   --set kubeProxyReplacement=partial \
-   --set hostServices.enabled=false \
-   --set externalIPs.enabled=true \
-   --set nodePort.enabled=true \
-   --set hostPort.enabled=true \
-   --set bpf.masquerade=false \
-   --set image.pullPolicy=IfNotPresent \
-   --set ipam.mode=kubernetes \
-	 --set nodeinit.restartPods=true \
-	 --set operator.replicas=1
-	for deploy in cilium-operator; \
-		do $(ks) rollout status deploy/$${deploy}; done
-	helm upgrade cilium cilium/cilium --version $(cilium) \
-   --namespace kube-system \
-   --reuse-values \
-   --set hubble.listenAddress=":4244" \
-   --set hubble.relay.enabled=true \
-   --set hubble.ui.enabled=true
-	for deploy in hubble-relay hubble-ui; \
-		do $(ks) rollout status deploy/$${deploy}; done
-	for deploy in coredns local-path-provisioner metrics-server; \
-		do $(ks) rollout status deploy/$${deploy}; done
 
 argocd:
 	-$(k) create ns argocd
@@ -285,23 +229,54 @@ bash:
 	chmod 755 bash
 
 cilium-cli:
+	$(MAKE) cilium-cli-$(shell uname -s)
+	$(MAKE) hubble-cli-$(shell uname -s)
+
+cilium-cli-Linux:
 	curl -sLLO https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz
 	sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
 	rm cilium-linux-amd64.tar.gz
 
-hubble-cli:
+hubble-cli-Linux:
 	export HUBBLE_VERSION=$(shell curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
 	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-linux-amd64.tar.gz"
 	sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
 	rm -f hubble-linux-amd64.tar.gz	
 
-cilium-cli-darwin:
+cilium-cli-Darwin:
 	curl -sLLO https://github.com/cilium/cilium-cli/releases/latest/download/cilium-darwin-amd64.tar.gz
 	sudo tar xzvfC cilium-darwin-amd64.tar.gz /usr/local/bin
 	rm cilium-darwin-amd64.tar.gz
 
-hubble-cli-darwin:
+hubble-cli-Darwin:
 	export HUBBLE_VERSION=$(shell curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
 	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-darwin-amd64.tar.gz"
 	sudo tar xzvfC hubble-darwin-amd64.tar.gz /usr/local/bin
 	rm -f hubble-darwin-amd64.tar.gz	
+
+vault-agent:
+	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
+	helm repo update
+	helm install vault hashicorp/vault --values k/vault-agent/values.yaml
+
+gloo:
+	#glooctl install knative -g
+	glooctl install gateway --values k/gloo/values.yaml --with-admin-console
+	kubectl patch settings -n gloo-system default -p '{"spec":{"linkerd":true}}' --type=merge
+	curl -sSL https://raw.githubusercontent.com/solo-io/gloo/v1.2.9/example/petstore/petstore.yaml | $(k) apply -f -
+	glooctl add route --path-exact /all-pets --dest-name default-petstore-8080 --prefix-rewrite /api/pets
+
+external-secrets:
+	$(kx) apply -f k/external-secrets/crds
+	kustomize build --enable-alpha-plugins k/external-secrets | $(kx) apply -f -
+
+home:
+	kustomize build --enable-alpha-plugins k/home | $(k) apply -f -
+
+registry: # Run a local registry
+	k apply -f k/registry.yaml
+
+gojo todo toge:
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') defn $(first)
+	$(first) $(MAKE) cilium
+
