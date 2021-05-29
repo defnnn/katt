@@ -7,4 +7,4 @@ _wildcard_counter: "i001.defn.ooo"
 _cf_zone:  "defn.ooo"
 _cf_email: "cloudflare@defn.us"
 
-_bases: ["../base", "../argocd"]
+_bases: ["../base", "../base-argocd"]
