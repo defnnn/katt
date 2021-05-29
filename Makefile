@@ -153,6 +153,9 @@ c-plus:
 	$(first) cilium clustermesh status --context $@ --wait
 	$(MAKE) $(first)-{a,b}-mesh
 
+%-ssh:
+	ssh $(first)-prv.dev.defn.net -A
+
 %-secrets:
 	$(first) create ns cert-manager
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(first) $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
