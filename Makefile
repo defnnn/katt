@@ -84,14 +84,17 @@ east:
 	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
 	$(first) cilium clustermesh status --context $(first) --wait
 
-%-connectivity:
-	$(first) delete ns cilium-test
+%-test:
+	-$(first) delete ns cilium-test
 	$(first) cilium connectivity test
-	$(second) delete ns cilium-test
-	$(second) cilium connectivity test
+	$(first) delete ns cilium-test
+
+%-connectivity:
+	$(MAKE) $(first)-test
+	$(MAKE) $(second)-test
+	cilium connectivity test --context $(first) --multi-cluster $(second)
 	$(first) delete ns cilium-test
 	$(second) delete ns cilium-test
-	cilium connectivity test --context $(first) --multi-cluster $(second)
 
 west:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
