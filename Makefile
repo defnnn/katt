@@ -65,8 +65,8 @@ east:
 	-k3s-uninstall.sh
 	bin/cluster \
 		$(shell tailscale ip | grep ^100) \
-		$(shell ifconfig ens5 | grep ' inet ' | awk '{print $$2}') \
-		$(shell ifconfig ens5 | grep ' inet ' | awk '{print $$2}') \
+		$(shell tailscale ip | grep ^100) \
+		$(shell tailscale ip | grep ^100) \
 		ubuntu $(first) $(first).defn.ooo \
 		10.42.0.0/16 10.43.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
@@ -117,7 +117,7 @@ a:
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.50.0.0/16 10.51.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111 copt="--inherit-ca east"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
 	$(first) cilium clustermesh status --context $@ --wait
@@ -132,10 +132,10 @@ b:
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.52.0.0/16 10.53.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca east"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca a"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-{east,west,a}-mesh
+	$(MAKE) $(first)-a-mesh
 
 c:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -146,10 +146,10 @@ c:
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.54.0.0/16 10.55.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca east"
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca b"
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-{east,west,a,b}-mesh
+	$(MAKE) $(first)-{a,b}-mesh
 
 %-secrets:
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(first) $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
