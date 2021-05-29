@@ -84,6 +84,7 @@ east-argocd:
 
 west:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-echo "alter role postgres with password 'postgres'" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
