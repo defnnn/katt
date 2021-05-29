@@ -65,7 +65,8 @@ east:
 	-k3s-uninstall.sh
 	bin/cluster \
 		$(shell tailscale ip | grep ^100) \
-		$(shell tailscale ip | grep ^100) \
+		$(shell ifconfig ens5 | grep ' inet ' | awk '{print $$2}') \
+		$(shell ifconfig ens5 | grep ' inet ' | awk '{print $$2}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.42.0.0/16 10.43.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
@@ -90,6 +91,7 @@ west:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	bin/cluster \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
@@ -134,7 +136,8 @@ c:
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
+		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.54.0.0/16 10.55.0.0/16
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca east"
@@ -181,7 +184,7 @@ cilium:
 	$(MAKE) cli-cilium
 
 cli-cilium:
-	cilium install --version v1.10.0 --kube-proxy-replacement=strict --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
+	cilium install --version v1.10.0 --cluster-name "$(cname)" --cluster-id "$(cid)" --node-encryption $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
