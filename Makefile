@@ -92,7 +92,9 @@ west:
 		ubuntu $(first) $(first).defn.ooo \
 		10.40.0.0/16 10.41.0.0/16
 	$(MAKE) $(first)-secrets
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101 copt="--inherit-ca east"
+	$(MAKE) $(first)-add
+	$(MAKE) $(first)-app
 
 west-plus:
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
@@ -125,7 +127,7 @@ b:
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.52.0.0/16 10.53.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca a"
 
 b-plus:
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
@@ -141,7 +143,7 @@ c:
 		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.54.0.0/16 10.55.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca a"
 
 c-plus:
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
