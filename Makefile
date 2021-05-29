@@ -56,6 +56,11 @@ west-launch:
 	m delete --all --purge
 	$(MAKE) $(first)-mp
 
+west-reset:
+	-echo /usr/local/bin/k3s-uninstall.sh | m shell $(first)
+	-echo "echo drop database kubernetes | sudo -u postgres psql" | m shell $(first)
+	m restart $(first)
+
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
