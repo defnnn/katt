@@ -1,4 +1,0 @@
----
-injector:
-  enabled: true
-  externalVaultAddr: https://vault.global.defn.sh
