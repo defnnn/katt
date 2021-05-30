@@ -6,9 +6,9 @@ metadata:
 spec:
   project: east
   source:
-    repoURL: 'https://github.com/defn/katt'
-    path: k/cert-manager/base
-    targetRevision: mp
+    repoURL: 'https://github.com/letfn/katt-cert-manager'
+    path: base
+    targetRevision: master
   destination:
     name: in-cluster
     namespace: cert-manager
