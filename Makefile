@@ -166,7 +166,7 @@ c-plus:
 	argocd cluster add $(first)
 
 %-app:
-	east apply -f https://github.com/amanibhavam/katt-spiral/app/$(first).yaml
+	east apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/app/$(first).yaml
 
 %-mp:
 	-m delete --purge $(first)
