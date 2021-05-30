@@ -61,7 +61,8 @@ east:
 east-argocd:
 	$(first) $(MAKE) argocd
 	$(first) $(MAKE) argocd-init
-	$(MAKE) $(first)-app
+	$(first) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/clusters.yaml
+	argocd app wait clusters --health
 	argocd app wait $(first) --health
 	argocd app wait $(first)--cert-manager --health
 	argocd app wait $(first)--traefik --health
@@ -164,9 +165,6 @@ c-plus:
 %-add:
 	-argocd cluster rm https://$(first).defn.ooo:6443
 	argocd cluster add $(first)
-
-%-app:
-	east apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/app/$(first).yaml
 
 %-mp:
 	-m delete --purge $(first)
