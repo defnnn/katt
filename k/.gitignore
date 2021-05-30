@@ -1,3 +1,0 @@
-traefik/config/traefik.yaml
-*.sops
-diff*.yaml
