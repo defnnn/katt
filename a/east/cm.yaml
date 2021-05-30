@@ -6,9 +6,9 @@ metadata:
 spec:
   project: east
   source:
-    repoURL: 'https://github.com/defn/katt'
-    path: k/cm/east
-    targetRevision: mp
+    repoURL: 'https://github.com/letfn/katt-cm'
+    path: east
+    targetRevision: master
   destination:
     name: in-cluster
     namespace: default

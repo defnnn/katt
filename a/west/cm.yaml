@@ -6,9 +6,9 @@ metadata:
 spec:
   project: west
   source:
-    repoURL: 'https://github.com/defn/katt'
-    path: k/cm/west
-    targetRevision: mp
+    repoURL: 'https://github.com/letfn/katt-cm'
+    path: west
+    targetRevision: master
   destination:
     name: west
     namespace: default

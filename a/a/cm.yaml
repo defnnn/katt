@@ -6,9 +6,9 @@ metadata:
 spec:
   project: a
   source:
-    repoURL: 'https://github.com/defn/katt'
-    path: k/cm/a
-    targetRevision: mp
+    repoURL: 'https://github.com/letfn/katt-cm'
+    path: a
+    targetRevision: master
   destination:
     name: a
     namespace: default
