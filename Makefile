@@ -207,12 +207,17 @@ cilium-clustermesh:
 	cilium clustermesh status --wait
 
 argocd:
-	-$(k) create ns argocd
-	kustomize build https://github.com/letfn/katt-argocd/base | $(ka) apply -f -
+	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
+prometheus-setup:
+	kustomize build https://github.com/letfn/katt-prometheus/setup | $(k) apply -f -
+
+prometheus:
+	kustomize build https://github.com/letfn/katt-prometheus/base | $(k) apply -f -
+	
 argocd-init:
 	$(MAKE) argocd-port &
 	sleep 10
