@@ -212,10 +212,9 @@ argocd:
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
-prometheus-setup:
-	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
-
 prometheus:
+	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
+	until $(k) get servicemonitors --all-namespaces ; do sleep 1; done
 	kustomize build https://github.com/letfn/katt-prometheus/base | $(k) apply -f -
 	
 argocd-init:
