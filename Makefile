@@ -52,7 +52,7 @@ east:
 		$(shell tailscale ip | grep ^100) \
 		ubuntu $(first) $(first).defn.ooo \
 		10.42.0.0/16 10.43.0.0/16
-	$(MAKE) $(first)-secrets
+	$(first) $(MAKE) secrets
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
 	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $@ --wait
@@ -158,9 +158,9 @@ c-plus:
 %-ssh:
 	ssh $(first)-prv.dev.defn.net -A
 
-%-secrets:
-	$(first) create ns cert-manager
-	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(first) $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
+secrets:
+	$(k) create ns cert-manager
+	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 
 %-add:
 	-argocd cluster rm https://$(first).defn.ooo:6443
