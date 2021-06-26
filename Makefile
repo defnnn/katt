@@ -201,10 +201,8 @@ kind:
 	-kind delete cluster
 	kind create cluster --config=kind.yaml
 
-prometheus:
+prometheus-setup:
 	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
-	until $(k) get servicemonitors --all-namespaces ; do sleep 1; done
-	kustomize build https://github.com/letfn/katt-prometheus/base | $(k) apply -f -
 
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
