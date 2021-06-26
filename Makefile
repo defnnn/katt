@@ -210,17 +210,17 @@ kind:
 	-kind delete cluster
 	kind create cluster
 
+prometheus:
+	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
+	until $(k) get servicemonitors --all-namespaces ; do sleep 1; done
+	kustomize build https://github.com/letfn/katt-prometheus/base | $(k) apply -f -
+
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
-prometheus:
-	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
-	until $(k) get servicemonitors --all-namespaces ; do sleep 1; done
-	kustomize build https://github.com/letfn/katt-prometheus/base | $(k) apply -f -
-	
 argocd-init:
 	$(MAKE) argocd-port &
 	sleep 10
