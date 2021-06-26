@@ -3,3 +3,4 @@ helm 3.5.4
 k3sup 0.11.1
 argocd 2.0.4
 kubectl 1.21.2
+kind 0.11.1
