@@ -202,8 +202,8 @@ dev:
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) prometheus-setup
-	$(MAKE) dev-deploy
 	$(MAKE) argocd-init
+	$(MAKE) dev-deploy
 
 kind:
 	-kind delete cluster
