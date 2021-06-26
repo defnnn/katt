@@ -197,6 +197,14 @@ cilium-clustermesh:
 	cilium clustermesh enable --service-type LoadBalancer
 	cilium clustermesh status --wait
 
+dev:
+	$(MAKE) kind
+	$(MAKE) argocd
+	$(MAKE) secrets
+	$(MAKE) prometheus-setup
+	$(MAKE) dev-deploy
+	$(MAKE) argocd-init
+
 kind:
 	-kind delete cluster
 	kind create cluster --config=kind.yaml
