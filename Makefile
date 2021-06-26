@@ -58,15 +58,6 @@ east:
 	$(first) cilium clustermesh status --context $@ --wait
 	$(MAKE) $(first)-argocd
 
-east-argocd:
-	$(first) $(MAKE) argocd
-	$(first) $(MAKE) argocd-init
-	$(first) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/clusters.yaml
-	argocd app wait clusters --health
-	argocd app wait $(first) --health
-	argocd app wait $(first)--cert-manager --health
-	argocd app wait $(first)--traefik --health
-
 %-mesh:
 	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
 	$(first) cilium clustermesh status --context $(first) --wait
@@ -226,6 +217,13 @@ argocd-init:
 	sleep 10
 	$(MAKE) argocd-login
 	$(MAKE) argocd-passwd
+
+dev-deploy:
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
+	argocd app wait dev --health
+	argocd app wait kind --health
+	argocd app wait kind--cert-manager --health
+	argocd app wait kind--traefik --health
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
