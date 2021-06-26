@@ -199,7 +199,7 @@ cilium-clustermesh:
 
 kind:
 	-kind delete cluster
-	kind create cluster
+	kind create cluster --config=kind.yaml
 
 prometheus:
 	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
