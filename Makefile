@@ -150,7 +150,7 @@ c-plus:
 	ssh $(first)-prv.dev.defn.net -A
 
 secrets:
-	$(k) create ns cert-manager
+	-$(k) create ns cert-manager
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 
 %-add:
@@ -230,6 +230,7 @@ dev-deploy:
 	argocd app wait kind --health
 	argocd app wait kind--cert-manager --health
 	argocd app wait kind--traefik --health
+	argocd app wait kind--site --health
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
