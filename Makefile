@@ -206,6 +206,10 @@ cilium-clustermesh:
 	cilium clustermesh enable --service-type LoadBalancer
 	cilium clustermesh status --wait
 
+kind:
+	-kind delete cluster
+	kind create cluster
+
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
 	for deploy in dex-server redis repo-server server; \
