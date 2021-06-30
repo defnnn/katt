@@ -201,16 +201,12 @@ dev:
 	$(MAKE) kind
 	$(MAKE) argocd
 	$(MAKE) secrets
-	$(MAKE) prometheus-setup
 	$(MAKE) argocd-init
 	$(MAKE) dev-deploy
 
 kind:
 	-kind delete cluster
 	kind create cluster --config=kind.yaml
-
-prometheus-setup:
-	kustomize build https://github.com/letfn/katt-prometheus/base/setup | $(k) apply -f -
 
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
@@ -230,7 +226,7 @@ dev-deploy:
 	argocd app wait kind --health
 	argocd app wait kind--cert-manager --health
 	argocd app wait kind--traefik --health
-	argocd app wait kind--site --health
+	argocd app wait kind--site --sync
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
