@@ -206,7 +206,7 @@ dev:
 
 kind:
 	-kind delete cluster
-	kind create cluster --config=kind.yaml
+	kind create cluster --config=etc/kind.yaml
 
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
