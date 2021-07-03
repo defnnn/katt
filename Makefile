@@ -152,6 +152,13 @@ c-plus:
 secrets:
 	-$(k) create ns cert-manager
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
+	-$(k) create ns traefik
+	-pass SECRET | perl -pe 's{\s+$$}{}' | $(kc) create secret generic traefik-forward-auth-secret  --from-file=SECRET=/dev/stdin
+	-pass CLIENT_SECRET | perl -pe 's{\s+$$}{}' | $(kc) create secret generic traefik-forward-auth-client-secret  --from-file=CLIENT_SECRET=/dev/stdin
+	-pass CLIENT_ID | perl -pe 's{\s+$$}{}' | $(kc) create secret generic traefik-forward-auth-client-id --from-file=CLIENT_ID=/dev/stdin
+	-pass COOKIE_DOMAINS | perl -pe 's{\s+$$}{}' | $(kc) create secret generic traefik-forward-auth-cookie-domains --from-file=COOKIE_DOMAINS=/dev/stdin
+	-pass DOMAINS | perl -pe 's{\s+$$}{}' | $(kc) create secret generic traefik-forward-auth-domains --from-file=DOMAINS=/dev/stdin
+	-pass AUTH_HOST | perl -pe 's{\s+$$}{}' | $(kc) create secret generic traefik-forward-auth-auth-host --from-file=AUTH_HOST=/dev/stdin
 
 %-add:
 	-argocd cluster rm https://$(first).defn.ooo:6443
