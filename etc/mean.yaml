@@ -19,7 +19,7 @@ kubeadmConfigPatches:
 nodes:
 - role: control-plane
   extraPortMappings:
-  - containerPort: 5681
+  - containerPort: 35681
     hostPort: 5681
-  - containerPort: 5685
+  - containerPort: 35685
     hostPort: 5685

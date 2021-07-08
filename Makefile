@@ -210,6 +210,7 @@ dev:
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) argocd-init
+	argocd cluster add kind-mean --name mean
 	$(MAKE) dev-deploy
 
 kind:
