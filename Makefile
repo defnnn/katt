@@ -205,15 +205,16 @@ cilium-clustermesh:
 	cilium clustermesh status --wait
 
 dev:
-	$(MAKE) kind
+	$(MAKE) kind name=mean
+	$(MAKE) kind name=kind
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) argocd-init
 	$(MAKE) dev-deploy
 
 kind:
-	-kind delete cluster
-	kind create cluster --config=etc/kind.yaml
+	-kind delete cluster --name=$(name)
+	kind create cluster --config=etc/kind.yaml --name=$(name)
 
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
