@@ -204,6 +204,10 @@ cilium-clustermesh:
 	cilium clustermesh enable --service-type LoadBalancer
 	cilium clustermesh status --wait
 
+mean:
+	$(MAKE) kind name=mean
+	argocd cluster add kind-mean --name mean --upsert
+
 dev:
 	$(MAKE) kind name=mean
 	$(MAKE) kind name=kind
