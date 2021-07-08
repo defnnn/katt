@@ -214,7 +214,7 @@ dev:
 
 kind:
 	-kind delete cluster --name=$(name)
-	kind create cluster --config=etc/kind.yaml --name=$(name)
+	kind create cluster --config=etc/$(name).yaml --name=$(name)
 
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
