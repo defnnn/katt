@@ -234,7 +234,9 @@ dev-deploy:
 	argocd app wait kind --health
 	argocd app wait kind--cert-manager --health
 	argocd app wait kind--traefik --health
-	argocd app wait kind--site --sync
+	-argocd app wait kind--site --sync
+	sleep 60
+	argocd app wait kind--site --health
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
