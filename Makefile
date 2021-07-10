@@ -235,13 +235,13 @@ argocd-init:
 
 dev-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
-	argocd app wait dev --health
-	argocd app wait kind --health
+	argocd app wait dev --sync
+	argocd app wait dev--kind --sync
+	argocd app wait dev--mean --sync
 	argocd app wait kind--cert-manager --health
 	argocd app wait kind--traefik --health
 	-argocd app wait kind--site --sync
-	sleep 60
-	argocd app wait kind--site --health
+	while ! argocd app wait kind--site --health; do sleep 1; done
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
