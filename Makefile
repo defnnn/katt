@@ -263,6 +263,8 @@ bash:
 
 kumactl-cli:
 	curl -L https://kuma.io/installer.sh | sh -
+	rsync -ia kuma-1.2.1/bin/* /usr/local/bin/
+	rm -rf kuma-1.2.1
 
 cilium-cli:
 	$(MAKE) cilium-cli-$(shell uname -s)
