@@ -261,6 +261,9 @@ bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
 	chmod 755 bash
 
+kumactl-cli:
+	curl -L https://kuma.io/installer.sh | sh -
+
 cilium-cli:
 	$(MAKE) cilium-cli-$(shell uname -s)
 	$(MAKE) hubble-cli-$(shell uname -s)
