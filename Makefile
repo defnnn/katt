@@ -240,7 +240,9 @@ dev-deploy:
 	argocd app wait dev--mean --sync
 	argocd app wait kind--cert-manager --health
 	argocd app wait kind--traefik --health
-	-argocd app wait kind--site --sync
+	$(MAKE) ready
+
+ready:
 	while ! argocd app wait kind--site --health; do sleep 1; done
 
 argocd-login:
