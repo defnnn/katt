@@ -12,6 +12,7 @@ kx := kubectl -n external-secrets
 kc := kubectl -n cert-manager
 kd := kubectl -n external-dns
 ka := kubectl -n argocd
+km := kubectl -n kuma-system
 kn := kubectl -n
 
 bridge := en0
