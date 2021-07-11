@@ -267,6 +267,9 @@ kumactl-cli:
 	rsync -ia kuma-1.2.1/bin/* /usr/local/bin/
 	rm -rf kuma-1.2.1
 
+kuma-demo:
+	$(k) apply -f https://bit.ly/demokuma
+
 kuma-cp:
 	env KUMA_MODE=zone KUMA_MULTIZONE_ZONE_NAME=defm KUMA_MULTIZONE_ZONE_GLOBAL_ADDRESS=grpcs://100.111.69.60:5685 KUMA_API_SERVER_HTTP_PORT=5666 kuma-cp run
 
