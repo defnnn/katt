@@ -1,0 +1,17 @@
+type: Dataplane
+mesh: default
+name: local
+networking:
+  address: 127.0.0.1
+  inbound:
+    - port: 9000
+      servicePort: 9000
+      tags:
+        kuma.io/service: local
+  outbound:
+    - port: 33001
+      tags:
+        kuma.io/service: redis_kuma-demo_svc_6379
+    - port: 33002
+      tags:
+        kuma.io/service: postgres_kuma-demo_svc_5432

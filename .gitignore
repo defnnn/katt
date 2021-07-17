@@ -4,6 +4,7 @@ cutout
 .env*
 docker-compose.override.yml
 *-token
+*.token
 acme.json
 venv
 etc/zerotier
