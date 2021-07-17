@@ -273,8 +273,8 @@ kuma-cp:
 
 kuma-dp:
 	kumactl generate dataplane-token > .kuma-dp.token
-	-kuma-dp run --dataplane-file etc/kuma-dp.yaml --dataplane-token-file=.kuma-dp.token
-	rm -f .kuma-dp.token
+	-(sleep 10; rm -vf .kuma-dp.token) &
+	kuma-dp run --dataplane-file etc/kuma-dp.yaml --dataplane-token-file=.kuma-dp.token
 
 cilium-cli:
 	$(MAKE) cilium-cli-$(shell uname -s)
