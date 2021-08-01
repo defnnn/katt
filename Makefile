@@ -207,7 +207,7 @@ cilium-clustermesh:
 
 mean:
 	$(MAKE) kind name=mean
-	argocd cluster add kind-mean --name mean --upsert --yes
+	argocd cluster add kind-mean --name mean --upsert #--yes
 
 dev:
 	$(MAKE) kind name=mean
@@ -215,7 +215,7 @@ dev:
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) argocd-init
-	argocd cluster add kind-mean --name mean --upsert --yes
+	argocd cluster add kind-mean --name mean --upsert #--yes
 	$(MAKE) dev-deploy
 
 kind:
@@ -253,7 +253,7 @@ argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'
 
 argocd-change-passwd:
-	@argocd account update-password --core --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password admin
+	@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password admin
 
 argocd-ignore:
 	argocd proj add-orphaned-ignore default cilium.io CiliumIdentity
