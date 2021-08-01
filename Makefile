@@ -232,6 +232,7 @@ argocd-init:
 	$(MAKE) argocd-port &
 	sleep 10
 	$(MAKE) argocd-login
+	$(MAKE) argocd-change-passwd
 
 dev-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
