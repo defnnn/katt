@@ -1,6 +1,6 @@
 kustomize 3.9.4
 helm 3.6.0
 k3sup 0.11.1
-argocd 2.1.0-rc1
+argocd 2.0.5
 kubectl 1.21.0
 kind 0.11.1
