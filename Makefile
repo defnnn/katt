@@ -229,8 +229,6 @@ argocd:
 	$(ka) rollout status statefulset/argocd-application-controller
 
 argocd-init:
-	$(MAKE) argocd-port &
-	sleep 10
 	$(MAKE) argocd-login
 	$(MAKE) argocd-passwd
 
@@ -247,16 +245,14 @@ ready:
 	while ! argocd app wait kind--site --health; do sleep 1; done
 
 argocd-login:
-	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
+	kns argocd
+	echo y | argocd login --core
 
 argocd-passwd:
 	@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password admin
 
 argocd-ignore:
 	argocd proj add-orphaned-ignore default cilium.io CiliumIdentity
-
-argocd-port:
-	$(ka) port-forward svc/argocd-server 8080:443
 
 bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
