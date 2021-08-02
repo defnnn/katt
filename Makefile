@@ -207,7 +207,7 @@ cilium-clustermesh:
 
 mean:
 	$(MAKE) kind name=mean
-	argocd cluster add kind-mean --name mean --upsert #--yes
+	argocd cluster add kind-mean --name mean --upsert --yes
 
 dev:
 	$(MAKE) kind name=mean
@@ -215,7 +215,7 @@ dev:
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) argocd-init
-	argocd cluster add kind-mean --name mean --upsert #--yes
+	argocd cluster add kind-mean --name mean --upsert --yes
 	$(MAKE) dev-deploy
 
 kind:
