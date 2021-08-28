@@ -253,7 +253,7 @@ argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'
 
 argocd-change-passwd:
-	@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password admin
+	@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password adminadmin
 
 argocd-ignore:
 	argocd proj add-orphaned-ignore default cilium.io CiliumIdentity
