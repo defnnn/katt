@@ -23,6 +23,7 @@ menu:
 %-all:
 	%$(MAKE) $(first)-reset
 	%$(MAKE) $(first)-launch
+	%$(MAKE) $(first)-test
 	%$(MAKE) $(first)-add
 
 %-launch:
@@ -31,8 +32,23 @@ menu:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
-		10.201.0.0/16 10.202.0.0/16
+		$(shell $(MAKE) $(first)-network)
 	$(MAKE) $(first)-cilium
+
+%-cilium:
+	true
+
+%-network:
+	@echo 10.251.0.0/16 10.252.0.0/16
+
+mbpro-network:
+	@echo 10.201.0.0/16 10.202.0.0/16
+
+imac-network:
+	@echo 10.203.0.0/16 10.204.0.0/16
+
+mini-network:
+	@echo 10.205.0.0/16 10.206.0.0/16
 
 mbpro-cilium:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=201
@@ -42,6 +58,9 @@ imac-cilium:
 
 mini-cilium:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=203
+
+mbpro-test imac-test mini-test:
+	$(first) cilium connectivity test
 
 west-launch:
 	m delete --all --purge
@@ -206,7 +225,7 @@ cilium:
 	$(MAKE) cilium-install
 
 cilium-install:
-	cilium install --wait --version v1.10.3 --kube-proxy-replacement=strict --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
+	cilium install --wait --version v1.10.3 --cluster-name "$(cname)" --cluster-id "$(cid)" $(copt)
 	cilium hubble enable --ui
 	$(ks) rollout status deployment/hubble-relay
 	$(ks) rollout status deployment/hubble-ui
