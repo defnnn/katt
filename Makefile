@@ -20,6 +20,11 @@ bridge := en0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
+%-all:
+	%$(MAKE) $(first)-reset
+	%$(MAKE) $(first)-launch
+	%$(MAKE) $(first)-add
+
 %-launch:
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
