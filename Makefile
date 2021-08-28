@@ -21,10 +21,10 @@ menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
 %-all:
-	%$(MAKE) $(first)-reset
-	%$(MAKE) $(first)-launch
-	%$(MAKE) $(first)-test
-	%$(MAKE) $(first)-add
+	$(MAKE) $(first)-reset
+	$(MAKE) $(first)-launch
+	$(MAKE) $(first)-test
+	$(MAKE) $(first)-add
 
 %-launch:
 	bin/cluster \
