@@ -83,7 +83,9 @@ mbair-cilium:
 	true
 
 mbpro-test imac-test mini-test mbair-test:
+	-$(first) delete ns cilium-test
 	$(first) cilium connectivity test
+	-$(first) delete ns cilium-test
 
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
