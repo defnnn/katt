@@ -70,23 +70,29 @@ mbair-network:
 
 mbpro-cilium:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=201
+	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $(first) --wait
 
 imac-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=202
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=202 copt="--inherit-ca mbpro"
+	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $(first) --wait
 
 mini-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=203
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=203 copt="--inherit-ca mbpro"
+	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $(first) --wait
 
 mbair-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=204
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=204 copt="--inherit-ca mbpro"
+	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium clustermesh status --context $(first) --wait
 
+%-test:
+	true
 
 mbpro-test imac-test mini-test mbair-test:
 	$(first) cilium connectivity test
-
-west-launch:
-	m delete --all --purge
-	$(MAKE) $(first)-mp
 
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -97,29 +103,9 @@ west-launch:
 %-reboot:
 	ssh "$(first).defn.ooo" sudo reboot &
 
-east:
-	-k3s-uninstall.sh
-	-echo "drop database kubernetes" | sudo -u postgres psql
-	bin/cluster \
-		$(shell tailscale ip | grep ^100) \
-		$(shell tailscale ip | grep ^100) \
-		$(shell tailscale ip | grep ^100) \
-		ubuntu $(first) $(first).defn.ooo \
-		10.42.0.0/16 10.43.0.0/16
-	$(first) $(MAKE) secrets
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=102
-	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-argocd
-
 %-mesh:
 	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
 	$(first) cilium clustermesh status --context $(first) --wait
-
-%-test:
-	-$(first) delete ns cilium-test
-	$(first) cilium connectivity test
-	$(first) delete ns cilium-test
 
 %-connectivity:
 	-$(first) delete ns cilium-test
@@ -149,60 +135,6 @@ west-plus:
 	$(MAKE) $(first)-east-mesh
 	$(MAKE) $(first)-add
 
-.PHONY: a
-a:
-	-ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" /usr/local/bin/k3s-uninstall.sh
-	-echo "alter role postgres with password 'postgres'" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
-	-echo "drop database kubernetes" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
-	bin/cluster \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
-		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo \
-		10.50.0.0/16 10.51.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=111
-
-a-plus:
-	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $@ --wait
-
-b:
-	-ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" /usr/local/bin/k3s-uninstall.sh
-	-echo "alter role postgres with password 'postgres'" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
-	-echo "drop database kubernetes" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
-	bin/cluster \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
-		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo \
-		10.52.0.0/16 10.53.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=112 copt="--inherit-ca a"
-
-b-plus:
-	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-a-mesh
-
-c:
-	-ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" /usr/local/bin/k3s-uninstall.sh
-	-echo "alter role postgres with password 'postgres'" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
-	-echo "drop database kubernetes" | ssh "$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}')" sudo -u postgres psql
-	bin/cluster \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first)-prv.dev.defn.net | awk '{print $$NF}') \
-		$(shell host $(first)-pub.dev.defn.net | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo \
-		10.54.0.0/16 10.55.0.0/16
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=113 copt="--inherit-ca a"
-
-c-plus:
-	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-{a,b}-mesh
-
-%-ssh:
-	ssh $(first)-prv.dev.defn.net -A
-
 secrets:
 	-$(k) create ns cert-manager
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
@@ -231,13 +163,6 @@ secrets:
 	m exec $(first) -- sudo apt install -y --install-recommends postgresql postgresql-contrib
 	m restart $(first)
 
-consul:
-	helm install consul hashicorp/consul --set global.name=consul --set server.replicas=1
-	$(k) rollout status statefulset.apps/consul-server
-
-vault:
-	helm install vault hashicorp/vault --set global.name=consul --set server.replicas=1
-
 once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
@@ -251,10 +176,6 @@ cilium-install:
 	cilium hubble enable --ui
 	$(ks) rollout status deployment/hubble-relay
 	$(ks) rollout status deployment/hubble-ui
-
-cilium-clustermesh:
-	cilium clustermesh enable --service-type LoadBalancer
-	cilium clustermesh status --wait
 
 mean:
 	$(MAKE) kind name=mean
