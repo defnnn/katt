@@ -3,10 +3,10 @@
 function main {
   set -exfu
 
-  local server_name="$1"; shift
-  local server="$1"; shift
   local agent_name="$1"; shift
   local agent="$1"; shift
+  local server_name="$1"; shift
+  local server="$1"; shift
   
   k3sup join \
     --host "${agent}" --user "${agent_name}" --server-host "${server}" --server-user "${server_name}" \
