@@ -26,6 +26,10 @@ menu:
 	$(MAKE) $(first)-test
 	$(MAKE) $(first)-add
 
+mbair-all:
+	$(MAKE) $(first)-reset
+	$(MAKE) $(first)-mbpro-join
+
 %-launch:
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
@@ -34,6 +38,11 @@ menu:
 		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
 	$(MAKE) $(first)-cilium
+
+%-join:
+	bin/join \
+		ubuntu $(first).defn.ooo \
+		ubuntu $(second).defn.ooo
 
 %-cilium:
 	true
@@ -50,6 +59,10 @@ imac-network:
 mini-network:
 	@echo 10.205.0.0/16 10.206.0.0/16
 
+mbair-network:
+	@echo 10.207.0.0/16 10.208.0.0/16
+
+
 mbpro-cilium:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=201
 
@@ -59,7 +72,11 @@ imac-cilium:
 mini-cilium:
 	$(first) $(MAKE) cilium cname="katt-$(first)" cid=203
 
-mbpro-test imac-test mini-test:
+mbair-cilium:
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=204
+
+
+mbpro-test imac-test mini-test mbair-test:
 	$(first) cilium connectivity test
 
 west-launch:
@@ -275,7 +292,7 @@ dev-deploy:
 spiral:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/spiral.yaml
 	argocd app wait spiral --sync
-	for a in mbpro mini imac; do \
+	for a in mbpro mbair mini imac; do \
 		argocd app wait spiral--$$a --sync; done
 
 ready:
