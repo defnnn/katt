@@ -161,7 +161,7 @@ secrets:
 
 %-add:
 	-argocd cluster rm https://$(first).defn.ooo:6443
-	argocd cluster add $(first)
+	argocd cluster add -y $(first)
 
 %-mp:
 	-m delete --purge $(first)
