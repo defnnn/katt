@@ -206,9 +206,7 @@ cilium:
 	$(MAKE) cilium-install
 
 cilium-install:
-	cilium install --version v1.10.3 --kube-proxy-replacement=strict --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
-	cilium status --wait
-	$(ks) rollout status deployment/cilium-operator
+	cilium install --wait --version v1.10.3 --kube-proxy-replacement=strict --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
 	cilium hubble enable --ui
 	$(ks) rollout status deployment/hubble-relay
 	$(ks) rollout status deployment/hubble-ui
