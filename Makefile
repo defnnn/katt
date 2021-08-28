@@ -21,27 +21,25 @@ menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
 mbpro:
-	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') ubuntu $(first)
-	$(first) $(MAKE) cilium
+	bin/cluster \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo \
+		10.201.0.0/16 10.202.0.0/16
+	#$(first) $(MAKE) cilium
 
 west-launch:
 	m delete --all --purge
 	$(MAKE) $(first)-mp
 
-west-reset:
-	-echo /usr/local/bin/k3s-uninstall.sh | m shell $(first)
-	-echo "echo drop database kubernetes | sudo -u postgres psql" | m shell $(first)
-	m restart $(first)
-
-east-reset:
-	-/usr/local/bin/k3s-uninstall.sh
-	-echo "database kubernetes" | sudo -u postgres psql
-	sudo reboot &
-	tmux detach
-
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-ssh "$(first).defn.ooo" sudo apt install -y postgresql postgresql-contrib
+	-echo "alter role postgres with password 'postgres'" | ssh "$(first).defn.ooo" sudo -u postgres psql
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+
+%-reboot:
 	ssh "$(first).defn.ooo" sudo reboot &
 
 east:
@@ -175,7 +173,7 @@ secrets:
 	m exec $(first) -- sudo apt-get update
 	m exec $(first) -- sudo apt-get install tailscale
 	m exec $(first) -- sudo tailscale up --accept-dns=false
-	m exec $(first) -- sudo apt install -y --install-recommends linux-generic-hwe-20.04 postgresql postgresql-contrib
+	m exec $(first) -- sudo apt install -y --install-recommends postgresql postgresql-contrib
 	m restart $(first)
 
 consul:
