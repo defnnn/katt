@@ -20,20 +20,11 @@ bridge := en0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-mbpro-mbair:
-	$(MAKE) mbpro-all
-	$(MAKE) mbair-all
-	$(MAKE) $(first)-test
-
 %-all:
 	$(MAKE) $(first)-reset
 	$(MAKE) $(first)-launch
 	$(MAKE) $(first)-test
 	$(MAKE) $(first)-add
-
-mbair-all:
-	$(MAKE) $(first)-reset
-	$(MAKE) $(first)-mbpro-join
 
 %-launch:
 	bin/cluster \
