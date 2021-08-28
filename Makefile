@@ -272,6 +272,12 @@ dev-deploy:
 	argocd app wait kind--traefik --health
 	$(MAKE) ready
 
+spiral:
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/spiral.yaml
+	argocd app wait spiral --sync
+	for a in mbpro mini imac; do \
+		argocd app wait spiral--$$a --sync; done
+
 ready:
 	while ! argocd app wait kind--site --health; do sleep 1; done
 
