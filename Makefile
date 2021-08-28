@@ -107,27 +107,6 @@ mbpro-test imac-test mini-test mbair-test:
 	-$(first) delete ns cilium-test
 	-$(second) delete ns cilium-test
 
-west:
-	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
-	-echo "alter role postgres with password 'postgres'" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	bin/cluster \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo \
-		10.40.0.0/16 10.41.0.0/16
-	$(MAKE) $(first)-secrets
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=101 copt="--inherit-ca east"
-	$(MAKE) $(first)-add
-	$(MAKE) $(first)-app
-
-west-plus:
-	$(first) cilium clustermesh enable --context $@ --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $@ --wait
-	$(MAKE) $(first)-east-mesh
-	$(MAKE) $(first)-add
-
 secrets:
 	-$(k) create ns cert-manager
 	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
