@@ -9,7 +9,7 @@ function main {
   local server="$1"; shift
   
   k3sup join \
-    --host "${agent}" --user "${agent_name}" --server-host "${server}" --server-user "${server_name}" \
+    --ip "${agent}" --user "${agent_name}" --server-ip "${server}" --server-user "${server_name}" \
     --k3s-extra-args "--no-flannel --node-ip=${agent} --node-external-ip ${agent}" "$@"
 }
 

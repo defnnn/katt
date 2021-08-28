@@ -41,8 +41,8 @@ mbair-all:
 
 %-join:
 	bin/join \
-		ubuntu $(first).defn.ooo \
-		ubuntu $(second).defn.ooo
+		ubuntu $(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(shell host $(second).defn.ooo | awk '{print $$NF}')
 
 %-cilium:
 	true
