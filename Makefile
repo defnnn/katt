@@ -32,7 +32,16 @@ menu:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		10.201.0.0/16 10.202.0.0/16
-	#$(first) $(MAKE) cilium
+	$(MAKE) $(first)-cilium
+
+mbpro-cilium:
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=201
+
+imac-cilium:
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=202
+
+mini-cilium:
+	$(first) $(MAKE) cilium cname="katt-$(first)" cid=203
 
 west-launch:
 	m delete --all --purge
@@ -197,7 +206,7 @@ cilium:
 	$(MAKE) cilium-install
 
 cilium-install:
-	cilium install --version v1.10.0 --kube-proxy-replacement=strict --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
+	cilium install --version v1.10.3 --kube-proxy-replacement=strict --config tunnel=vxlan --cluster-name "$(cname)" --cluster-id "$(cid)" --ipam=kubernetes $(copt)
 	cilium status --wait
 	$(ks) rollout status deployment/cilium-operator
 	cilium hubble enable --ui
