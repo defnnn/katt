@@ -197,11 +197,13 @@ argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'
 
 argocd-change-passwd:
-	$(MAKE) argocd-port &
-	sleep 10
-	$(MAKE) argocd-login
-	@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password adminadmin
-	-pkill -f 'argocd port-forward svc/argocd-server 8080:443'
+	$(ka) patch secret argocd-secret -p \
+		'{"stringData": { "admin.password": "$$2a$$10$$3sQFra.ZmAz88EhVIxtd6uKBgxcLNYjKBR2SoPGV2ifqiG6.oMiqm", "admin.passwordMtime": "2021-08-29T20:01:0" }}'
+	#$(MAKE) argocd-port &
+	#sleep 10
+	#$(MAKE) argocd-login
+	#@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password adminadmin
+	#-pkill -f 'argocd port-forward svc/argocd-server 8080:443'
 
 argocd-ignore:
 	argocd --core proj add-orphaned-ignore default cilium.io CiliumIdentity
