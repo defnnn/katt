@@ -277,3 +277,5 @@ gojo todo toge:
 	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') defn $(first)
 	$(first) $(MAKE) cilium
 
+images:
+	docker exec kind-control-plane crictl images
