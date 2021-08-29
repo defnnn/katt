@@ -291,5 +291,6 @@ images-save:
 images-load:
 	cat etc/images.txt | grep -v ^IMAGE | awk '{print $$1 ":" $$2}' \
 		| while read -r a; do \
+			echo "$$a"; \
 			kind load image-archive "load/$${a/://}/image" --name $(name); \
 		done
