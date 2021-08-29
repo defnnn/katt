@@ -279,7 +279,7 @@ gojo todo toge:
 	$(first) $(MAKE) cilium
 
 images:
-	docker exec kind-control-plane crictl images
+	docker exec $(name)-control-plane crictl images
 
 images-save:
 	cat etc/images.txt | grep -v ^IMAGE | awk '{print $$1 ":" $$2}' \
@@ -291,5 +291,5 @@ images-save:
 images-load:
 	cat etc/images.txt | grep -v ^IMAGE | awk '{print $$1 ":" $$2}' \
 		| while read -r a; do \
-			kind load image-archive "load/$${a/://}/image" --name $(name)
+			kind load image-archive "load/$${a/://}/image" --name $(name); \
 		done
