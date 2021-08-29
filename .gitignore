@@ -12,3 +12,4 @@ issuer.*
 root.*
 bundle.crt
 trustAnchor.crt
+load/

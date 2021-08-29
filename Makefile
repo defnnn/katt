@@ -156,6 +156,7 @@ mean:
 kind:
 	-kind delete cluster --name=$(name)
 	kind create cluster --config=etc/$(name).yaml --name=$(name)
+	if [[ -f etc/images.txt ]]; then $(MAKE) images-load name=$(name); fi
 
 argocd:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
@@ -279,3 +280,16 @@ gojo todo toge:
 
 images:
 	docker exec kind-control-plane crictl images
+
+images-save:
+	cat etc/images.txt | grep -v ^IMAGE | awk '{print $$1 ":" $$2}' \
+		| while read -r a; do \
+			echo "$$a"; mkdir -p "load/$${a/://}"; \
+			docker pull "$$a"; docker save "$$a" -o "load/$${a/://}/image"; \
+		done
+
+images-load:
+	cat etc/images.txt | grep -v ^IMAGE | awk '{print $$1 ":" $$2}' \
+		| while read -r a; do \
+			kind load image-archive "load/$${a/://}/image" --name $(name)
+		done
