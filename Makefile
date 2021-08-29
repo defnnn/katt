@@ -119,8 +119,8 @@ secrets:
 	-pass AUTH_HOST | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-auth-host --from-file=AUTH_HOST=/dev/stdin
 
 %-add:
-	-argocd cluster rm https://$(first).defn.ooo:6443
-	argocd cluster add -y $(first)
+	-argocd --core cluster rm https://$(first).defn.ooo:6443
+	argocd --core cluster add -y $(first)
 
 %-mp:
 	-m delete --purge $(first)
@@ -151,7 +151,7 @@ cilium-install:
 
 mean:
 	$(MAKE) kind name=mean
-	argocd cluster add kind-mean --name mean --upsert --yes
+	argocd --core cluster add kind-mean --name mean --upsert --yes
 
 kind:
 	-kind delete cluster --name=$(name)
@@ -165,9 +165,6 @@ argocd:
 	$(ka) rollout status statefulset/argocd-application-controller
 
 argocd-init:
-	$(MAKE) argocd-port &
-	sleep 10
-	$(MAKE) argocd-login
 	$(MAKE) argocd-change-passwd
 
 dev:
@@ -176,22 +173,22 @@ dev:
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) argocd-init
-	#argocd cluster add kind-mean --name mean --upsert --yes
+	#argocd --core cluster add kind-mean --name mean --upsert --yes
 	$(MAKE) dev-deploy
 
 dev-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
-	argocd app wait dev --sync
-	argocd app wait dev--kind --sync
-	#argocd app wait dev--mean --sync
-	argocd app wait kind--cert-manager --health
-	while ! argocd app wait kind--traefik --health; do sleep 1; done
+	argocd --core app wait dev --sync
+	argocd --core app wait dev--kind --sync
+	#argocd --core app wait dev--mean --sync
+	argocd --core app wait kind--cert-manager --health
+	while ! argocd --core app wait kind--traefik --health; do sleep 1; done
 
 spiral-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/spiral.yaml
-	argocd app wait spiral --sync
+	argocd --core app wait spiral --sync
 	for a in mbpro mbair mini imac; do \
-		argocd app wait spiral--$$a --sync; done
+		argocd --core app wait spiral--$$a --sync; done
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
@@ -200,10 +197,14 @@ argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'
 
 argocd-change-passwd:
+	$(MAKE) argocd-port &
+	sleep 10
+	$(MAKE) argocd-login
 	@argocd account update-password --account admin --current-password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')" --new-password adminadmin
+	-pkill -f 'argocd port-forward svc/argocd-server 8080:443'
 
 argocd-ignore:
-	argocd proj add-orphaned-ignore default cilium.io CiliumIdentity
+	argocd --core proj add-orphaned-ignore default cilium.io CiliumIdentity
 
 argocd-port:
 	$(ka) port-forward svc/argocd-server 8080:443
