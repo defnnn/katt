@@ -158,21 +158,19 @@ kind:
 	kind create cluster --config=etc/$(name).yaml --name=$(name)
 	if [[ -f etc/images.txt ]]; then $(MAKE) images-load name=$(name); fi
 
-argocd:
+argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
+	kns argocd
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
-argocd-init:
-	$(MAKE) argocd-change-passwd
-
 dev:
 	#$(MAKE) kind name=mean
 	$(MAKE) kind name=kind
-	$(MAKE) argocd
+	$(MAKE) argocd-install
+	$(MAKE) argocd-change-passwd
 	$(MAKE) secrets
-	$(MAKE) argocd-init
 	#argocd --core cluster add kind-mean --name mean --upsert --yes
 	$(MAKE) dev-deploy
 
