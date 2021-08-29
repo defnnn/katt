@@ -153,15 +153,6 @@ mean:
 	$(MAKE) kind name=mean
 	argocd cluster add kind-mean --name mean --upsert --yes
 
-dev:
-	$(MAKE) kind name=mean
-	$(MAKE) kind name=kind
-	$(MAKE) argocd
-	$(MAKE) secrets
-	$(MAKE) argocd-init
-	argocd cluster add kind-mean --name mean --upsert --yes
-	$(MAKE) dev-deploy
-
 kind:
 	-kind delete cluster --name=$(name)
 	kind create cluster --config=etc/$(name).yaml --name=$(name)
@@ -178,6 +169,15 @@ argocd-init:
 	$(MAKE) argocd-login
 	$(MAKE) argocd-change-passwd
 
+dev:
+	$(MAKE) kind name=mean
+	$(MAKE) kind name=kind
+	$(MAKE) argocd
+	$(MAKE) secrets
+	$(MAKE) argocd-init
+	argocd cluster add kind-mean --name mean --upsert --yes
+	$(MAKE) dev-deploy
+
 dev-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
 	argocd app wait dev --sync
@@ -187,7 +187,7 @@ dev-deploy:
 	argocd app wait kind--traefik --health
 	$(MAKE) ready
 
-spiral:
+spiral-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/spiral.yaml
 	argocd app wait spiral --sync
 	for a in mbpro mbair mini imac; do \
