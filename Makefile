@@ -170,19 +170,19 @@ argocd-init:
 	$(MAKE) argocd-change-passwd
 
 dev:
-	$(MAKE) kind name=mean
+	#$(MAKE) kind name=mean
 	$(MAKE) kind name=kind
 	$(MAKE) argocd
 	$(MAKE) secrets
 	$(MAKE) argocd-init
-	argocd cluster add kind-mean --name mean --upsert --yes
+	#argocd cluster add kind-mean --name mean --upsert --yes
 	$(MAKE) dev-deploy
 
 dev-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
 	argocd app wait dev --sync
 	argocd app wait dev--kind --sync
-	argocd app wait dev--mean --sync
+	#argocd app wait dev--mean --sync
 	argocd app wait kind--cert-manager --health
 	while ! argocd app wait kind--traefik --health; do sleep 1; done
 
