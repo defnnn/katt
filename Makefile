@@ -33,7 +33,6 @@ menu:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
-	$(MAKE) $(first)-cilium
 
 %-join:
 	bin/join \
