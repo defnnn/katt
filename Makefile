@@ -23,7 +23,6 @@ menu:
 %-all:
 	$(MAKE) $(first)-reset
 	$(MAKE) $(first)-launch
-	$(MAKE) $(first)-test
 	$(MAKE) $(first)-add
 
 %-launch:
