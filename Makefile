@@ -27,16 +27,16 @@ menu:
 
 %-launch:
 	bin/cluster \
-		$(shell host $(first).defn.sh | awk '{print $$NF}') \
-		$(shell host $(first).defn.sh | awk '{print $$NF}') \
-		$(shell host $(first).defn.sh | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.sh \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
 
 %-join:
 	bin/join \
-		ubuntu $(shell host $(first).defn.sh | awk '{print $$NF}') \
-		ubuntu $(shell host $(second).defn.sh | awk '{print $$NF}')
+		ubuntu $(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(shell host $(second).defn.ooo | awk '{print $$NF}')
 
 %-cilium:
 	true
@@ -86,13 +86,13 @@ mbpro-test imac-test mini-test mbair-test:
 	-$(first) delete ns cilium-test
 
 %-reset:
-	-ssh "$(first).defn.sh" /usr/local/bin/k3s-uninstall.sh
-	-ssh "$(first).defn.sh" sudo apt install -y postgresql postgresql-contrib
-	-echo "alter role postgres with password 'postgres'" | ssh "$(first).defn.sh" sudo -u postgres psql
-	-echo "drop database kubernetes" | ssh "$(first).defn.sh" sudo -u postgres psql
+	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-ssh "$(first).defn.ooo" sudo apt install -y postgresql postgresql-contrib
+	-echo "alter role postgres with password 'postgres'" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 
 %-reboot:
-	ssh "$(first).defn.sh" sudo reboot &
+	ssh "$(first).defn.ooo" sudo reboot &
 
 %-mesh:
 	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
@@ -118,7 +118,7 @@ secrets:
 	-pass AUTH_HOST | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-auth-host --from-file=AUTH_HOST=/dev/stdin
 
 %-add:
-	-argocd --core cluster rm https://$(first).defn.sh:6443
+	-argocd --core cluster rm https://$(first).defn.ooo:6443
 	argocd --core cluster add -y $(first)
 
 %-mp:
@@ -275,7 +275,7 @@ registry: # Run a local registry
 	k apply -f k/registry.yaml
 
 gojo todo toge:
-	bin/cluster $(shell host $(first).defn.sh | awk '{print $$NF}') defn $(first)
+	bin/cluster $(shell host $(first).defn.ooo | awk '{print $$NF}') defn $(first)
 	$(first) $(MAKE) cilium
 
 images:
