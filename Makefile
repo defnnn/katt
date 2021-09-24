@@ -218,7 +218,7 @@ kumactl-cli:
 
 kuma-cp:
 	- (sleep 10; kumactl config control-planes add --address http://127.0.0.1:5666 --name local --overwrite) & 
-	env KUMA_MODE=zone KUMA_MULTIZONE_ZONE_NAME=defm KUMA_MULTIZONE_ZONE_GLOBAL_ADDRESS=grpcs://100.111.69.60:5685 KUMA_API_SERVER_HTTP_PORT=5666 kuma-cp run
+	env KUMA_MODE=zone KUMA_MULTIZONE_ZONE_NAME=defm KUMA_MULTIZONE_ZONE_GLOBAL_ADDRESS=grpcs://100.101.28.35:5685 KUMA_API_SERVER_HTTP_PORT=5666 kuma-cp run
 
 kuma-dp:
 	kumactl generate dataplane-token > .kuma-dp.token
