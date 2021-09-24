@@ -169,8 +169,9 @@ dev:
 	$(MAKE) kind name=kind
 	$(MAKE) argocd-install
 	$(MAKE) argocd-change-passwd
-	$(MAKE) secrets
+	argocd --core cluster add kind-kind --name kind --upsert --yes
 	argocd --core cluster add kind-mean --name mean --upsert --yes
+	$(MAKE) secrets
 	$(MAKE) dev-deploy
 
 dev-deploy:
