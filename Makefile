@@ -107,8 +107,9 @@ mbpro-test imac-test mini-test mbair-test:
 
 secrets:
 	-$(k) create ns cert-manager
-	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
+	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kc) create secret generic cloudflare --from-file=dns-token=/dev/stdin
 	-$(k) create ns traefik
+	-pass CF_API_TOKEN | perl -pe 's{\s+$$}{}' | $(kt) create secret generic cert-manager-secret --from-file=CF_API_TOKEN=/dev/stdin
 	-pass SECRET | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-secret --from-file=SECRET=/dev/stdin
 	-pass CLIENT_SECRET | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-client-secret --from-file=CLIENT_SECRET=/dev/stdin
 	-pass CLIENT_ID | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-client-id --from-file=CLIENT_ID=/dev/stdin
