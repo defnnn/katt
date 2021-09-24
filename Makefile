@@ -173,7 +173,7 @@ dev:
 	$(MAKE) dev-deploy
 
 dev-deploy:
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/dev.yaml
 	argocd --core app wait dev --sync
 	argocd --core app wait dev--kind --sync
 	argocd --core app wait dev--mean --sync
