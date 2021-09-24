@@ -182,10 +182,8 @@ dev-deploy:
 	while ! argocd --core app wait kind--traefik --health; do sleep 1; done
 
 spiral-deploy:
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/spiral.yaml
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/spiral.yaml
 	argocd --core app wait spiral --sync
-	for a in mbpro mbair mini imac; do \
-		argocd --core app wait spiral--$$a --sync; done
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
