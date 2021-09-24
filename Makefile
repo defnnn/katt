@@ -164,19 +164,19 @@ argocd-install:
 	$(ka) rollout status statefulset/argocd-application-controller
 
 dev:
-	#$(MAKE) kind name=mean
+	$(MAKE) kind name=mean
 	$(MAKE) kind name=kind
 	$(MAKE) argocd-install
 	$(MAKE) argocd-change-passwd
 	$(MAKE) secrets
-	#argocd --core cluster add kind-mean --name mean --upsert --yes
+	argocd --core cluster add kind-mean --name mean --upsert --yes
 	$(MAKE) dev-deploy
 
 dev-deploy:
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/katt-spiral/master/dev.yaml
 	argocd --core app wait dev --sync
 	argocd --core app wait dev--kind --sync
-	#argocd --core app wait dev--mean --sync
+	argocd --core app wait dev--mean --sync
 	argocd --core app wait kind--cert-manager --health
 	while ! argocd --core app wait kind--traefik --health; do sleep 1; done
 
