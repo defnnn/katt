@@ -216,8 +216,8 @@ kumactl:
 
 kumactl-cli:
 	curl -L https://kuma.io/installer.sh | sh -
-	rsync -ia kuma-1.2.3/bin/* /usr/local/bin/
-	rm -rf kuma-1.2.3
+	rsync -ia kuma-1.3.0/bin/* /usr/local/bin/
+	rm -rf kuma-1.3.0
 
 kuma-cp:
 	- (sleep 10; kumactl config control-planes add --address http://127.0.0.1:5666 --name local --overwrite) & 
