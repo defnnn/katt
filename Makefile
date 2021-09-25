@@ -211,6 +211,9 @@ bash:
 	curl -o bash -sSL https://github.com/robxu9/bash-static/releases/download/5.1.004-1.2.2/bash-linux-x86_64
 	chmod 755 bash
 
+kumactl:
+	kumactl config control-planes add --name=katt --address=http://127.0.0.1:5681 --overwrite
+
 kumactl-cli:
 	curl -L https://kuma.io/installer.sh | sh -
 	rsync -ia kuma-1.2.3/bin/* /usr/local/bin/
