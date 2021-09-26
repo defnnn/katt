@@ -19,7 +19,7 @@ kubeadmConfigPatches:
 nodes:
 - role: control-plane
   extraMounts:
-    - hostPath: /data
+    - hostPath: /tmp/data
       containerPath: /data
   extraPortMappings:
   - containerPort: 30080
