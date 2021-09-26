@@ -160,10 +160,9 @@ kind:
 argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
 	kns argocd
-	sleep 10
 	for deploy in dex-server redis repo-server server; \
-		do $(ka) rollout status deploy/argocd-argocd-$${deploy}; done
-	$(ka) rollout status statefulset/argocd-argocd-application-controller
+		do $(ka) rollout status deploy/argocd-$${deploy}; done
+	$(ka) rollout status statefulset/argocd-application-controller
 
 dev:
 	$(MAKE) kind name=mean
