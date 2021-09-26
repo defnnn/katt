@@ -155,14 +155,15 @@ mean:
 kind:
 	-kind delete cluster --name=$(name)
 	kind create cluster --config=etc/$(name).yaml --name=$(name)
-	if [[ -f etc/images.txt ]]; then $(MAKE) images-load name=$(name); fi
+	#if [[ -f etc/images.txt ]]; then $(MAKE) images-load name=$(name); fi
 
 argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
 	kns argocd
+	sleep 10
 	for deploy in dex-server redis repo-server server; \
-		do $(ka) rollout status deploy/argocd-$${deploy}; done
-	$(ka) rollout status statefulset/argocd-application-controller
+		do $(ka) rollout status deploy/argocd-argocd-$${deploy}; done
+	$(ka) rollout status statefulset/argocd-argocd-application-controller
 
 dev:
 	$(MAKE) kind name=mean
