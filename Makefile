@@ -174,17 +174,8 @@ dev:
 	$(MAKE) secrets
 	$(MAKE) dev-deploy
 
-dev-deploy:
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/dev.yaml
-	argocd --core app wait dev --sync
-	argocd --core app wait dev--kind --sync
-	argocd --core app wait dev--mean --sync
-	argocd --core app wait kind--cert-manager --health
-	while ! argocd --core app wait kind--traefik --health; do sleep 1; done
-
-spiral-deploy:
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/spiral.yaml
-	argocd --core app wait spiral --sync
+%-deploy:
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first).yaml
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
