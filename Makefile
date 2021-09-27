@@ -173,11 +173,11 @@ boot-k3d:
 	-k3d cluster delete mean
 	-k3d cluster delete kind
 	k3d cluster create mean --wait --no-hostip --no-lb --no-image-volume \
-		--k3s-server-arg --tls-san 100.101.28.35 \
+		--k3s-server-arg --tls-san=100.101.28.35 \
 		--k3s-server-arg --disable=traefik 
 	k3d cluster create kind --wait --no-hostip --no-lb --no-image-volume \
 		-p 80:30080@server[0] -p 443:30443@server[0] -p 81:30081@server[0] \
-		--k3s-server-arg --tls-san 100.101.28.35 \
+		--k3s-server-arg --tls-san=100.101.28.35 \
 		--k3s-server-arg --disable=traefik 
 	perl -pe 's{//0.0.0.0}{//100.101.28.35}g' -i ~/.kube/config
 	$(MAKE) dev prefix=k3d
