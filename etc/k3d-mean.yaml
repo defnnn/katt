@@ -13,7 +13,7 @@ volumes:
     nodeFilters:
       - all
 ports:
-  - port: 5671:30681
+  - port: 5681:30681
     nodeFilters:
       - server[0]
   - port: 5685:30685
