@@ -4,7 +4,9 @@ name: k3d-kind
 servers: 1
 agents: 0
 kubeAPI:
-  hostIP: "100.101.28.3"
+  host: "100.101.28.3"
+  hostIP: "0.0.0.0"
+  hostPort: "6443"
 image: rancher/k3s:v1.21.4-k3s1
 volumes:
   - volume: /tmp/data:/data
