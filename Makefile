@@ -148,14 +148,7 @@ cilium-install:
 	$(ks) rollout status deployment/hubble-relay
 	$(ks) rollout status deployment/hubble-ui
 
-mean:
-	$(MAKE) kind name=mean
-	argocd --core cluster add kind-mean --name mean --upsert --yes
-
 kind:
-	-kind delete cluster --name=$(name)
-	kind create cluster --config=etc/$(name).yaml --name=$(name)
-	#if [[ -f etc/images.txt ]]; then $(MAKE) images-load name=$(name); fi
 
 argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
@@ -165,8 +158,10 @@ argocd-install:
 	$(ka) rollout status statefulset/argocd-application-controller
 
 boot-kind:
-	$(MAKE) kind name=mean
-	$(MAKE) kind name=kind
+	-kind delete cluster --name=mean
+	kind create cluster --config=etc/kind-mean.yaml --name=mean
+	-kind delete cluster --name=kind
+	kind create cluster --config=etc/kind-kind.yaml --name=kind
 	$(MAKE) dev prefix=kind
 
 boot-k3d:
