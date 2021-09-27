@@ -174,7 +174,6 @@ boot-k3d:
 	-k3d cluster delete kind
 	k3d cluster create mean --config etc/k3d-mean.yaml
 	k3d cluster create kind --config etc/k3d-kind.yaml
-	perl -pe 's{//0.0.0.0}{//100.101.28.35}g' -i ~/.kube/config
 	$(MAKE) dev prefix=k3d
 
 dev:
