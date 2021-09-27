@@ -164,13 +164,25 @@ argocd-install:
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
-dev:
+boot-kind:
 	$(MAKE) kind name=mean
 	$(MAKE) kind name=kind
+	$(MAKE) dev prefix=kind
+
+boot-k3d:
+	-k3d cluster delete mean
+	-k3d cluster delete kind
+	k3d cluster create mean --wait --no-hostip --no-lb --no-image-volume --k3s-server-arg --disable=traefik
+	k3d cluster create kind --wait --no-hostip --no-lb --no-image-volume --k3s-server-arg --disable=traefik \
+		-p 80:30080@server[0] -p 443:30443@server[0] -p 81:30081@server[0]
+	perl -pe 's{//0.0.0.0}{//100.101.28.35}g' -i ~/.kube/config
+	$(MAKE) dev prefix=k3d
+
+dev:
 	$(MAKE) argocd-install
 	$(MAKE) argocd-change-passwd
-	argocd --core cluster add kind-kind --name kind --upsert --yes
-	argocd --core cluster add kind-mean --name mean --upsert --yes
+	argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
+	argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
 	$(MAKE) secrets
 	$(MAKE) dev-deploy
 
