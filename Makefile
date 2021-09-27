@@ -172,17 +172,8 @@ boot-kind:
 boot-k3d:
 	-k3d cluster delete mean
 	-k3d cluster delete kind
-	k3d cluster create mean --wait --no-hostip --no-lb --no-image-volume \
-		--api-port 6444 \
-		--k3s-server-arg --tls-san=100.101.28.35 \
-		--k3s-server-arg --disable=traefik 
-	k3d cluster create kind --wait --no-hostip --no-lb --no-image-volume \
-		--api-port 6443 \
-		-p 80:30080@server[0] -p 443:30443@server[0] -p 81:30081@server[0] \
-		-v /tmp/data:/data \
-		--k3s-server-arg --tls-san=100.101.28.35 \
-		--k3s-server-arg --disable=traefik 
-	perl -pe 's{//0.0.0.0}{//100.101.28.35}g' -i ~/.kube/config
+	k3d cluster create mean --config etc/k3d-mean.yaml
+	k3d cluster create kind --config etc/k3d-kind.yaml
 	$(MAKE) dev prefix=k3d
 
 dev:

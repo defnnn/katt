@@ -1,0 +1,34 @@
+apiVersion: k3d.io/v1alpha2
+kind: Simple
+name: k3d-mean
+servers: 1
+agents: 0
+kubeAPI:
+  hostIP: "100.101.28.3"
+image: rancher/k3s:v1.21.4-k3s1
+volumes:
+  - volume: /tmp/data:/data
+    nodeFilters:
+      - all
+ports:
+  - port: 5671:30681
+    nodeFilters:
+      - server[0]
+  - port: 5685:30685
+    nodeFilters:
+      - server[0]
+options:
+  k3d:
+    wait: true
+    timeout: "360s"
+    disableLoadbalancer: true
+    disableImageVolume: true
+    disableHostIPInjection: true
+  k3s:
+    extraServerArgs:
+      - --tls-san=100.101.28.3
+      - --disable=traefik
+    extraAgentArgs: []
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
