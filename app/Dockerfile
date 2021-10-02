@@ -4,7 +4,7 @@ ENV FLASK_ENV development
 
 WORKDIR /app
 
-RUN apt update && apt install -y net-tools
+RUN apt update && apt install -y net-tools dnsutils
 
 ADD . .
 RUN pip install -r requirements.txt
