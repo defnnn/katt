@@ -2,7 +2,7 @@ k9s:
 	k9s -n katt
 
 up:
-	tilt up --stream=true
+	tilt up
 
 down:
 	tilt down
