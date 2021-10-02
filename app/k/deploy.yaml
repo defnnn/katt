@@ -17,4 +17,5 @@ spec:
         - name: katt
           image: defn/katt-image
           ports:
-            - containerPort: 8000
+            - name: katt
+              containerPort: 8000

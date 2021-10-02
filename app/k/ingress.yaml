@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: katt
+spec:
+  tls:
+    certResolver: letsencrypt
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`katt.defn.ooo`)
+      kind: Rule
+      services:
+        - name: katt
+          port: 80
+      middlewares:
+        - name: traefik-forward-auth
