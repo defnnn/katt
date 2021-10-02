@@ -27,6 +27,7 @@ menu:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
+	(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
 %-join:
 	bin/join \
@@ -51,22 +52,9 @@ mbpro-network:
 mbair-network:
 	@echo 10.204.0.0/16 10.104.0.0/16
 
-
-mbpro-cilium:
-	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium -n cilium clustermesh status --context $(first) --wait
-
-imac-cilium:
-	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium -n cilium clustermesh status --context $(first) --wait
-
-mini-cilium:
-	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium -n cilium clustermesh status --context $(first) --wait
-
-mbair-cilium:
-	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium -n cilium clustermesh status --context $(first) --wait
+clustermesh-mini clustermesh-imac clustermesh-mbpro clustermesh-mbair:
+	$(second) cilium -n cilium clustermesh enable -n cilium --context $(second) --service-type LoadBalancer
+	$(scond) cilium -n cilium clustermesh status -n cilium --context $(second) --wait
 
 test-%:
 	true
