@@ -10,6 +10,8 @@ docker_build('defn/katt-image', '.', build_args={'flask_env': 'development'},
         sync('now.py', '/app'),
         sync('app.py', '/app'),
         sync('requirements.txt', '/app'),
+        sync('start-time.txt.txt', '/app'),
+        sync('index.html', '/app'),
 
         run('cd /app && pip install -r requirements.txt', trigger='./requirements.txt'),
         run('touch /app/app.py', trigger='./start-time.txt'),

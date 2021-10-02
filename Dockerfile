@@ -11,4 +11,10 @@ RUN pip install -r requirements.txt
 
 ADD app.py now.py start-time.txt .
 
+ADD index.html templates/index.html
+
+RUN pwd
+RUN ls -ld *
+RUN id -a
+
 ENTRYPOINT ["python", "/app/app.py"]
