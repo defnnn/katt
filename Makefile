@@ -27,7 +27,7 @@ menu:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
-	(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+	(cd etc && $(first) kn cilium create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
 %-join:
 	bin/join \
@@ -53,8 +53,8 @@ mbair-network:
 	@echo 10.204.0.0/16 10.104.0.0/16
 
 clustermesh-mini clustermesh-imac clustermesh-mbpro clustermesh-mbair:
-	$(second) cilium -n cilium clustermesh enable -n cilium --context $(second) --service-type LoadBalancer
-	$(scond) cilium -n cilium clustermesh status -n cilium --context $(second) --wait
+	$(second) cilium -n cilium clustermesh enable --service-type LoadBalancer
+	$(second) cilium clustermesh status --namespace cilium --wait
 
 test-%:
 	true
@@ -79,16 +79,16 @@ status-mbpro status-imac status-mini status-mbair:
 %-reboot:
 	ssh "$(first).defn.ooo" sudo reboot &
 
-%-mesh:
-	$(first) cilium -n cilium clustermesh connect --context $(first) --destination-context $(second)
-	$(first) cilium -n cilium clustermesh status --context $(first) --wait
+connect-%:
+	$(second) cilium -n cilium clustermesh connect --destination-context $(third)
+	$(second) cilium clustermesh status --namespace cilium --wait
 
-%-connectivity:
-	-$(first) delete ns cilium-test
+connectivity-%:
 	-$(second) delete ns cilium-test
-	cilium -n cilium connectivity test --context $(first) --multi-cluster $(second)
-	-$(first) delete ns cilium-test
+	-$(third) delete ns cilium-test
+	$(second) cilium -n cilium connectivity test --multi-cluster $(third)
 	-$(second) delete ns cilium-test
+	-$(third) delete ns cilium-test
 
 secrets:
 	-$(k) create ns cert-manager
