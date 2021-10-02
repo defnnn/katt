@@ -1,6 +1,6 @@
 # -*- mode: Python -*
 
-k8s_yaml(kustomize('./k'))
+k8s_yaml(kustomize('./k/base'))
 
 docker_build('defn/katt-image', '.',
     live_update=[
