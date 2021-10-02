@@ -27,7 +27,7 @@ menu:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
-	(cd etc && $(first) kn cilium create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+	(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
 %-join:
 	bin/join \
@@ -53,8 +53,8 @@ mbair-network:
 	@echo 10.204.0.0/16 10.104.0.0/16
 
 clustermesh-mini clustermesh-imac clustermesh-mbpro clustermesh-mbair:
-	$(second) cilium -n cilium clustermesh enable --service-type LoadBalancer
-	$(second) cilium clustermesh status --namespace cilium --wait
+	$(second) cilium clustermesh enable --service-type LoadBalancer
+	$(second) cilium clustermesh status --wait
 
 test-%:
 	true
@@ -64,11 +64,12 @@ status-%:
 
 test-mbpro test-imac test-mini test-mbair:
 	-$(second) delete ns cilium-test
-	$(second) cilium -n cilium connectivity test
+	$(second) cilium connectivity test
 	-$(second) delete ns cilium-test
 
 status-mbpro status-imac status-mini status-mbair:
-	$(second) cilium -n cilium status
+	$(second) cilium status
+	-$(second) cilium clustermesh status --wait
 
 %-reset:
 	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
@@ -80,13 +81,13 @@ status-mbpro status-imac status-mini status-mbair:
 	ssh "$(first).defn.ooo" sudo reboot &
 
 connect-%:
-	$(second) cilium -n cilium clustermesh connect --destination-context $(third)
-	$(second) cilium clustermesh status --namespace cilium --wait
+	$(second) cilium clustermesh connect --destination-context $(third)
+	$(second) cilium clustermesh status --wait
 
 connectivity-%:
 	-$(second) delete ns cilium-test
 	-$(third) delete ns cilium-test
-	$(second) cilium -n cilium connectivity test --multi-cluster $(third)
+	$(second) cilium connectivity test --multi-cluster $(third)
 	-$(second) delete ns cilium-test
 	-$(third) delete ns cilium-test
 
