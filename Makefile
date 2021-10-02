@@ -179,8 +179,8 @@ dev:
 	$(MAKE) secrets
 	$(MAKE) dev-deploy
 
-%-deploy:
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first).yaml
+deploy-%:
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(secohnd).yaml
 
 argocd-login:
 	@echo y | argocd login localhost:8080 --insecure --username admin --password "$(shell $(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d')"
