@@ -20,11 +20,6 @@ bridge := en0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-%-all:
-	$(MAKE) $(first)-reset
-	$(MAKE) $(first)-launch
-	$(MAKE) $(first)-add
-
 %-launch:
 	bin/cluster \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
@@ -170,6 +165,11 @@ boot-k3d:
 	k3d cluster create mean --config etc/k3d-mean.yaml
 	k3d cluster create kind --config etc/k3d-kind.yaml
 	$(MAKE) dev prefix=k3d
+
+boot-%:
+	$(MAKE) $(second)-reset
+	$(MAKE) $(second)-launch
+	$(MAKE) $(second)-add
 
 dev:
 	$(MAKE) argocd-install
