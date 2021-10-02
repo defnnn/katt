@@ -154,6 +154,8 @@ boot-k3d:
 
 boot-%:
 	$(MAKE) $(second)-reset
+	$(MAKE) $(second)-reboot
+	sleep 30
 	$(MAKE) $(second)-launch
 	$(MAKE) $(second)-add
 
