@@ -4,22 +4,22 @@ networking:
   apiServerAddress: 100.101.28.35
   apiServerPort: 6444
 kubeadmConfigPatches:
-- |-
-  kind: ClusterConfiguration
-  metadata:
-    name: config
-  apiServer:
-    certSANs:
-      - localhost
-      - 127.0.0.1
-      - kubernetes
-      - kubernetes.default.svc
-      - kubernetes.default.svc.cluster.local
-      - 100.101.28.35
+  - |-
+    kind: ClusterConfiguration
+    metadata:
+      name: config
+    apiServer:
+      certSANs:
+        - localhost
+        - 127.0.0.1
+        - kubernetes
+        - kubernetes.default.svc
+        - kubernetes.default.svc.cluster.local
+        - 100.101.28.35
 nodes:
-- role: control-plane
-  extraPortMappings:
-  - containerPort: 30681
-    hostPort: 5681
-  - containerPort: 30685
-    hostPort: 5685
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30681
+        hostPort: 5681
+      - containerPort: 30685
+        hostPort: 5685

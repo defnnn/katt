@@ -6,5 +6,5 @@ spec:
   mtls:
     enabledBackend: ca-1
     backends:
-    - name: ca-1
-      type: builtin
+      - name: ca-1
+        type: builtin

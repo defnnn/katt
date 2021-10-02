@@ -8,15 +8,15 @@ platform:
   arch: amd64
 
 steps:
-- name: drone fmt
-  image: letfn/drone
-  settings:
-    task: fmt
+  - name: drone fmt
+    image: letfn/drone
+    settings:
+      task: fmt
 
-- name: drone lint
-  image: letfn/drone
-  settings:
-    task: lint
+  - name: drone lint
+    image: letfn/drone
+    settings:
+      task: lint
 
 ---
 kind: pipeline
@@ -28,7 +28,5 @@ platform:
   arch: amd64
 
 steps:
-- name: local
-  image: letfn/drone-hugo
-
-...
+  - name: local
+    image: letfn/drone-hugo

@@ -265,3 +265,8 @@ images-load:
 			echo "$$a"; \
 			kind load image-archive "load/$${a/://}/image" --name $(name); \
 		done
+
+fmt:
+	black --quiet -c pyproject.toml $(shell git ls-files | grep 'py$$') Tiltfile
+	isort --quiet $(shell git ls-files | grep 'py$$')
+	git diff

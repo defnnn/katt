@@ -31,7 +31,7 @@ store:
     maxOpenConnections: 0 # ENV: KUMA_STORE_POSTGRES_MAX_OPEN_CONNECTIONS
     # Maximum number of connections in the idle connection pool
     # <0 value means no idle connections and 0 means default max idle connections
-    maxIdleConnections: 0  # ENV: KUMA_STORE_POSTGRES_MAX_IDLE_CONNECTIONS
+    maxIdleConnections: 0 # ENV: KUMA_STORE_POSTGRES_MAX_IDLE_CONNECTIONS
     # TLS settings
     tls:
       # Mode of TLS connection. Available values (disable, verifyNone, verifyCa, verifyFull)
@@ -179,7 +179,7 @@ runtime:
       # VirtualProbesPort is a port for exposing virtual probes which are not secured by mTLS
       virtualProbesPort: 9000 # ENV: KUMA_RUNTIME_KUBERNETES_VIRTUAL_PROBES_PORT
       # CaCertFile is CA certificate which will be used to verify a connection to the control plane.
-      caCertFile:  # ENV: KUMA_RUNTIME_KUBERNETES_INJECTOR_CA_CERT_FILE
+      caCertFile: # ENV: KUMA_RUNTIME_KUBERNETES_INJECTOR_CA_CERT_FILE
       # SidecarContainer defines configuration of the Kuma sidecar container.
       sidecarContainer:
         # Image name.
@@ -244,10 +244,10 @@ runtime:
       sidecarTraffic:
         # List of inbound ports that will be excluded from interception.
         # This setting is applied on every pod unless traffic.kuma.io/exclude-inbound-ports annotation is specified on Pod.
-        excludeInboundPorts: [ ] # ENV: KUMA_RUNTIME_KUBERNETES_SIDECAR_TRAFFIC_EXCLUDE_INBOUND_PORTS
+        excludeInboundPorts: [] # ENV: KUMA_RUNTIME_KUBERNETES_SIDECAR_TRAFFIC_EXCLUDE_INBOUND_PORTS
         # List of outbound ports that will be excluded from interception.
         # This setting is applied on every pod unless traffic.kuma.io/exclude-oubound-ports annotation is specified on Pod.
-        excludeOutboundPorts: [ ] # ENV: KUMA_RUNTIME_KUBERNETES_SIDECAR_TRAFFIC_EXCLUDE_OUTBOUND_PORTS
+        excludeOutboundPorts: [] # ENV: KUMA_RUNTIME_KUBERNETES_SIDECAR_TRAFFIC_EXCLUDE_OUTBOUND_PORTS
       builtinDNS:
         # Use the built-in DNS
         enabled: true # ENV: KUMA_RUNTIME_KUBERNETES_INJECTOR_BUILTIN_DNS_ENABLED

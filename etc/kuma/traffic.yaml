@@ -6,11 +6,11 @@ metadata:
   name: kong-to-frontend
 spec:
   sources:
-  - match:
-      kuma.io/service: "*"
+    - match:
+        kuma.io/service: "*"
   destinations:
-  - match:
-      kuma.io/service: frontend_kuma-demo_svc_8080
+    - match:
+        kuma.io/service: frontend_kuma-demo_svc_8080
 ---
 apiVersion: kuma.io/v1alpha1
 kind: TrafficPermission
@@ -20,11 +20,11 @@ metadata:
   name: frontend-to-backend
 spec:
   sources:
-  - match:
-      kuma.io/service: frontend_kuma-demo_svc_8080
+    - match:
+        kuma.io/service: frontend_kuma-demo_svc_8080
   destinations:
-  - match:
-      kuma.io/service: backend_kuma-demo_svc_3001
+    - match:
+        kuma.io/service: backend_kuma-demo_svc_3001
 ---
 apiVersion: kuma.io/v1alpha1
 kind: TrafficPermission
@@ -34,10 +34,10 @@ metadata:
   name: backend-to-postgres
 spec:
   sources:
-  - match:
-      kuma.io/service: local
-  - match:
-      kuma.io/service: backend_kuma-demo_svc_3001
+    - match:
+        kuma.io/service: local
+    - match:
+        kuma.io/service: backend_kuma-demo_svc_3001
   destinations:
-  - match:
-      kuma.io/service: postgres_kuma-demo_svc_5432
+    - match:
+        kuma.io/service: postgres_kuma-demo_svc_5432
