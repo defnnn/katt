@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt
 ADD app.py now.py start-time.txt .
 
 ADD index.html templates/index.html
+ADD pets.png static/pets.png
 
 RUN pwd
 RUN ls -ld *
