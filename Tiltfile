@@ -1,6 +1,6 @@
 # -*- mode: Python -*
 
-k8s_yaml('dev.yaml')
+k8s_yaml('tilt.yaml')
 k8s_resource('katt', port_forwards=8000)
 
 docker_build('defn/katt-image', '.', build_args={'flask_env': 'development'},
