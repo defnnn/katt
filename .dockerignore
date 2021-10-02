@@ -1,6 +1,6 @@
-# Secrets
 .drone.secret
 .drone.env
 .env
 etc
 k
+load
