@@ -1,4 +1,4 @@
-FROM python:3.10.0rc2
+FROM python:3.9.7-slim
 
 ARG flask_env=production
 
