@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: example-python
+  name: katt
   labels:
-    app: example-python
+    app: katt
 spec:
   selector:
     matchLabels:
-      app: example-python
+      app: katt
   template:
     metadata:
       labels:
-        app: example-python
+        app: katt
     spec:
       containers:
-        - name: example-python
-          image: example-python-image
+        - name: katt
+          image: katt-image
           ports:
             - containerPort: 8000

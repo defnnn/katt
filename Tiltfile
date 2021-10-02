@@ -1,9 +1,9 @@
 # -*- mode: Python -*
 
 k8s_yaml('main.yaml')
-k8s_resource('example-python', port_forwards=8000, resource_deps=['deploy'])
+k8s_resource('katt', port_forwards=8000)
 
-docker_build('example-python-image', '.', build_args={'flask_env': 'development'},
+docker_build('katt-image', '.', build_args={'flask_env': 'development'},
     live_update=[
         sync('now.py', '/app'),
         sync('app.py', '/app'),
