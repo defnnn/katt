@@ -7,4 +7,5 @@ resources:
   - namespace.yaml
   - deploy.yaml
   - service.yaml
+  - middleware.yaml
   - ingress.yaml
