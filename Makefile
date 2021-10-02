@@ -72,12 +72,12 @@ mbair-cilium:
 	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
 	$(first) cilium clustermesh status --context $(first) --wait
 
-%-test:
+test-%:
 	true
 
-mbpro-test imac-test mini-test mbair-test:
+test-mbpro test-imac test-mini test-mbair:
 	-$(first) delete ns cilium-test
-	$(first) cilium connectivity test
+	$(first) cilium connectivity -n cilium test
 	-$(first) delete ns cilium-test
 
 %-reset:
@@ -133,17 +133,6 @@ once:
 	helm repo add cilium https://helm.cilium.io/ --force-update
 	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
 	helm repo update
-
-cilium:
-	$(MAKE) cilium-install
-
-cilium-install:
-	cilium install --wait --version v1.10.3 --cluster-name "$(cname)" --cluster-id "$(cid)" $(copt)
-	cilium hubble enable --ui
-	$(ks) rollout status deployment/hubble-relay
-	$(ks) rollout status deployment/hubble-ui
-
-kind:
 
 argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
