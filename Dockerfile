@@ -9,6 +9,6 @@ WORKDIR /app
 ADD requirements.txt .
 RUN pip install -r requirements.txt
 
-ADD app.py now.py .
+ADD app.py now.py start-time.txt .
 
 ENTRYPOINT ["python", "/app/app.py"]
