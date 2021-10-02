@@ -2,14 +2,11 @@
 
 k8s_yaml(kustomize('./k'))
 
-local_resource( 'uncategorized', 'python now.py > start-time.txt')
-
 docker_build('defn/katt-image', '.',
     live_update=[
         sync('.', '/app'),
 
         run('cd /app && pip install -r requirements.txt', trigger='./requirements.txt'),
-        run('touch /app/app.py', trigger='./start-time.txt'),
 
         run('sed -i "s/Hello cats!/{}/g" ./templates/index.html'. format("Congrats, you ran a live update!")),
 ])
