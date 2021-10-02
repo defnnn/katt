@@ -53,31 +53,27 @@ mbair-network:
 
 
 mbpro-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=201
-	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $(first) --wait
+	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium -n cilium clustermesh status --context $(first) --wait
 
 imac-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=202 copt="--inherit-ca mbpro"
-	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $(first) --wait
+	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium -n cilium clustermesh status --context $(first) --wait
 
 mini-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=203 copt="--inherit-ca mbpro"
-	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $(first) --wait
+	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium -n cilium clustermesh status --context $(first) --wait
 
 mbair-cilium:
-	$(first) $(MAKE) cilium cname="katt-$(first)" cid=204 copt="--inherit-ca mbpro"
-	$(first) cilium clustermesh enable --context $(first) --service-type LoadBalancer
-	$(first) cilium clustermesh status --context $(first) --wait
+	$(first) cilium -n cilium clustermesh enable --context $(first) --service-type LoadBalancer
+	$(first) cilium -n cilium clustermesh status --context $(first) --wait
 
 test-%:
 	true
 
 test-mbpro test-imac test-mini test-mbair:
 	-$(first) delete ns cilium-test
-	$(first) cilium connectivity -n cilium test
+	$(first) cilium -n cilium connectivity test
 	-$(first) delete ns cilium-test
 
 %-reset:
@@ -90,13 +86,13 @@ test-mbpro test-imac test-mini test-mbair:
 	ssh "$(first).defn.ooo" sudo reboot &
 
 %-mesh:
-	$(first) cilium clustermesh connect --context $(first) --destination-context $(second)
-	$(first) cilium clustermesh status --context $(first) --wait
+	$(first) cilium -n cilium clustermesh connect --context $(first) --destination-context $(second)
+	$(first) cilium -n cilium clustermesh status --context $(first) --wait
 
 %-connectivity:
 	-$(first) delete ns cilium-test
 	-$(second) delete ns cilium-test
-	cilium connectivity test --context $(first) --multi-cluster $(second)
+	cilium -n cilium connectivity test --context $(first) --multi-cluster $(second)
 	-$(first) delete ns cilium-test
 	-$(second) delete ns cilium-test
 
@@ -128,11 +124,6 @@ secrets:
 	m exec $(first) -- sudo tailscale up --accept-dns=false
 	m exec $(first) -- sudo apt install -y --install-recommends postgresql postgresql-contrib
 	m restart $(first)
-
-once:
-	helm repo add cilium https://helm.cilium.io/ --force-update
-	helm repo add hashicorp https://helm.releases.hashicorp.com --force-update
-	helm repo update
 
 argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
@@ -223,8 +214,7 @@ cilium-cli-Linux:
 	rm cilium-linux-amd64.tar.gz
 
 hubble-cli-Linux:
-	export HUBBLE_VERSION=$(shell curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
-	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-linux-amd64.tar.gz"
+	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.2/hubble-linux-amd64.tar.gz"
 	sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
 	rm -f hubble-linux-amd64.tar.gz	
 
@@ -234,8 +224,7 @@ cilium-cli-Darwin:
 	rm cilium-darwin-amd64.tar.gz
 
 hubble-cli-Darwin:
-	export HUBBLE_VERSION=$(shell curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)
-	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.0/hubble-darwin-amd64.tar.gz"
+	curl -sSLO "https://github.com/cilium/hubble/releases/download/v0.8.2/hubble-darwin-amd64.tar.gz"
 	sudo tar xzvfC hubble-darwin-amd64.tar.gz /usr/local/bin
 	rm -f hubble-darwin-amd64.tar.gz	
 
