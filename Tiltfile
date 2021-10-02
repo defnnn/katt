@@ -3,7 +3,7 @@
 k8s_yaml('main.yaml')
 k8s_resource('katt', port_forwards=8000)
 
-docker_build('katt-image', '.', build_args={'flask_env': 'development'},
+docker_build('defn/katt-image', '.', build_args={'flask_env': 'development'},
     live_update=[
         sync('now.py', '/app'),
         sync('app.py', '/app'),
