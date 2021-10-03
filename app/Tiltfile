@@ -4,8 +4,6 @@ analytics_settings(False)
 
 k8s_yaml(kustomize('.'))
 
-k8s_resource('katt-home', port_forwards=2222)
-
 docker_build('katt-image', '.',
     live_update=[
         sync('.', '/app'),
