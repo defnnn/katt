@@ -2,7 +2,7 @@
 
 analytics_settings(False)
 
-k8s_yaml(kustomize('./k/base'))
+k8s_yaml(kustomize('.'))
 
 docker_build('katt-image', '.',
     live_update=[

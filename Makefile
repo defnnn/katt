@@ -111,8 +111,8 @@ boot-dev:
 	-k3d registry create hub.defn.ooo --port 5000
 	k3d cluster create mean --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-mean.yaml
 	k3d cluster create kind --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-kind.yaml
-	sleep 30
-	kn kube-public apply -f etc/registry.yaml
+	#sleep 30
+	#kn kube-public apply -f etc/registry.yaml
 	#k annotate node k3d-kind-server-0 \
 		tilt.dev/registry=k3d-hub.defn.ooo:5000 \
 		tilt.dev/registry-from-cluster=k3d-hub.defn.ooo:5000
