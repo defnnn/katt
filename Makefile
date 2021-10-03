@@ -127,14 +127,14 @@ argocd-install:
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
-boot-kind:
+boot-dev-kind:
 	-kind delete cluster --name=mean
 	kind create cluster --config=etc/kind-mean.yaml --name=mean
 	-kind delete cluster --name=kind
 	kind create cluster --config=etc/kind-kind.yaml --name=kind
 	$(MAKE) dev prefix=kind
 
-boot-k3d:
+boot-dev:
 	-k3d cluster delete mean
 	-k3d cluster delete kind
 	k3d registry create k3d registry create hub.defn.ooo --port 5000
