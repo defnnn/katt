@@ -110,8 +110,8 @@ boot-dev:
 	-k3d cluster delete kind
 	-docker rm -f k3d-hub.defn.ooo
 	k3d registry create hub.defn.ooo --port 5000
-	k3d cluster create mean --config etc/k3d-mean.yaml --registry-use k3d-hub.defn.ooo:5000
-	k3d cluster create kind --config etc/k3d-kind.yaml --registry-use k3d-hub.defn.ooo:5000
+	k3d cluster create mean --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-mean.yaml
+	k3d cluster create kind --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-kind.yaml
 	$(MAKE) dev prefix=k3d
 
 boot-%:
