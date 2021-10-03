@@ -97,7 +97,7 @@ argocd-install:
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
-	kn apply -f etc/registry.yaml
+	kn kube-public apply -f etc/registry.yaml
 
 boot-dev-kind:
 	-kind delete cluster --name=mean
