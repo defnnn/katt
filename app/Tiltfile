@@ -4,7 +4,7 @@ analytics_settings(False)
 
 k8s_yaml(kustomize('./k/base'))
 
-docker_build('k3d-hub.defn.ooo:5000/katt-image', '.',
+docker_build('katt-image', '.',
     live_update=[
         sync('.', '/app'),
 
