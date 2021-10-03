@@ -10,5 +10,5 @@ docker_build('katt-image', '.',
 
         run('cd /app && pip install -r requirements.txt', trigger='./requirements.txt'),
 
-        run('sed -i "s/Hello cats!/{}/g" ./templates/index.html'. format("Congrats, you ran a live update!")),
+        run('cd /app && sed -i "s/Hello cats!/{}/g" ./templates/index.html'. format("Congrats, you ran a live update!")),
 ])
