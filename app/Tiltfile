@@ -2,8 +2,6 @@
 
 analytics_settings(False)
 
-default_registry('k3d-hub.defn.ooo:5000')
-
 k8s_yaml(kustomize('./k/base'))
 
 docker_build('katt-image', '.',
