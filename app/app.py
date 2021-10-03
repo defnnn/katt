@@ -3,16 +3,23 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
+greeting = "hello"
+
+def hello(name):
+    s = f"{greeting}, {name}!"
+    print(s)
+    return s
+
 
 @app.route("/")
 def serve():
-    return render_template("index.html")
+    return render_template("index.html", greeting=greeting)
 
 
 @app.route("/debug")
 def debug():
     web_pdb.set_trace()
-    return render_template("index.html")
+    return render_template("index.html", greeting=greeting)
 
 
 if __name__ == "__main__":

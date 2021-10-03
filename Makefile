@@ -267,6 +267,6 @@ images-load:
 		done
 
 fmt:
-	black --quiet -c pyproject.toml $(shell git ls-files | grep 'py$$') Tiltfile
+	black --quiet -c pyproject.toml $(shell git ls-files | grep 'py$$') app/Tiltfile
 	isort --quiet $(shell git ls-files | grep 'py$$')
 	git diff
