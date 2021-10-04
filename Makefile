@@ -29,6 +29,14 @@ menu:
 		$(shell $(MAKE) $(first)-network)
 	-(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
+%-config:
+	bin/config \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo \
+		$(shell $(MAKE) $(first)-network)
+
 %-join:
 	bin/join \
 		ubuntu $(shell host $(first).defn.ooo | awk '{print $$NF}') \
