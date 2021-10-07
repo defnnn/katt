@@ -1,4 +1,4 @@
-apiVersion: k3d.io/v1alpha2
+apiVersion: k3d.io/v1alpha3
 kind: Simple
 name: k3d-mean
 servers: 1
@@ -15,22 +15,24 @@ volumes:
 ports:
   - port: 5681:30681
     nodeFilters:
-      - server[0]
+      - loadbalancer
   - port: 5685:30685
     nodeFilters:
-      - server[0]
+      - loadbalancer
 options:
   k3d:
     wait: true
     timeout: "360s"
-    disableLoadbalancer: true
-    disableImageVolume: true
-    disableHostIPInjection: true
+    disableLoadbalancer: false
+    disableImageVolume: false
   k3s:
-    extraServerArgs:
-      - --tls-san=100.101.28.3
-      - --disable=traefik
-    extraAgentArgs: []
+    extraArgs:
+      - arg: --tls-san=100.101.28.3
+        nodeFilters:
+          - loadbalancer
+      - arg: --disable=traefik
+        nodeFilters:
+          - loadbalancer
   kubeconfig:
     updateDefaultKubeconfig: true
     switchCurrentContext: true
