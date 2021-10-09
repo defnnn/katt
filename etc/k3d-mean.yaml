@@ -7,7 +7,7 @@ kubeAPI:
   host: "100.101.28.35"
   hostIP: "0.0.0.0"
   hostPort: "6444"
-image: rancher/k3s:v1.21.4-k3s1
+image: rancher/k3s:v1.21.5-k3s1
 volumes:
   - volume: /tmp/data:/data
     nodeFilters:
