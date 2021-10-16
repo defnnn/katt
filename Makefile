@@ -81,7 +81,7 @@ status-mbpro status-imac status-mini status-mbair:
 	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
 
 %-reboot:
-	ssh "$(first).defn.ooo" sudo reboot &
+	ssh "$(first).defn.ooo" sudo reboot
 
 secrets:
 	-$(k) create ns cert-manager
@@ -126,6 +126,12 @@ boot-dev:
 		tilt.dev/registry-from-cluster=k3d-hub.defn.ooo:5000
 	$(MAKE) dev prefix=k3d
 
+reboot-%:
+	$(MAKE) $(second)-reset
+	-$(MAKE) $(second)-reboot &
+	sleep 30
+	ping $(second).defn.ooo
+
 boot-%:
 	$(MAKE) $(second)-reset
 	$(MAKE) $(second)-launch
@@ -138,10 +144,6 @@ dev:
 	argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
 	argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
 	$(MAKE) secrets
-	$(MAKE) deploy-dev
-
-deploy-%:
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(second).yaml
 
 argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'
