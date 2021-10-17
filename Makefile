@@ -140,7 +140,6 @@ boot-%:
 dev:
 	$(MAKE) argocd-install
 	$(MAKE) argocd-change-passwd
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/projects/main.yaml
 	argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
 	argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
 	$(MAKE) secrets
