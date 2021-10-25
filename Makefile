@@ -204,13 +204,10 @@ warm:
 	docker tag "$(shell cat params.yaml | yq -r .base_upstream_source)$(variant)" "$(shell cat params.yaml | yq -r .base_source)$(variant)"
 	docker push "$(shell cat params.yaml | yq -r .base_source)$(variant)"
 
-revision ?= master
-version ?= master
-
 submit:
 	$(MAKE) submit_base
 	$(MAKE) submit_{app,ci}
 	$(MAKE) submit_{aws,terraform,cdktf}
 
 submit_%:
-	argo submit --log -f params.yaml --parameter "variant=$(variant)" --parameter "revision=$(revsion)" --parameter "version=$(version)" --entrypoint build-$(second_) argo.yaml
+	argo submit --log -f params.yaml --entrypoint build-$(second_) argo.yaml
