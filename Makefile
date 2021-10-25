@@ -195,3 +195,19 @@ fmt:
 	black --quiet -c pyproject.toml $(shell git ls-files | grep 'py$$') app/Tiltfile
 	isort --quiet $(shell git ls-files | grep 'py$$')
 	git diff
+
+first_ = $(word 1, $(subst _, ,$@))
+second_ = $(word 2, $(subst _, ,$@))
+
+warm:
+	docker pull "$(shell cat params.yaml | yq -r .base_upstream_source)$(variant)"
+	docker tag "$(shell cat params.yaml | yq -r .base_upstream_source)$(variant)" "$(shell cat params.yaml | yq -r .base_source)$(variant)"
+	docker push "$(shell cat params.yaml | yq -r .base_source)$(variant)"
+
+submit:
+	$(MAKE) submit_base
+	$(MAKE) submit_{app,ci}
+	$(MAKE) submit_{aws,terraform,cdktf}
+
+submit_%:
+	argo submit --log -f params.yaml --parameter "variant=$(variant)" --entrypoint build-$(second_) argo.yaml

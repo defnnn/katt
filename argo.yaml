@@ -1,0 +1,156 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: katt-kaniko-build-
+spec:
+  arguments:
+    parameters:
+      - name: repo
+      - name: revision
+      - name: variant
+      - name: base_source
+      - name: base_destination
+      - name: base_dockerfile
+      - name: app_source
+      - name: app_destination
+      - name: app_dockerfile
+      - name: ci_source
+      - name: ci_destination
+      - name: ci_dockerfile
+      - name: aws_source
+      - name: aws_destination
+      - name: aws_dockerfile
+      - name: terraform_source
+      - name: terraform_destination
+      - name: terraform_dockerfile
+      - name: cdktf_source
+      - name: cdktf_destination
+      - name: cdktf_dockerfile
+  templates:
+    - name: build-base
+      steps:
+        - - name: build-base
+            template: kaniko-build
+            arguments:
+              parameters:
+                - name: repo
+                  value: "{{workflow.parameters.repo}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: source
+                  value: "{{workflow.parameters.base_source}}{{workflow.parameters.variant}}"
+                - name: destination
+                  value: "{{workflow.parameters.base_destination}}{{workflow.parameters.variant}}"
+                - name: dockerfile
+                  value: "{{workflow.parameters.base_dockerfile}}"
+    - name: build-app
+      steps:
+        - - name: build-app
+            template: kaniko-build
+            arguments:
+              parameters:
+                - name: repo
+                  value: "{{workflow.parameters.repo}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: source
+                  value: "{{workflow.parameters.app_source}}{{workflow.parameters.variant}}"
+                - name: destination
+                  value: "{{workflow.parameters.app_destination}}{{workflow.parameters.variant}}"
+                - name: dockerfile
+                  value: "{{workflow.parameters.app_dockerfile}}"
+    - name: build-ci
+      steps:
+        - - name: build-ci
+            template: kaniko-build
+            arguments:
+              parameters:
+                - name: repo
+                  value: "{{workflow.parameters.repo}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: source
+                  value: "{{workflow.parameters.ci_source}}{{workflow.parameters.variant}}"
+                - name: destination
+                  value: "{{workflow.parameters.ci_destination}}{{workflow.parameters.variant}}"
+                - name: dockerfile
+                  value: "{{workflow.parameters.ci_dockerfile}}"
+    - name: build-aws
+      steps:
+        - - name: build-aws
+            template: kaniko-build
+            arguments:
+              parameters:
+                - name: repo
+                  value: "{{workflow.parameters.repo}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: source
+                  value: "{{workflow.parameters.aws_source}}{{workflow.parameters.variant}}"
+                - name: destination
+                  value: "{{workflow.parameters.aws_destination}}{{workflow.parameters.variant}}"
+                - name: dockerfile
+                  value: "{{workflow.parameters.aws_dockerfile}}"
+    - name: build-terraform
+      steps:
+        - - name: build-terraform
+            template: kaniko-build
+            arguments:
+              parameters:
+                - name: repo
+                  value: "{{workflow.parameters.repo}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: source
+                  value: "{{workflow.parameters.terraform_source}}{{workflow.parameters.variant}}"
+                - name: destination
+                  value: "{{workflow.parameters.terraform_destination}}{{workflow.parameters.variant}}"
+                - name: dockerfile
+                  value: "{{workflow.parameters.terraform_dockerfile}}"
+    - name: build-cdktf
+      steps:
+        - - name: build-cdktf
+            template: kaniko-build
+            arguments:
+              parameters:
+                - name: repo
+                  value: "{{workflow.parameters.repo}}"
+                - name: revision
+                  value: "{{workflow.parameters.revision}}"
+                - name: source
+                  value: "{{workflow.parameters.cdktf_source}}{{workflow.parameters.variant}}"
+                - name: destination
+                  value: "{{workflow.parameters.cdktf_destination}}{{workflow.parameters.variant}}"
+                - name: dockerfile
+                  value: "{{workflow.parameters.cdktf_dockerfile}}"
+    - name: kaniko-build
+      inputs:
+        parameters:
+          - name: repo
+          - name: revision
+          - name: source
+          - name: destination
+          - name: dockerfile
+          - name: insecure_pull
+            value: "--insecure-pull"
+        artifacts:
+          - name: source
+            path: /src
+            git:
+              repo: "{{inputs.parameters.repo}}"
+              revision: "{{inputs.parameters.revision}}"
+      container:
+        image: gcr.io/kaniko-project/executor
+        args:
+          - "--context=/src/context"
+          - "--dockerfile={{inputs.parameters.dockerfile}}"
+          - "--destination={{inputs.parameters.destination}}"
+          - "--build-arg"
+          - "IMAGE={{inputs.parameters.source}}"
+          - "--reproducible"
+          - "--cache"
+          - "--cache-copy-layers"
+          - "--insecure"
+          - "{{inputs.parameters.insecure_pull}}"
+  securityContext:
+    runAsNonRoot: false
