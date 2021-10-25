@@ -204,8 +204,8 @@ warm:
 	docker tag "$(shell cat params.yaml | yq -r .base_upstream_source)$(variant)" "$(shell cat params.yaml | yq -r .base_source)$(variant)"
 	docker push "$(shell cat params.yaml | yq -r .base_source)$(variant)"
 
-revision ?= 0.0.1
-version ?= 0.0.1
+revision ?= master
+version ?= master
 
 submit:
 	$(MAKE) submit_base
