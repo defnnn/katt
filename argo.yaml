@@ -142,7 +142,7 @@ spec:
       container:
         image: gcr.io/kaniko-project/executor
         args:
-          - "--context=/src/context"
+          - "--context=/src"
           - "--dockerfile={{inputs.parameters.dockerfile}}"
           - "--destination={{inputs.parameters.destination}}"
           - "--build-arg"
