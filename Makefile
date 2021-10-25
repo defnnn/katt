@@ -213,4 +213,4 @@ submit:
 	$(MAKE) submit_{aws,terraform,cdktf}
 
 submit_%:
-	argo submit --log -f params.yaml --parameter "variant=$(variant)" --parameter "version=$(version)" --entrypoint build-$(second_) argo.yaml
+	argo submit --log -f params.yaml --parameter "variant=$(variant)" --parameter "revision=$(revsion)" --parameter "version=$(version)" --entrypoint build-$(second_) argo.yaml

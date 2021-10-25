@@ -39,9 +39,9 @@ spec:
                 - name: revision
                   value: "{{workflow.parameters.revision}}"
                 - name: source
-                  value: "{{workflow.parameters.base_source}}{{workflow.parameters.variant}}{{workflow.parameters.version}}"
+                  value: "{{workflow.parameters.base_source}}{{workflow.parameters.variant}}"
                 - name: destination
-                  value: "{{workflow.parameters.base_destination}}{{workflow.parameters.variant}}{{workflow.parameters.version}}"
+                  value: "{{workflow.parameters.base_destination}}{{workflow.parameters.variant}}{{workflow.parameters.revision}}"
                 - name: dockerfile
                   value: "{{workflow.parameters.base_dockerfile}}"
     - name: build-app
