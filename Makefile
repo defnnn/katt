@@ -147,14 +147,14 @@ reboot-%:
 	sleep 30
 	ping $(second).defn.ooo
 
-boot-kitt boot-katt:
-	$(MAKE) $(second)-reset
-	$(MAKE) $(second)-launch
-
 boot-%:
 	$(MAKE) $(second)-reset
 	$(MAKE) $(second)-launch
 	$(MAKE) $(second)-add
+
+boot-kitt boot-katt:
+	$(MAKE) $(second)-reset
+	$(MAKE) $(second)-launch-plain
 
 boot:
 	$(MAKE) boot-kitt
