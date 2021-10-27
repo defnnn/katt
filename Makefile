@@ -29,6 +29,15 @@ menu:
 		$(shell $(MAKE) $(first)-network)
 	-(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
+%-launch-plain:
+	bin/cluster-plain \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(first) $(first).defn.ooo \
+		$(shell $(MAKE) $(first)-network)
+	-(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+
 %-config:
 	bin/config \
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
@@ -138,16 +147,28 @@ reboot-%:
 	sleep 30
 	ping $(second).defn.ooo
 
+boot-kitt boot-katt:
+	$(MAKE) $(second)-reset
+	$(MAKE) $(second)-launch
+
 boot-%:
 	$(MAKE) $(second)-reset
 	$(MAKE) $(second)-launch
-	-$(MAKE) $(second)-add
+	$(MAKE) $(second)-add
+
+boot:
+	$(MAKE) boot-kitt
+	$(MAKE) boot-katt
+	ktx katt
+	$(MAKE) dev
 
 dev:
 	$(MAKE) argocd-install
 	$(MAKE) argocd-change-passwd
-	argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
-	argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
+	$(MAKE) kitt-add
+	$(MAKE) katt-add
+	#argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
+	#argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
 	$(MAKE) secrets
 
 argocd-passwd:
