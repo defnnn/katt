@@ -141,7 +141,7 @@ reboot-%:
 boot-%:
 	$(MAKE) $(second)-reset
 	$(MAKE) $(second)-launch
-	$(MAKE) $(second)-add
+	-$(MAKE) $(second)-add
 
 dev:
 	$(MAKE) argocd-install
