@@ -48,6 +48,12 @@ menu:
 %-network:
 	@echo 10.200.0.0/16 10.101.0.0/16
 
+kitt-network:
+	@echo 10.201.0.0/16 10.98.0.0/16
+
+katt-network:
+	@echo 10.201.0.0/16 10.99.0.0/16
+
 mini-network:
 	@echo 10.201.0.0/16 10.101.0.0/16
 
@@ -66,12 +72,12 @@ test-%:
 status-%:
 	true
 
-test-mbpro test-imac test-mini test-mbair:
+test-mbpro test-imac test-mini test-mbair test-katt test-kitt:
 	-$(second) delete ns cilium-test
 	$(second) cilium connectivity test
 	-$(second) delete ns cilium-test
 
-status-mbpro status-imac status-mini status-mbair:
+status-mbpro status-imac status-mini status-mbair status-katt status-kitt:
 	$(second) cilium status
 
 %-reset:
