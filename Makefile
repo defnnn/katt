@@ -43,9 +43,9 @@ immanent:
 	ktx mini
 	-argocd --core cluster rm https://$(first).defn.ooo:6443 >/dev/null 2>&1
 	argocd --core cluster add -y --name $(first) k3d-$(first)
-	$(MAKE) install-secrets
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first).yaml
 	ktx k3d-$(first)
+	$(MAKE) install-secrets
 
 boot-dev-kind:
 	-kind delete cluster --name=mean
