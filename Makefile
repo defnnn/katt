@@ -43,8 +43,7 @@ immanent:
 	k3d cluster create $(first) --config etc/k3d-$(first).yaml
 	ktx mini
 	kns argocd
-	-argocd --core cluster rm https://$(first).defn.ooo:6443
-	-argocd --core cluster rm https://$(shell host $(first).defn.ooo | awk '{print $$NF}'):6443
+	-argocd --core cluster rm https://$(first).defn.ooo:6443 >/dev/null 2>&1
 	argocd --core cluster add -y --name $(first) k3d-$(first)
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first).yaml
 	ktx k3d-$(first)
