@@ -27,6 +27,9 @@ install-katt:
 	$(MAKE) install-argocd
 	$(MAKE) install-secrets
 
+install-cilium:
+	kustomize build https://github.com/amanibhavam/spiral-$(shell uname -n | cut -d. -f1)/cilium | $(k) apply -f -
+
 launch-%:
 	bin/cluster \
 		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
