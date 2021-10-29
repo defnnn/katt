@@ -26,6 +26,8 @@ install-katt:
 	$(MAKE) install-cilium
 	$(MAKE) install-argocd
 	$(MAKE) install-secrets
+	$(MAKE) add-$(shell uname -n | cut -d. -f1)
+	$(MAKE) deploy-$(shell uname -n | cut -d. -f1)
 
 install-cilium:
 	kustomize build https://github.com/amanibhavam/spiral-$(shell uname -n | cut -d. -f1)/cilium | $(k) apply -f -
