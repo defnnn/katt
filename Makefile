@@ -129,9 +129,12 @@ secrets:
 	-pass DOMAINS | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-domains --from-file=DOMAINS=/dev/stdin
 	-pass AUTH_HOST | perl -pe 's{\s+$$}{}' | $(kt) create secret generic traefik-forward-auth-auth-host --from-file=AUTH_HOST=/dev/stdin
 
+add-%:
+	-argocd --core cluster rm https://$(second).defn.ooo:6443
+	argocd --core cluster add -y $(second)
+
 %-add:
-	-argocd --core cluster rm https://$(first).defn.ooo:6443
-	argocd --core cluster add -y $(first)
+	$(MAKE) add-$(first)
 
 argocd-install:
 	kustomize build https://github.com/letfn/katt-argocd/base | $(k) apply -f -
