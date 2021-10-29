@@ -20,14 +20,20 @@ bridge := en0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-install-katt:
-	$(MAKE) reset-$(shell uname -n | cut -d. -f1)
-	$(MAKE) launch-$(shell uname -n | cut -d. -f1)
+katt-%:
+	$(MAKE) reset-$(second)
+	$(MAKE) launch-$(second)
 	$(MAKE) install-cilium
 	$(MAKE) install-argocd
 	$(MAKE) install-secrets
-	$(MAKE) add-$(shell uname -n | cut -d. -f1)
-	$(MAKE) deploy-$(shell uname -n | cut -d. -f1)
+	$(MAKE) add-$(second)
+	$(MAKE) deploy-$(second)
+
+kitt-%:
+	$(MAKE) reset-$(second)
+	$(MAKE) launch-$(second)
+	$(MAKE) add-$(second)
+	$(MAKE) deploy-$(second)
 
 install-cilium:
 	kustomize build https://github.com/amanibhavam/spiral-$(shell uname -n | cut -d. -f1)/cilium | $(k) apply -f -
