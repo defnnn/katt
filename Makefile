@@ -35,11 +35,19 @@ kitt-%:
 	$(MAKE) add-$(second)
 	$(MAKE) deploy-$(second)
 
-immanent:
+registry:
 	-k3d registry create hub.defn.ooo --port 5000
+
+immanent:
+	k3d cluster delete $(first)
 	k3d cluster create $(first) --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-$(first).yaml
-	mini $(MAKE) add-$(first)
-	mini $(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first)/$(first).yaml
+	ktx mini
+	kns argocd
+	-argocd --core cluster rm https://$(first).defn.ooo:6443
+	argocd --core cluster add -y --name $(first) k3d-$(first)
+	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first)/$(first).yaml
+	ktx $(first)
+	kns default
 
 boot-dev-kind:
 	-kind delete cluster --name=mean
