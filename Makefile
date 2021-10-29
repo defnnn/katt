@@ -35,6 +35,10 @@ kitt-%:
 	$(MAKE) add-$(second)
 	$(MAKE) deploy-$(second)
 
+immanent:
+	$(MAKE) add-$(first)
+	$(MAKE) deploy-$(first)
+
 install-cilium:
 	kustomize build https://github.com/amanibhavam/spiral-$(shell uname -n | cut -d. -f1)/cilium | $(k) apply -f -
 
