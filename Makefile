@@ -36,8 +36,17 @@ kitt-%:
 	$(MAKE) deploy-$(second)
 
 immanent:
-	$(MAKE) add-$(first)
-	$(k) apply -fhttps://raw.githubusercontent.com/amanibhavam/deploy/master/immanent/$(second).yaml
+	-k3d registry create hub.defn.ooo --port 5000
+	k3d cluster create $(first) --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-$(first).yaml
+	mini $(MAKE) add-$(first)
+	mini $(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first)/$(first).yaml
+
+boot-dev-kind:
+	-kind delete cluster --name=mean
+	kind create cluster --config=etc/kind-mean.yaml --name=mean
+	-kind delete cluster --name=kind
+	kind create cluster --config=etc/kind-kind.yaml --name=kind
+	$(MAKE) dev prefix=kind
 
 install-cilium:
 	kustomize build https://github.com/amanibhavam/spiral-$(shell uname -n | cut -d. -f1)/cilium | $(k) apply -f -
@@ -157,26 +166,6 @@ argocd-install:
 deploy-%:
 	$(k) apply -fhttps://raw.githubusercontent.com/amanibhavam/deploy/master/spiral/$(second).yaml
 
-boot-dev-kind:
-	-kind delete cluster --name=mean
-	kind create cluster --config=etc/kind-mean.yaml --name=mean
-	-kind delete cluster --name=kind
-	kind create cluster --config=etc/kind-kind.yaml --name=kind
-	$(MAKE) dev prefix=kind
-
-boot-dev:
-	-k3d cluster delete mean
-	-k3d cluster delete kind
-	-k3d registry create hub.defn.ooo --port 5000
-	k3d cluster create mean --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-mean.yaml
-	k3d cluster create kind --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-kind.yaml
-	#sleep 30
-	#kn kube-public apply -f etc/registry.yaml
-	#k annotate node k3d-kind-server-0 \
-		tilt.dev/registry=k3d-hub.defn.ooo:5000 \
-		tilt.dev/registry-from-cluster=k3d-hub.defn.ooo:5000
-	$(MAKE) dev prefix=k3d
-
 reboot-%:
 	$(MAKE) $(second)-reset
 	-$(MAKE) $(second)-reboot &
@@ -210,14 +199,6 @@ install-argocd:
 
 install-secrets:
 	$(MAKE) secrets
-
-dev:
-	$(MAKE) install-argocd
-	$(MAKE) kitt-add
-	$(MAKE) katt-add
-	#argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
-	#argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
-	$(MAKE) install-secrets
 
 argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'

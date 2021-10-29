@@ -1,0 +1,38 @@
+apiVersion: k3d.io/v1alpha3
+kind: Simple
+name: k3d-immanent
+servers: 1
+agents: 0
+kubeAPI:
+  host: "100.101.28.35"
+  hostIP: "0.0.0.0"
+  hostPort: "6443"
+image: rancher/k3s:v1.21.5-k3s2
+volumes:
+  - volume: /tmp/data:/data
+    nodeFilters:
+      - all
+ports:
+  - port: 80:30080
+    nodeFilters:
+      - loadbalancer
+  - port: 443:30443
+    nodeFilters:
+      - loadbalancer
+options:
+  k3d:
+    wait: true
+    timeout: "360s"
+    disableLoadbalancer: false
+    disableImageVolume: false
+  k3s:
+    extraArgs:
+      - arg: --tls-san=100.101.28.35
+        nodeFilters:
+          - loadbalancer
+      - arg: --disable=traefik
+        nodeFilters:
+          - loadbalancer
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
