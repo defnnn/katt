@@ -20,14 +20,24 @@ bridge := en0
 menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
-%-launch:
+install-katt:
+	sudo apt install -y postgresql
+	$(MAKE) reset-$(shell uname -n | cut -d. -f1)
+	$(MAKE) launch-$(shell uname -n | cut -d. -f1)
+	$(MAKE) install-argocd
+	$(MAKE) install-secrets
+
+launch-%:
 	bin/cluster \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo \
-		$(shell $(MAKE) $(first)-network)
-	-(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(second) $(second).defn.ooo \
+		$(shell $(MAKE) -s $(second)-network)
+	-(cd etc && $(second) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+
+%-launch:
+	$(MAKE) launch-$(first)
 
 %-launch-plain:
 	bin/cluster-plain \
@@ -94,12 +104,6 @@ reset-%:
 	-ssh "$(second).defn.ooo" sudo apt install -y postgresql postgresql-contrib
 	-echo "alter role postgres with password 'postgres'" | ssh "$(second).defn.ooo" sudo -u postgres psql
 	-echo "drop database kubernetes" | ssh "$(second).defn.ooo" sudo -u postgres psql
-
-reset-self:
-	-/usr/local/bin/k3s-uninstall.sh
-	-sudo apt install -y postgresql postgresql-contrib
-	-echo "alter role postgres with password 'postgres'" | sudo -u postgres psql
-	-echo "drop database kubernetes" | sudo -u postgres psql
 
 %-reset:
 	$(MAKE) reset-$(first)
@@ -174,14 +178,25 @@ boot:
 	ktx katt
 	$(MAKE) dev
 
-dev:
+install-tools:
+	for a in kustomize kubectl kubectx k3sup; do \
+		asdf plugin-add $$a || true; \
+		asdf install $$a; done
+
+install-argocd:
 	$(MAKE) argocd-install
 	$(MAKE) argocd-change-passwd
+
+install-secrets:
+	$(MAKE) secrets
+
+dev:
+	$(MAKE) install-argocd
 	$(MAKE) kitt-add
 	$(MAKE) katt-add
 	#argocd --core cluster add $(prefix)-kind --name kind --upsert --yes
 	#argocd --core cluster add $(prefix)-mean --name mean --upsert --yes
-	$(MAKE) secrets
+	$(MAKE) install-secrets
 
 argocd-passwd:
 	$(ka) get -o json secret/argocd-initial-admin-secret | jq -r '.data.password | @base64d'
