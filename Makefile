@@ -143,6 +143,9 @@ argocd-install:
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
 
+deploy-%:
+	kustomize build https://github.com/amanibhavam/deploy/$(second).yaml | $(k) apply -f -
+
 boot-dev-kind:
 	-kind delete cluster --name=mean
 	kind create cluster --config=etc/kind-mean.yaml --name=mean
