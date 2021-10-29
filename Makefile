@@ -89,11 +89,20 @@ test-mbpro test-imac test-mini test-mbair test-katt test-kitt:
 status-mbpro status-imac status-mini status-mbair status-katt status-kitt:
 	$(second) cilium status
 
+reset-%:
+	-ssh "$(second).defn.ooo" /usr/local/bin/k3s-uninstall.sh
+	-ssh "$(second).defn.ooo" sudo apt install -y postgresql postgresql-contrib
+	-echo "alter role postgres with password 'postgres'" | ssh "$(second).defn.ooo" sudo -u postgres psql
+	-echo "drop database kubernetes" | ssh "$(second).defn.ooo" sudo -u postgres psql
+
+reset-self:
+	-/usr/local/bin/k3s-uninstall.sh
+	-sudo apt install -y postgresql postgresql-contrib
+	-echo "alter role postgres with password 'postgres'" | sudo -u postgres psql
+	-echo "drop database kubernetes" | sudo -u postgres psql
+
 %-reset:
-	-ssh "$(first).defn.ooo" /usr/local/bin/k3s-uninstall.sh
-	-ssh "$(first).defn.ooo" sudo apt install -y postgresql postgresql-contrib
-	-echo "alter role postgres with password 'postgres'" | ssh "$(first).defn.ooo" sudo -u postgres psql
-	-echo "drop database kubernetes" | ssh "$(first).defn.ooo" sudo -u postgres psql
+	$(MAKE) reset-$(first)
 
 %-reboot:
 	ssh "$(first).defn.ooo" sudo reboot
