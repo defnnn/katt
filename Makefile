@@ -196,7 +196,7 @@ boot:
 	$(MAKE) dev
 
 install-tools:
-	sudo apt install -y postgresql
+	-sudo apt install -y postgresql
 	for a in kustomize kubectl kubectx k9s k3sup argo argocd; do \
 		asdf plugin-add $$a || true; \
 		asdf install $$a; done
