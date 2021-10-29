@@ -21,9 +21,9 @@ menu:
 	@perl -ne 'printf("%20s: %s\n","$$1","$$2") if m{^([\w+-]+):[^#]+#\s(.+)$$}' Makefile
 
 install-katt:
-	sudo apt install -y postgresql
 	$(MAKE) reset-$(shell uname -n | cut -d. -f1)
 	$(MAKE) launch-$(shell uname -n | cut -d. -f1)
+	$(MAKE) install-cilium
 	$(MAKE) install-argocd
 	$(MAKE) install-secrets
 
@@ -179,6 +179,7 @@ boot:
 	$(MAKE) dev
 
 install-tools:
+	sudo apt install -y postgresql
 	for a in kustomize kubectl kubectx k9s k3sup; do \
 		asdf plugin-add $$a || true; \
 		asdf install $$a; done
