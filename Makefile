@@ -104,8 +104,11 @@ reset-self:
 %-reset:
 	$(MAKE) reset-$(first)
 
+reboot-%:
+	ssh "$(second).defn.ooo" sudo reboot
+
 %-reboot:
-	ssh "$(first).defn.ooo" sudo reboot
+	$(MAKE) reboot-$(second)
 
 secrets:
 	-$(k) create ns cert-manager
