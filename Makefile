@@ -37,7 +37,7 @@ kitt-%:
 
 immanent:
 	$(MAKE) add-$(first)
-	$(MAKE) deploy-$(first)
+	$(k) apply -fhttps://raw.githubusercontent.com/amanibhavam/deploy/master/immanent/$(second).yaml
 
 install-cilium:
 	kustomize build https://github.com/amanibhavam/spiral-$(shell uname -n | cut -d. -f1)/cilium | $(k) apply -f -
