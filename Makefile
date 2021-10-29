@@ -179,7 +179,7 @@ boot:
 	$(MAKE) dev
 
 install-tools:
-	for a in kustomize kubectl kubectx k3sup; do \
+	for a in kustomize kubectl kubectx k9s k3sup; do \
 		asdf plugin-add $$a || true; \
 		asdf install $$a; done
 
