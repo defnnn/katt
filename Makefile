@@ -63,13 +63,12 @@ launch-%:
 		$(shell $(MAKE) $(first)-network)
 	-(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
-%-config:
+config-%:
 	bin/config \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
-		ubuntu $(first) $(first).defn.ooo \
-		$(shell $(MAKE) $(first)-network)
+		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
+		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
+		ubuntu $(second) $(second).defn.ooo
 
 %-join:
 	bin/join \
