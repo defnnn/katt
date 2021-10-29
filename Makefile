@@ -47,7 +47,7 @@ immanent:
 	-argocd --core cluster rm https://$(shell host $(first).defn.ooo | awk '{print $$NF}'):6443
 	argocd --core cluster add -y --name $(first) k3d-$(first)
 	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first).yaml
-	ktx $(first)
+	ktx k3d-$(first)
 	kns default
 
 boot-dev-kind:
