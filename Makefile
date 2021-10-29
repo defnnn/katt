@@ -40,7 +40,7 @@ registry:
 
 immanent:
 	k3d cluster delete $(first)
-	k3d cluster create $(first) --registry-use k3d-hub.defn.ooo:5000 --config etc/k3d-$(first).yaml
+	k3d cluster create $(first) --config etc/k3d-$(first).yaml
 	ktx mini
 	kns argocd
 	-argocd --core cluster rm https://$(first).defn.ooo:6443
