@@ -2,7 +2,7 @@ apiVersion: "argoproj.io/v1alpha1"
 kind:       "Workflow"
 metadata: generateName: "katt-kaniko-build-"
 
-_templates: [NAME=string]: {
+_builds: [NAME=string]: {
 	name: "build-\(NAME)"
 	steps: [[_build_step]]
 
@@ -80,7 +80,7 @@ _template_kaniko_build: {
 let layers = [ "base", "app", "ci", "aws", "terraform", "cdktf"]
 
 for l in layers {
-	_templates: "\(l)": {}
+	_builds: "\(l)": {}
 }
 
 spec: {
@@ -93,7 +93,7 @@ spec: {
 		},
 	]
 	templates: [
-		for t in _templates {t},
+		for t in _builds {t},
 		_template_kaniko_build,
 	]
 	securityContext: runAsNonRoot: false
