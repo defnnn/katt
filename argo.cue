@@ -2,6 +2,30 @@ apiVersion: "argoproj.io/v1alpha1"
 kind:       "Workflow"
 metadata: generateName: "katt-kaniko-build-"
 
+let layers = [ "base", "app", "ci", "aws", "terraform", "cdktf"]
+
+for l in layers {
+	_builds: "\(l)": {}
+}
+
+spec: {
+	arguments: parameters: [
+		for p in [ "repo", "revision", "version", "variant"] {
+			name: p
+		},
+		for l in layers for s in ["source", "destination", "dockerfile"] {
+			name: "\(l)_\(s)"
+		},
+	]
+
+	templates: [
+		for t in _builds {t},
+		_template_kaniko_build,
+	]
+
+	securityContext: runAsNonRoot: false
+}
+
 _builds: [NAME=string]: {
 	name: "build-\(NAME)"
 	steps: [[_build_step]]
@@ -74,28 +98,4 @@ _template_kaniko_build: {
 			revision: "{{inputs.parameters.revision}}"
 		}
 	}
-}
-
-let layers = [ "base", "app", "ci", "aws", "terraform", "cdktf"]
-
-for l in layers {
-	_builds: "\(l)": {}
-}
-
-spec: {
-	arguments: parameters: [
-		for p in [ "repo", "revision", "version", "variant"] {
-			name: p
-		},
-		for l in layers for s in ["source", "destination", "dockerfile"] {
-			name: "\(l)_\(s)"
-		},
-	]
-
-	templates: [
-		for t in _builds {t},
-		_template_kaniko_build,
-	]
-
-	securityContext: runAsNonRoot: false
 }
