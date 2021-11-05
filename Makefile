@@ -271,7 +271,7 @@ submit:
 	$(MAKE) submit_{app,ci}
 	$(MAKE) submit_{aws,terraform,cdktf}
 
-o/argo.yaml:
+o/argo.yaml: argo.cue
 	cue eval --out yaml argo.cue > o/argo.yaml
 
 submit_%: o/argo.yaml

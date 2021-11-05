@@ -16,7 +16,7 @@ spec: {
 
 	templates: [
 		for t in _builds {t},
-		_template_kaniko_build,
+		for t in _templates {t},
 	]
 
 	securityContext: runAsNonRoot: false
@@ -61,7 +61,7 @@ _builds: [NAME=string]: {
 	]
 }
 
-_template_kaniko_build: {
+_templates: "kaniko-build": {
 	name: "kaniko-build"
 	inputs: parameters: _params
 	inputs: artifacts: [ _git_source]
