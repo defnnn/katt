@@ -271,6 +271,8 @@ submit:
 	$(MAKE) submit_{app,ci}
 	$(MAKE) submit_{aws,terraform,cdktf}
 
-submit_%:
-	cue eval --out yaml argo.cue > argo.yaml
-	argo submit --log -f params.yaml --entrypoint build-$(second_) argo.yaml
+o/argo.yaml:
+	cue eval --out yaml argo.cue > o/argo.yaml
+
+submit_%: o/argo.yaml
+	argo submit --log -f params.yaml --entrypoint build-$(second_) o/argo.yaml
