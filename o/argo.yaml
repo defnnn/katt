@@ -125,6 +125,19 @@ spec:
           - name: dockerfile
             value: '{{workflow.parameters.cdktf_dockerfile}}'
   - name: kaniko-build
+    container:
+      image: gcr.io/kaniko-project/executor
+      args:
+      - --context=/src
+      - --dockerfile={{inputs.parameters.dockerfile}}
+      - --destination={{inputs.parameters.destination}}
+      - --build-arg
+      - IMAGE={{inputs.parameters.source}}
+      - --reproducible
+      - --cache
+      - --cache-copy-layers
+      - --insecure
+      - '{{inputs.parameters.insecure_pull}}'
     inputs:
       parameters:
       - name: repo
@@ -140,18 +153,5 @@ spec:
         git:
           repo: '{{inputs.parameters.repo}}'
           revision: '{{inputs.parameters.revision}}'
-    container:
-      image: gcr.io/kaniko-project/executor
-      args:
-      - --context=/src
-      - --dockerfile={{inputs.parameters.dockerfile}}
-      - --destination={{inputs.parameters.destination}}
-      - --build-arg
-      - IMAGE={{inputs.parameters.source}}
-      - --reproducible
-      - --cache
-      - --cache-copy-layers
-      - --insecure
-      - '{{inputs.parameters.insecure_pull}}'
   securityContext:
     runAsNonRoot: false

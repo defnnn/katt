@@ -272,10 +272,10 @@ submit:
 	$(MAKE) submit_{aws,terraform,cdktf}
 
 cue: o/argo.yaml
-	git diff o/argo.yaml
+	#git diff o/argo.yaml
 
-o/argo.yaml: argo.cue
-	cue eval --out yaml argo.cue > o/argo.yaml
+o/argo.yaml: argo.cue schema.cue
+	cue eval --out yaml > o/argo.yaml
 
 submit_%: o/argo.yaml
 	argo submit --log -f params.yaml --entrypoint build-$(second_) o/argo.yaml
