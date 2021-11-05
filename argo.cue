@@ -6,9 +6,10 @@ _builds: [NAME=string]: {
 	name: "build-\(NAME)"
 	steps: [[_build_step]]
 
-	_source_suffix: string | *"-{{workflow.parameters.version}}"
-	if NAME == "base" {
-		_source_suffix: ""
+	_build_step: {
+		name:     "build-\(NAME)"
+		template: "kaniko-build"
+		arguments: parameters: _build_params
 	}
 
 	_build_params: [
@@ -21,6 +22,11 @@ _builds: [NAME=string]: {
 		}, {
 			name:  "source"
 			value: "{{workflow.parameters.\(NAME)_source}}{{workflow.parameters.variant}}\(_source_suffix)"
+
+			_source_suffix: string | *"-{{workflow.parameters.version}}"
+			if NAME == "base" {
+				_source_suffix: ""
+			}
 		}, {
 			name:  "destination"
 			value: "{{workflow.parameters.\(NAME)_destination}}{{workflow.parameters.variant}}-{{workflow.parameters.version}}"
@@ -29,13 +35,6 @@ _builds: [NAME=string]: {
 			value: "{{workflow.parameters.\(NAME)_dockerfile}}"
 		},
 	]
-
-	_build_step: {
-		name:     "build-\(NAME)"
-		template: "kaniko-build"
-		arguments: parameters: _build_params
-	}
-
 }
 
 _template_kaniko_build: {
@@ -92,9 +91,11 @@ spec: {
 			name: "\(l)_\(s)"
 		},
 	]
+
 	templates: [
 		for t in _builds {t},
 		_template_kaniko_build,
 	]
+
 	securityContext: runAsNonRoot: false
 }
