@@ -3,16 +3,16 @@ kind:       "Workflow"
 metadata: generateName: "katt-kaniko-build-"
 
 _templates: [NAME=string]: {
+	name: "build-\(NAME)"
+	steps: [[_build_step]]
+
 	_source_suffix: string | *"-{{workflow.parameters.version}}"
 	if NAME == "base" {
 		_source_suffix: ""
 	}
 
-	name: "build-\(NAME)"
-	steps: [ [{
-		name:     "build-\(NAME)"
-		template: "kaniko-build"
-		arguments: parameters: [{
+	_build_params: [
+		{
 			name:  "repo"
 			value: "{{workflow.parameters.repo}}"
 		}, {
@@ -27,31 +27,21 @@ _templates: [NAME=string]: {
 		}, {
 			name:  "dockerfile"
 			value: "{{workflow.parameters.\(NAME)_dockerfile}}"
-		}]
-	}],
+		},
 	]
+
+	_build_step: {
+		name:     "build-\(NAME)"
+		template: "kaniko-build"
+		arguments: parameters: _build_params
+	}
+
 }
 
 _template_kaniko_build: {
 	name: "kaniko-build"
-	inputs: {
-		parameters: [
-			for p in [ "repo", "revision", "source", "destination", "dockerfile"] {
-				name: p
-			},
-			{
-				name:  "insecure_pull"
-				value: "--insecure-pull"
-			}]
-		artifacts: [{
-			name: "source"
-			path: "/src"
-			git: {
-				repo:     "{{inputs.parameters.repo}}"
-				revision: "{{inputs.parameters.revision}}"
-			}
-		}]
-	}
+	inputs: parameters: _params
+	inputs: artifacts: [ _git_source]
 	container: {
 		image: "gcr.io/kaniko-project/executor"
 		args: [
@@ -66,6 +56,24 @@ _template_kaniko_build: {
 			"--insecure",
 			"{{inputs.parameters.insecure_pull}}",
 		]
+	}
+
+	_params: [
+		for p in [ "repo", "revision", "source", "destination", "dockerfile"] {
+			name: p
+		},
+		{
+			name:  "insecure_pull"
+			value: "--insecure-pull"
+		}]
+
+	_git_source: {
+		name: "source"
+		path: "/src"
+		git: {
+			repo:     "{{inputs.parameters.repo}}"
+			revision: "{{inputs.parameters.revision}}"
+		}
 	}
 }
 

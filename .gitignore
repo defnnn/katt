@@ -14,3 +14,4 @@ bundle.crt
 trustAnchor.crt
 load/
 start-time.txt
+argo.yaml
