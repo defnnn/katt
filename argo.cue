@@ -14,19 +14,21 @@ spec: {
 		},
 	]
 
+	_builds: [
+		for l in layers {
+			#Build & {"\(l)": {}}
+		},
+	]
+
 	templates: [
-		for t in _builds {t},
+		for ts in _builds for t in ts {t},
 		for t in _templates {t},
 	]
 
 	securityContext: runAsNonRoot: false
 }
 
-for l in layers {
-	_builds: "\(l)": {}
-}
-
-_builds: [NAME=string]: {
+#Build: [NAME=string]: {
 	name: "build-\(NAME)"
 	steps: [[_build_step]]
 
@@ -36,29 +38,27 @@ _builds: [NAME=string]: {
 		arguments: parameters: _build_params
 	}
 
-	_build_params: [
-		{
-			name:  "repo"
-			value: "{{workflow.parameters.repo}}"
-		}, {
-			name:  "revision"
-			value: "{{workflow.parameters.revision}}"
-		}, {
-			name:  "source"
-			value: "{{workflow.parameters.\(NAME)_source}}{{workflow.parameters.variant}}\(_source_suffix)"
+	_build_params: [{
+		name:  "repo"
+		value: "{{workflow.parameters.repo}}"
+	}, {
+		name:  "revision"
+		value: "{{workflow.parameters.revision}}"
+	}, {
+		name:  "source"
+		value: "{{workflow.parameters.\(NAME)_source}}{{workflow.parameters.variant}}\(_source_suffix)"
 
-			_source_suffix: string | *"-{{workflow.parameters.version}}"
-			if NAME == "base" {
-				_source_suffix: ""
-			}
-		}, {
-			name:  "destination"
-			value: "{{workflow.parameters.\(NAME)_destination}}{{workflow.parameters.variant}}-{{workflow.parameters.version}}"
-		}, {
-			name:  "dockerfile"
-			value: "{{workflow.parameters.\(NAME)_dockerfile}}"
-		},
-	]
+		_source_suffix: string | *"-{{workflow.parameters.version}}"
+		if NAME == "base" {
+			_source_suffix: ""
+		}
+	}, {
+		name:  "destination"
+		value: "{{workflow.parameters.\(NAME)_destination}}{{workflow.parameters.variant}}-{{workflow.parameters.version}}"
+	}, {
+		name:  "dockerfile"
+		value: "{{workflow.parameters.\(NAME)_dockerfile}}"
+	}]
 }
 
 _templates: "kaniko-build": {
@@ -88,7 +88,8 @@ _templates: "kaniko-build": {
 		{
 			name:  "insecure_pull"
 			value: "--insecure-pull"
-		}]
+		},
+	]
 
 	_git_source: {
 		name: "source"
