@@ -4,10 +4,6 @@ metadata: generateName: "katt-kaniko-build-"
 
 let layers = [ "base", "app", "ci", "aws", "terraform", "cdktf"]
 
-for l in layers {
-	_builds: "\(l)": {}
-}
-
 spec: {
 	arguments: parameters: [
 		for p in [ "repo", "revision", "version", "variant"] {
@@ -24,6 +20,10 @@ spec: {
 	]
 
 	securityContext: runAsNonRoot: false
+}
+
+for l in layers {
+	_builds: "\(l)": {}
 }
 
 _builds: [NAME=string]: {
