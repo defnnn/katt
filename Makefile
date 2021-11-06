@@ -26,13 +26,11 @@ katt-%:
 	$(MAKE) install-cilium
 	$(MAKE) install-argocd
 	$(MAKE) add-$(second)
-	$(MAKE) deploy-$(second)
 
 kitt-%:
 	$(MAKE) reset-$(second)
 	$(MAKE) launch-$(second)
 	$(MAKE) add-$(second)
-	$(MAKE) deploy-$(second)
 
 registry:
 	-k3d registry create hub.defn.ooo --port 5000
@@ -43,7 +41,6 @@ immanent:
 	ktx mini
 	-argocd --core cluster rm https://$(first).defn.ooo:6443 >/dev/null 2>&1
 	argocd --core cluster add -y --name $(first) k3d-$(first)
-	$(k) apply -f https://raw.githubusercontent.com/amanibhavam/deploy/master/$(first).yaml
 	ktx k3d-$(first)
 	$(MAKE) install-secrets
 
@@ -168,9 +165,6 @@ argocd-install:
 	for deploy in dex-server redis repo-server server; \
 		do $(ka) rollout status deploy/argocd-$${deploy}; done
 	$(ka) rollout status statefulset/argocd-application-controller
-
-deploy-%:
-	$(k) apply -fhttps://raw.githubusercontent.com/amanibhavam/deploy/master/spiral/$(second).yaml
 
 reboot-%:
 	$(MAKE) $(second)-reset
