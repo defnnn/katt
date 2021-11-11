@@ -273,3 +273,21 @@ o/argo.yaml: argo.cue schema.cue
 
 submit_%: o/argo.yaml
 	argo submit --log -f params.yaml --entrypoint build-$(second_) o/argo.yaml
+
+multipass-set:
+	sudo multipass set local.driver=virtualbox
+	sudo multipass set local.bridged-network=en0
+	sudo multipass set local.privileged-mounts=true
+	sudo multipass set client.gui.autostart=false
+
+multipass-reload:
+	$(MAKE) multipass-set
+	-sudo launchctl unload /Library/LaunchDaemons/com.canonical.multipassd.plist
+	sudo launchctl load /Library/LaunchDaemons/com.canonical.multipassd.plist
+
+multipass-reset:
+	-multipass delete --all --purge
+	$(MAKE) multipass-reload
+
+multipass:
+	multipass launch -c 4 -m 8G -d 200G -n primary --bridged
