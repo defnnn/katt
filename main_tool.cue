@@ -41,7 +41,7 @@ command: {
 				"--merge",
 				"--context", config.name,
 				"--local-path", config.kubeconfig,
-				"--k3s-extra-args", "--disable traefik --node-ip=\(config.ip) --node-external-ip=\(config.ip) --advertise-address=\(config.ip) --cluster-cidr \(config.clusterCIDR) --service-cidr \(config.serviceCIDR) --tls-san \(config.fqdn) --datastore-endpoint postgres:// --flannel-backend=none --disable-network-policy",
+				"--k3s-extra-args", "--disable traefik --node-ip=\(config.ip) --node-external-ip=\(config.ip) --advertise-address=\(config.ip) --cluster-cidr \(config.clusterCIDR) --service-cidr \(config.serviceCIDR) --tls-san \(config.fqdn) --datastore-endpoint postgres://",
 			]
 		}
 		$after: deleteConfig
