@@ -35,15 +35,6 @@ kitt-%:
 registry:
 	-k3d registry create hub.defn.ooo --port 5000
 
-immanent:
-	k3d cluster delete $(first)
-	k3d cluster create $(first) --config etc/k3d-$(first).yaml
-	ktx mini
-	-argocd --core cluster rm https://$(first).defn.ooo:6443 >/dev/null 2>&1
-	argocd --core cluster add -y --name $(first) k3d-$(first)
-	ktx k3d-$(first)
-	$(MAKE) install-secrets
-
 boot-dev-kind:
 	-kind delete cluster --name=mean
 	kind create cluster --config=etc/kind-mean.yaml --name=mean
@@ -61,7 +52,7 @@ launch-%:
 		$(shell host $(second).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(second) $(second).defn.ooo \
 		$(shell $(MAKE) -s $(second)-network)
-	-(cd etc && $(second) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+	-(cd etc && ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
 %-launch:
 	$(MAKE) launch-$(first)
@@ -73,7 +64,7 @@ launch-%:
 		$(shell host $(first).defn.ooo | awk '{print $$NF}') \
 		ubuntu $(first) $(first).defn.ooo \
 		$(shell $(MAKE) $(first)-network)
-	-(cd etc && $(first) ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
+	-(cd etc && ks create secret generic cilium-ca --from-file=./ca.crt --from-file=./ca.key)
 
 config-%:
 	bin/config \
@@ -90,14 +81,14 @@ config-%:
 %-cilium:
 	true
 
-%-network:
-	@echo 10.200.0.0/16 10.101.0.0/16
+dev-network:
+	@echo 10.198.0.0/16 10.96.0.0/16
 
 kitt-network:
-	@echo 10.201.0.0/16 10.98.0.0/16
+	@echo 10.199.0.0/16 10.98.0.0/16
 
 katt-network:
-	@echo 10.201.0.0/16 10.99.0.0/16
+	@echo 10.200.0.0/16 10.99.0.0/16
 
 mini-network:
 	@echo 10.201.0.0/16 10.101.0.0/16
