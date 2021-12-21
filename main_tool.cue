@@ -15,7 +15,37 @@ arg7: string @tag(arg7)
 arg8: string @tag(arg8)
 arg9: string @tag(arg9)
 
+user: string @tag(user,var=username)
+
 command: {
+	install: {
+		ensureConfig: exec.Run & {
+			cmd: ["kubectl", "config", "set", "clusters.katttest.server", "https://1.2.3.4"]
+		}
+		for cfg in ["users", "clusters", "contexts"] {
+			"unsetConfig\(cfg)": exec.Run & {
+				cmd: ["kubectl", "config", "unset", "\(cfg).\(config.name)"]
+				$after: ensureConfig
+			}
+		}
+		deleteConfig: exec.Run & {
+			cmd: ["kubectl", "config", "unset", "clusters.katttest"]
+			$after: [install["unsetConfigusers"], install["unsetConfigclusters"], install["unsetConfigcontexts"]]
+		}
+		installK3S: exec.Run & {
+			cmd: ["k3sup", "install",
+				"--k3s-channel", config.channel,
+				"--cluster",
+				"--ip", config.ip,
+				"--user", config.username,
+				"--merge",
+				"--context", config.name,
+				"--local-path", config.kubeconfig,
+				"--k3s-extra-args", "\"--disable traefik --node-ip=\(config.ip) --node-external-ip=\(config.ip) --advertise-address=\(config.ip) --cluster-cidr \(config.clusterCIDR) --service-cidr \(config.serviceCIDR) --tls-san \(config.fqdn) --datastore-endpoint postgres:// --flannel-backend=none --disable-network-policy\"",
+			]
+		}
+		$after: deleteConfig
+	}
 	reset: {
 		setPostgresPassword: exec.Run & {
 			cmd: ["ssh", config.fqdn, "sudo", "-u", "postgres", "psql", "-c", "\"alter role postgres with password 'postgres'\""]
@@ -30,3 +60,7 @@ command: {
 		}
 	}
 }
+
+//k3sup install --k3s-channel v1.21 --cluster --ip ${server_ip_prv} --user ${server_username} --merge --context ${server_context} --local-path ~/.kube/config --k3s-extra-args \
+//    "--disable traefik --node-ip=${server_ip_ts} --node-external-ip=${server_ip_ts} --advertise-address=${server_ip_ts} --cluster-cidr ${cluster_cidr} --service-cidr ${service_cidr} --tls-san ${server_fqdn} --datastore-endpoint postgres:// --flannel-backend=none --disable-network-policy"
+//kubectl config set-cluster ${server_context} --server=https://${server_fqdn}:6443
