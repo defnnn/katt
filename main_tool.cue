@@ -48,7 +48,7 @@ command: {
 	}
 	reset: {
 		setPostgresPassword: exec.Run & {
-			cmd: ["ssh", config.fqdn, "sudo", "-u", "postgres", "psql", "-c", "\"alter role postgres with password 'postgres'\""]
+			cmd: ["ssh", "-o", "StrictHostKeyChecking=false", config.fqdn, "sudo", "-u", "postgres", "psql", "-c", "\"alter role postgres with password 'postgres'\""]
 		}
 		uninstallK3S: exec.Run & {
 			cmd: ["ssh", config.fqdn, "bash", "-c", "\"if [[ -f /usr/local/bin/k3s-uninstall.sh ]]; then /usr/local/bin/k3s-uninstall.sh; fi\""]
